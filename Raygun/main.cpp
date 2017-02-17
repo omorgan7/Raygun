@@ -170,6 +170,7 @@ private:
     float radius, ambientCoeff = 0.2, diffuseCoeff = 0.4, specularCoeff = 0.4, reflectCoeff;
     std::vector<float> SphereOrigin = std::vector<float>(3);
 };
+size_t bitmap_encode_rgb(const uint8_t* rgb, int width, int height, uint8_t** output);
 
 int main() {
     auto width = 1000;
@@ -212,16 +213,26 @@ int main() {
     }
     std::ofstream ofs("./raytrace.bmp", std::ios::out | std::ios::binary);
     std::cout<<sizeof(BYTE)<<"\n"<<sizeof(WORD)<<"\n"<<sizeof(DWORD)<<"\n";
-    //ofs << "P6\n" << width << " " << height << "\n255\n";
-    _WinBMPFileHeader BMP_file_header;
-    _Win3xBitmapHeader BMP_info_header;
+    ofs << "P6\n" << width << " " << height << "\n255\n";
+    WINBMPFILEHEADER BMP_file_header;
+    WIN3XBITMAPHEADER BMP_info_header;
     fillBitmapStruct(&BMP_file_header,&BMP_info_header,width,height);
-    writeBitmapHeaderToStream(&BMP_file_header, &BMP_info_header, &ofs);
-    for (auto i = 0; i < width * height * 3; i++) {
-        ofs << image[i];
-    }
-    ofs<<EOF;
+    //writeBitmapHeaderToStream(&BMP_file_header, &BMP_info_header, &ofs);
+    ofs.write((const char*) &BMP_file_header,sizeof(WINBMPFILEHEADER));
+    ofs.write((const char*) &BMP_info_header,sizeof(WIN3XBITMAPHEADER));
+    
+              
+    //for (auto i = 0; i < width * height * 3; i++) {
+    //    ofs << image[i];
+    //}
+    ofs.write((const char*) image, width*height*3*sizeof(unsigned char));
     ofs.close();
+    /*uint8_t* output;
+    size_t output_size = bitmap_encode_rgb(image, width, height, &output);
+    std::ofstream file_output;
+    file_output.open("output.bmp");
+    file_output.write((const char*)output, output_size);
+    file_output.close();*/
     delete [] image;
     return 1;
 }
