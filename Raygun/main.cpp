@@ -80,7 +80,7 @@ public:
         SphereOrigin[2] = z;
     }
     color AmbientRayInterSection(Ray R){
-        auto distance = radius*radius;
+        auto distance = 0.0f;
         auto distance_2norm = 0.0f;
         std::vector<float> difference = std::vector<float>(3);
         auto origin = R.GetStartPos();
@@ -91,7 +91,7 @@ public:
         }
         distance = R.DirectionDotProduct(difference);
         distance = powf(distance,2);
-        distance -= distance_2norm;
+        distance += radius*radius + distance_2norm;
         if(distance<0){
             return world::background_color;
         }
