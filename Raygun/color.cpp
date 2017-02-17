@@ -98,3 +98,9 @@ color color::operator*(float f){
     }
     return color(newRed,newGreen,newBlue);
 }
+bool color::operator==(color& c){
+    return (c.Red() == red)&&(c.Green() == green)&&(c.Blue() == blue);
+}
+bool color::operator!=(color& c){
+    return !((c.Red() == red)&&(c.Green() == green)&&(c.Blue() == blue));
+}

@@ -36,13 +36,32 @@ public:
         RayDirection[1] = y;
         RayDirection[2] = z;
     }
-    float DirectionDotProduct(std::vector<float> vector){
+    float DotProduct(std::vector<float> vector){
         assert(vector.size() ==3);
         float sum = 0;
         for(auto i = 0; i<3; i++){
             sum+= vector[i]*RayDirection[i];
         }
         return sum;
+    }
+    static float DotProduct(std::vector<float> v1, std::vector<float> v2){
+        assert(v1.size() == v2.size());
+        float sum = 0.0f;
+        for(auto i = 0; i<3; i++){
+            sum+= v1[i]*v2[i];
+        }
+        return sum;
+    }
+    template <typename T>
+    void NormaliseVector(std::vector<T> *vec){
+        double length = 0.0f;
+        for(auto i = vec->begin(); i != vec->end(); i++){
+            length+= (*i)*(*i);
+        }
+        length = powf(length,0.5f);
+        for(auto i = vec->begin(); i != vec->end(); i++){
+            (*i) /= length;
+        }
     }
     
 private:
@@ -79,28 +98,86 @@ public:
     void SetZ(float z){
         SphereOrigin[2] = z;
     }
+    std::vector<float> FindSurfaceNormal(std::vector<float> coords){
+        //potential bugs: doesn't account for finding the surface normal for the same point as the origin.
+        std::vector<float> normal = std::vector<float>(3);
+        assert(coords.size() == 3);
+        for(auto i = 0; i<3; i++){
+            normal[i] = coords[i] - SphereOrigin[i];
+        }
+        float normal_length = 0.0f;
+        for(auto i = 0; i<3; i++){
+            normal_length+= normal[i]*normal[i];
+        }
+        normal_length = powf(normal_length,0.5f);
+        for(auto i = 0; i<3; i++){
+            normal[i]/=normal_length;
+        }
+        return normal;
+    }
     color AmbientRayInterSection(Ray R){
+        auto distance = calculateInterSectionProduct(R);
+        if(distance<0){
+            return world::background_color;
+        }
+        return SphereColor*ambientCoeff;
+    }
+    color DiffuseColorCalc(Ray R){
+        std::vector<float> difference = std::vector<float>(3);
+        auto origin = R.GetStartPos();
+        auto direction = R.GetDirection();
+        auto distance = calculateInterSectionProduct(R);
+        assert(distance>=0);
+        auto dist_dot_product = R.DotProduct(difference);
+        auto d = -1*dist_dot_product + powf(distance,0.5f);
+        std::vector<float> surfaceCoordinates = std::vector<float>(3);
+        auto normal = FindSurfaceNormal(surfaceCoordinates);
+        std::vector<float> sunDirection = std::vector<float>(3);
+        auto sunDirectionLength = 0.0f;
+        for(auto i = 0; i<3; i++){
+            surfaceCoordinates[i] = origin[i] + d * direction[i];
+            sunDirection[i] = world::sunlightPosition[i] - surfaceCoordinates[i];
+            sunDirectionLength += sunDirection[i] * sunDirection[i];
+        }
+        sunDirectionLength = powf(sunDirectionLength,0.5f);
+        for(auto i = 0; i<3; i++){
+            sunDirection[i] /= sunDirectionLength;
+        }
+        auto lambertRay = Ray::DotProduct(normal,sunDirection);
+        if(lambertRay < 0){
+            d = -1*dist_dot_product - powf(distance,0.5f);
+            sunDirectionLength = 0.0f;
+            for(auto i = 0; i<3; i++){
+                surfaceCoordinates[i] = origin[i] + d * direction[i];
+                sunDirection[i] = world::sunlightPosition[i] - surfaceCoordinates[i];
+                sunDirectionLength += sunDirection[i] * sunDirection[i];
+            }
+            sunDirectionLength = powf(sunDirectionLength,0.5f);
+            for(auto i = 0; i<3; i++){
+                sunDirection[i] /= sunDirectionLength;
+            }
+            lambertRay = Ray::DotProduct(normal,sunDirection);
+        }
+        return SphereColor*diffuseCoeff*lambertRay;
+    }
+    float calculateInterSectionProduct(Ray R){
         auto distance = 0.0f;
         auto distance_2norm = 0.0f;
         std::vector<float> difference = std::vector<float>(3);
         auto origin = R.GetStartPos();
-        
         for(auto i = 0; i<3; i++){
             difference[i] = origin[i] - SphereOrigin[i];
             distance_2norm += difference[i]*difference[i];
         }
-        distance = R.DirectionDotProduct(difference);
-        distance = powf(distance,2);
+        auto dist_dot_product = R.DotProduct(difference);
+        distance = powf(dist_dot_product,2);
         distance += radius*radius - distance_2norm;
-        if(distance<0){
-            return world::background_color;
-        }
-        return SphereColor;
+        return distance;
     }
     
 private:
-    color SphereColor = color(255,0,0);
-    float radius, ambientCoeff = 0.3, diffuseCoeff, specularCoeff, reflectCoeff;
+    color SphereColor = color(255,255,0);
+    float radius, ambientCoeff = 0.2, diffuseCoeff = 0.5, specularCoeff, reflectCoeff;
     std::vector<float> SphereOrigin = std::vector<float>(3);
 };
 
@@ -109,7 +186,8 @@ int main() {
     auto width = 1000;
     auto height = 1000;
     unsigned char *image = new unsigned char[width*height*3];
-    Sphere RedSphere = Sphere(0,0,300,50); //creates a sphere at x,y,z = 0, r = 50
+    Sphere RedSphere = Sphere(0,0,100,200); //creates a sphere at x,y,z = 0, r = 50
+    world::sunlightPosition = {(float) width, (float) height,-400.0f};
     std::vector<float> origin = std::vector<float>(3);
     std::vector<float> direction = std::vector<float>(3);
     origin = {0,0,-200};
@@ -129,6 +207,10 @@ int main() {
         }
         Ray R = Ray(origin[0],origin[1],origin[2],direction[0],direction[1],direction[2]);
         color returnedColor = RedSphere.AmbientRayInterSection(R);
+        if(returnedColor != world::background_color){
+            auto diffuseColor = RedSphere.DiffuseColorCalc(R);
+            returnedColor = returnedColor + diffuseColor;
+        }
         image[i] = returnedColor.Red();
         image[i+1] = returnedColor.Green();
         image[i+2] = returnedColor.Blue();

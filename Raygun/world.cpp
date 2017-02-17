@@ -8,4 +8,5 @@
 
 #include "world.hpp"
 
-color world::background_color = color(255,255,255);
+color world::background_color = color(5,5,5);
+std::vector<float> world::sunlightPosition = std::vector<float>(3);

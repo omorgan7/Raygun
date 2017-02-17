@@ -11,10 +11,12 @@
 
 #include <stdio.h>
 #include "color.hpp"
+#include <vector>
 
 class world{
 public:
     static color background_color;
+    static std::vector<float> sunlightPosition;
 };
 
 #endif /* world_hpp */

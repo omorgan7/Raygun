@@ -20,6 +20,8 @@ public:
     color operator+(color& c);
     color operator*(float f);
     color operator-(color& c);
+    bool operator==(color& c);
+    bool operator!=(color& c);
 private:
     unsigned char red;
     unsigned char green;
