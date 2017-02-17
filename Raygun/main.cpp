@@ -91,7 +91,7 @@ public:
         }
         distance = R.DirectionDotProduct(difference);
         distance = powf(distance,2);
-        distance += radius*radius + distance_2norm;
+        distance += radius*radius - distance_2norm;
         if(distance<0){
             return world::background_color;
         }
