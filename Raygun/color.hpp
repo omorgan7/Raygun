@@ -16,6 +16,10 @@ public:
     unsigned char Red(void);
     unsigned char Green(void);
     unsigned char Blue(void);
+    //operators
+    color operator+(color& c);
+    color operator*(float f);
+    color operator-(color& c);
 private:
     unsigned char red;
     unsigned char green;

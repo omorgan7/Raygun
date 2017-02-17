@@ -79,21 +79,19 @@ public:
     void SetZ(float z){
         SphereOrigin[2] = z;
     }
-    color RayInterSection(Ray R){
-        auto distance = 0.0f;
-        auto distance_length = 0.0f;
+    color AmbientRayInterSection(Ray R){
+        auto distance = radius*radius;
+        auto distance_2norm = 0.0f;
         std::vector<float> difference = std::vector<float>(3);
         auto origin = R.GetStartPos();
         
         for(auto i = 0; i<3; i++){
             difference[i] = origin[i] - SphereOrigin[i];
-            distance_length += difference[i]*difference[i];
+            distance_2norm += difference[i]*difference[i];
         }
-        distance_length = powf(distance_length,0.5);
         distance = R.DirectionDotProduct(difference);
         distance = powf(distance,2);
-        distance += radius*radius - distance_length;
-        std::cout<<distance<<"\n";
+        distance -= distance_2norm;
         if(distance<0){
             return world::background_color;
         }
@@ -102,27 +100,35 @@ public:
     
 private:
     color SphereColor = color(255,0,0);
-    float radius;
+    float radius, ambientCoeff = 0.3, diffuseCoeff, specularCoeff, reflectCoeff;
     std::vector<float> SphereOrigin = std::vector<float>(3);
 };
 
 int main() {
     
-    auto width = 200;
-    auto height = 100;
+    auto width = 1000;
+    auto height = 1000;
     unsigned char *image = new unsigned char[width*height*3];
     Sphere RedSphere = Sphere(0,0,300,50); //creates a sphere at x,y,z = 0, r = 50
     std::vector<float> origin = std::vector<float>(3);
     std::vector<float> direction = std::vector<float>(3);
-    direction[2] = 200; //z direction;
     origin = {0,0,-200};
     for(auto i = 0; i<width*height*3; i+=3){
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/height;
         direction[0] = (width/2)-image_x;
         direction[1] = (height/2) - image_y;
+        direction[2] = 200; //z direction;
+        auto direction_length = 0.0f;
+        for(auto j = 0; j<3; j++){
+            direction_length += direction[j]*direction[j];
+        }
+        direction_length = powf(direction_length,0.5f);
+        for(auto j = 0; j<3; j++){
+            direction[j] /= direction_length;
+        }
         Ray R = Ray(origin[0],origin[1],origin[2],direction[0],direction[1],direction[2]);
-        color returnedColor = RedSphere.RayInterSection(R);
+        color returnedColor = RedSphere.AmbientRayInterSection(R);
         image[i] = returnedColor.Red();
         image[i+1] = returnedColor.Green();
         image[i+2] = returnedColor.Blue();
