@@ -17,6 +17,7 @@ class world{
 public:
     static color background_color;
     static std::vector<float> sunlightPosition;
+    static std::vector<float> sunlightDirection;
 };
 
 #endif /* world_hpp */

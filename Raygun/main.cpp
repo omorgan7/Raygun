@@ -13,6 +13,7 @@
 
 #include "world.hpp"
 #include "color.hpp"
+#include "bitmap.hpp"
 
 class Ray{
 public:
@@ -124,15 +125,32 @@ public:
         assert(distance>=0);
         auto d = -1*dist_dot_product + powf(distance,0.5f);
         std::vector<float> surfaceCoordinates = std::vector<float>(3);
-        std::vector<float> sunDirection = std::vector<float>(3);
         for(auto i = 0; i<3; i++){
             surfaceCoordinates[i] = origin[i] + d * direction[i];
-            sunDirection[i] = world::sunlightPosition[i] - surfaceCoordinates[i];
         }
         auto normal = FindSurfaceNormal(surfaceCoordinates);
-        Ray::NormaliseVector(&sunDirection);
-        auto lambertRay = Ray::DotProduct(normal,sunDirection);
+        auto lambertRay = Ray::DotProduct(normal,world::sunlightDirection);
         return SphereColor*diffuseCoeff*lambertRay;
+    }
+    color SpecularColorCalc(Ray ray){
+        auto origin = ray.GetStartPos();
+        auto direction = ray.GetDirection();
+        float dist_dot_product = 0.0f;
+        auto distance = calculateInterSectionProduct(ray, &dist_dot_product);
+        assert(distance>=0);
+        auto d = -1*dist_dot_product + powf(distance,0.5f);
+        std::vector<float> surfaceCoordinates = std::vector<float>(3);
+        for(auto i = 0; i<3; i++){
+            surfaceCoordinates[i] = origin[i] + d * direction[i];
+        }
+        auto normal = FindSurfaceNormal(surfaceCoordinates);
+        auto reflectionFactor = 2.0f*Ray::DotProduct(normal,world::sunlightDirection);
+        std::vector<float> reflectionVector = std::vector<float>(3);
+        for(auto i = 0; i<3; i++) {
+            reflectionVector[i] = normal[i]*reflectionFactor - world::sunlightDirection[i];
+        }
+        auto SpecRay = Ray::DotProduct(ray.GetDirection(),reflectionVector);
+        return SphereColor*specularCoeff*powf(SpecRay,20);
     }
     float calculateInterSectionProduct(Ray R, float *dist_dot_product){
         auto distance_2norm = 0.0f;
@@ -148,18 +166,21 @@ public:
     }
     
 private:
-    color SphereColor = color(255,255,0);
-    float radius, ambientCoeff = 0.2, diffuseCoeff = 0.5, specularCoeff, reflectCoeff;
+    color SphereColor = color(0,0,255);
+    float radius, ambientCoeff = 0.2, diffuseCoeff = 0.4, specularCoeff = 0.4, reflectCoeff;
     std::vector<float> SphereOrigin = std::vector<float>(3);
 };
 
 int main() {
-    
     auto width = 1000;
     auto height = 1000;
+
     unsigned char *image = new unsigned char[width*height*3];
     Sphere RedSphere = Sphere(0,0,100,200); //creates a sphere at x,y,z = 0, r = 50
     world::sunlightPosition = {(float) width, (float) height,-400.0f};
+    world::sunlightDirection = {world::sunlightPosition[0]-0,world::sunlightPosition[1]-0,world::sunlightPosition[2]-100};
+    Ray::NormaliseVector(&world::sunlightDirection);
+    
     std::vector<float> origin = std::vector<float>(3);
     std::vector<float> direction = std::vector<float>(3);
     origin = {0,0,-200};
@@ -181,18 +202,25 @@ int main() {
         color returnedColor = RedSphere.AmbientRayInterSection(R);
         if(returnedColor != world::background_color){
             auto diffuseColor = RedSphere.DiffuseColorCalc(R);
-            returnedColor = returnedColor + diffuseColor;
+            auto specularColor = RedSphere.SpecularColorCalc(R);
+            returnedColor = returnedColor + diffuseColor + specularColor;
         }
         image[i] = returnedColor.Red();
         image[i+1] = returnedColor.Green();
         image[i+2] = returnedColor.Blue();
         
     }
-    std::ofstream ofs("./raytrace.ppm", std::ios::out | std::ios::binary);
-    ofs << "P6\n" << width << " " << height << "\n255\n";
+    std::ofstream ofs("./raytrace.bmp", std::ios::out | std::ios::binary);
+    std::cout<<sizeof(BYTE)<<"\n"<<sizeof(WORD)<<"\n"<<sizeof(DWORD)<<"\n";
+    //ofs << "P6\n" << width << " " << height << "\n255\n";
+    _WinBMPFileHeader BMP_file_header;
+    _Win3xBitmapHeader BMP_info_header;
+    fillBitmapStruct(&BMP_file_header,&BMP_info_header,width,height);
+    writeBitmapHeaderToStream(&BMP_file_header, &BMP_info_header, &ofs);
     for (auto i = 0; i < width * height * 3; i++) {
         ofs << image[i];
     }
+    ofs<<EOF;
     ofs.close();
     delete [] image;
     return 1;

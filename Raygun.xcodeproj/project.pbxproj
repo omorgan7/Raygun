@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5A2AF25D1E56371E00910E82 /* world.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A2AF25B1E56371E00910E82 /* world.cpp */; };
 		5A2AF2601E56376C00910E82 /* color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A2AF25E1E56376C00910E82 /* color.cpp */; };
+		5A7FCFD71E575C8E002BBC75 /* bitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */; };
 		5A9656C61E546F9E005A8D95 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A9656C51E546F9E005A8D95 /* main.cpp */; };
 /* End PBXBuildFile section */
 
@@ -29,6 +30,8 @@
 		5A2AF25C1E56371E00910E82 /* world.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = world.hpp; sourceTree = "<group>"; };
 		5A2AF25E1E56376C00910E82 /* color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = color.cpp; sourceTree = "<group>"; };
 		5A2AF25F1E56376C00910E82 /* color.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = color.hpp; sourceTree = "<group>"; };
+		5A7FCFD51E572F9D002BBC75 /* bitmap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bitmap.hpp; sourceTree = "<group>"; };
+		5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bitmap.cpp; sourceTree = "<group>"; };
 		5A9656C21E546F9E005A8D95 /* Raygun */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Raygun; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A9656C51E546F9E005A8D95 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -64,6 +67,8 @@
 			isa = PBXGroup;
 			children = (
 				5A9656C51E546F9E005A8D95 /* main.cpp */,
+				5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */,
+				5A7FCFD51E572F9D002BBC75 /* bitmap.hpp */,
 				5A2AF25E1E56376C00910E82 /* color.cpp */,
 				5A2AF25F1E56376C00910E82 /* color.hpp */,
 				5A2AF25B1E56371E00910E82 /* world.cpp */,
@@ -129,6 +134,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5A7FCFD71E575C8E002BBC75 /* bitmap.cpp in Sources */,
 				5A2AF2601E56376C00910E82 /* color.cpp in Sources */,
 				5A2AF25D1E56371E00910E82 /* world.cpp in Sources */,
 				5A9656C61E546F9E005A8D95 /* main.cpp in Sources */,
