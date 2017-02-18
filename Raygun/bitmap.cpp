@@ -13,17 +13,17 @@
 
 void fillBitmapStruct(WINBMPFILEHEADER * FileHeader, WIN3XBITMAPHEADER *BitmapHeader, int width, int height){
     FileHeader->FileType = 0x4d42;//BMP magic number
-    FileHeader->FileSize = sizeof(_Win3xBitmapHeader)+ sizeof(_WinBMPFileHeader) + width*height*3;
+    FileHeader->FileSize = sizeof(WIN3XBITMAPHEADER)+ sizeof(WINBMPFILEHEADER) + width*height*3;
     FileHeader->Reserved1 = 0;
     FileHeader->Reserved2 = 0;
-    FileHeader->BitmapOffset = sizeof(_WinBMPFileHeader)+sizeof(_Win3xBitmapHeader);
-    BitmapHeader->Size = sizeof(_Win3xBitmapHeader);
+    FileHeader->BitmapOffset = sizeof(WINBMPFILEHEADER)+sizeof(WIN3XBITMAPHEADER);
+    BitmapHeader->Size = sizeof(WIN3XBITMAPHEADER);
     BitmapHeader->Width = width;
     BitmapHeader->Height = height;
     BitmapHeader->Planes = 1;
     BitmapHeader->BitsPerPixel = 24;
     BitmapHeader->Compression = 0;
-    BitmapHeader->SizeOfBitmap = FileHeader->FileSize;
+    BitmapHeader->SizeOfBitmap = width*height*3;
     BitmapHeader->HorzResolution = 2835;
     BitmapHeader->VertResolution = 2835;
     BitmapHeader->ColorsUsed = 0;

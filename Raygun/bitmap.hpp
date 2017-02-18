@@ -46,7 +46,7 @@ typedef struct _Win3xPaletteElement
     BYTE Reserved;  /* Padding (always 0) */
 } WIN3XPALETTEELEMENT;
 
-void fillBitmapStruct(_WinBMPFileHeader * FileHeader, _Win3xBitmapHeader *BitmapHeader, int width, int height);
+void fillBitmapStruct(WINBMPFILEHEADER * FileHeader, WIN3XBITMAPHEADER *BitmapHeader, int width, int height);
 void writeBitmapHeaderToStream(_WinBMPFileHeader * FileHeader, _Win3xBitmapHeader *BitmapHeader, std::ofstream *ofs);
 
 #endif /* bitmap_hpp */

@@ -173,25 +173,32 @@ private:
 size_t bitmap_encode_rgb(const uint8_t* rgb, int width, int height, uint8_t** output);
 
 int main() {
-    auto width = 1280;
-    auto height = 720;
+    auto width = 1000;
+    auto height = 1000;
 
     unsigned char *image = new unsigned char[width*height*3];
-    Sphere RedSphere = Sphere(0,0,100,200); //creates a sphere at x,y,z = 0, r = 50
+    Sphere RedSphere = Sphere(0,-height,100,200); //creates a sphere at x,y,z = 0, r = 50
     world::sunlightPosition = {(float) width, (float) height,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-0,world::sunlightPosition[1]-0,world::sunlightPosition[2]-100};
     Ray::NormaliseVector(&world::sunlightDirection);
     
     std::vector<float> origin = std::vector<float>(3);
     std::vector<float> direction = std::vector<float>(3);
-    origin = {0,0,1000};
+    origin = {0,0,-200};
     for(auto i = 0; i<width*height*3; i+=3){
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/height;
         direction[0] = (width/2)-image_x;
         direction[1] = (height/2) - image_y;
-        direction[2] = -origin[2]; //z direction;
-        Ray::NormaliseVector(&direction);
+        direction[2] = 200; //z direction;
+        auto direction_length = 0.0f;
+        for(auto j = 0; j<3; j++){
+            direction_length += direction[j]*direction[j];
+        }
+        direction_length = powf(direction_length,0.5f);
+        for(auto j = 0; j<3; j++){
+            direction[j] /= direction_length;
+        }
         Ray R = Ray(origin[0],origin[1],origin[2],direction[0],direction[1],direction[2]);
         color returnedColor = RedSphere.AmbientRayInterSection(R);
         if(returnedColor != world::background_color){
@@ -204,20 +211,13 @@ int main() {
         image[i+2] = returnedColor.Blue();
         
     }
-//PPM//////////////////
-
-//    std::ofstream ofs("./raytrace.ppm", std::ios::out | std::ios::binary);
-//    ofs << "P6\n" << width << " " << height << "\n255\n";
-//    for(auto i =0; i<width*height*3; i++){
-//        ofs<<image[i];
-//    }
-///////////////////////
-    
-//BMP///////////////
     std::ofstream ofs("./raytrace.bmp", std::ios::out | std::ios::binary);
+    std::cout<<sizeof(BYTE)<<"\n"<<sizeof(WORD)<<"\n"<<sizeof(DWORD)<<"\n";
+    ofs << "P6\n" << width << " " << height << "\n255\n";
     WINBMPFILEHEADER BMP_file_header;
     WIN3XBITMAPHEADER BMP_info_header;
     fillBitmapStruct(&BMP_file_header,&BMP_info_header,width,height);
+    //writeBitmapHeaderToStream(&BMP_file_header, &BMP_info_header, &ofs);
     ofs.write((const char*) &BMP_file_header,sizeof(WINBMPFILEHEADER));
     ofs.write((const char*) &BMP_info_header,sizeof(WIN3XBITMAPHEADER));
     
@@ -228,8 +228,14 @@ int main() {
             }
         }
     }
-///////////////////
+    //ofs.write((const char*) image, width*height*3*sizeof(unsigned char));
     ofs.close();
+    /*uint8_t* output;
+    size_t output_size = bitmap_encode_rgb(image, width, height, &output);
+    std::ofstream file_output;
+    file_output.open("output.bmp");
+    file_output.write((const char*)output, output_size);
+    file_output.close();*/
     delete [] image;
     return 1;
 }
