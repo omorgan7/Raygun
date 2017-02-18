@@ -15,6 +15,8 @@
 #include "color.hpp"
 #include "bitmap.hpp"
 
+#define PI 3.14159265f
+const static int CrossProductIndex[6] = {1,2,2,0,1,2};
 class Ray{
 public:
     std::vector<float> GetStartPos(void){
@@ -65,11 +67,11 @@ public:
             (*i) /= length;
         }
     }
-    constexpr static const int CrossProductIndex[6] = {1,2,2,0,1,2};
     
     template <typename T>
     static std::vector<T> VectorCrossProduct(std::vector<T> u, std::vector<T> v){
-        assert(u.size() == v.size() == 3);
+        assert(u.size() == 3);
+        assert(v.size() == 3);
         std::vector<T> crossProduct = std::vector<T>(3);
         T partial_product = 0;
         for(auto i = 0; i<6; i++){
@@ -78,6 +80,7 @@ public:
             partial_product = -u[CrossProductIndex[i]]*v[CrossProductIndex[i-1]];
             crossProduct[i/2] += partial_product;
         }
+        return crossProduct;
     }
     
 private:
@@ -197,24 +200,33 @@ int main() {
     world::sunlightDirection = {world::sunlightPosition[0]-0,world::sunlightPosition[1]-0,world::sunlightPosition[2]-100};
     Ray::NormaliseVector(&world::sunlightDirection);
     
-    std::vector<float> origin = std::vector<float>(3);
+    std::vector<float> eye_origin = std::vector<float>(3);
+    std::vector<float> eye_normal = std::vector<float>(3);
+    std::vector<float> eye_v = std::vector<float>(3);
+    std::vector<float> v_up = std::vector<float>(3);
+    std::vector<float> eye_u = std::vector<float>(3);
     std::vector<float> direction = std::vector<float>(3);
-    origin = {0,0,-200};
+    eye_origin = {0,0,-200};
+    eye_normal = eye_origin;
+    Ray::NormaliseVector(&eye_normal);
+    v_up[0] = (width/2)-eye_origin[0];
+    v_up[1] = (height/2)-eye_origin[1];
+    v_up[2] = 0-eye_origin[2];
+    Ray::NormaliseVector(&v_up);
+    eye_u = Ray::VectorCrossProduct(v_up, eye_normal);
+    eye_v = Ray::VectorCrossProduct(eye_normal, eye_u);
+    float field_of_view = 90.0f;
+    auto pixel_height = tan((field_of_view/180) * PI)/(2*eye_origin[2]);
+    auto pixel_width = pixel_height * (width/height);
+    
     for(auto i = 0; i<width*height*3; i+=3){
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/height;
         direction[0] = (width/2)-image_x;
         direction[1] = (height/2) - image_y;
         direction[2] = 200; //z direction;
-        auto direction_length = 0.0f;
-        for(auto j = 0; j<3; j++){
-            direction_length += direction[j]*direction[j];
-        }
-        direction_length = powf(direction_length,0.5f);
-        for(auto j = 0; j<3; j++){
-            direction[j] /= direction_length;
-        }
-        Ray R = Ray(origin[0],origin[1],origin[2],direction[0],direction[1],direction[2]);
+        Ray::NormaliseVector(&direction);
+        Ray R = Ray(eye_origin[0],eye_origin[1],eye_origin[2],direction[0],direction[1],direction[2]);
         color returnedColor = RedSphere.AmbientRayInterSection(R);
         if(returnedColor != world::background_color){
             auto diffuseColor = RedSphere.DiffuseColorCalc(R);
