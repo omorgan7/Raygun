@@ -45,7 +45,8 @@ public:
         }
         return sum;
     }
-    static float DotProduct(std::vector<float> v1, std::vector<float> v2){
+    template <typename T>
+    static float DotProduct(std::vector<T> v1, std::vector<T> v2){
         assert(v1.size() == v2.size());
         float sum = 0.0f;
         for(auto i = 0; i<3; i++){
@@ -62,6 +63,20 @@ public:
         length = powf(length,0.5f);
         for(auto i = vec->begin(); i != vec->end(); i++){
             (*i) /= length;
+        }
+    }
+    constexpr static const int CrossProductIndex[6] = {1,2,2,0,1,2};
+    
+    template <typename T>
+    static std::vector<T> VectorCrossProduct(std::vector<T> u, std::vector<T> v){
+        assert(u.size() == v.size() == 3);
+        std::vector<T> crossProduct = std::vector<T>(3);
+        T partial_product = 0;
+        for(auto i = 0; i<6; i++){
+            (i % 2) == 0 ?
+            partial_product = u[CrossProductIndex[i]]*v[CrossProductIndex[i+1]]:
+            partial_product = -u[CrossProductIndex[i]]*v[CrossProductIndex[i-1]];
+            crossProduct[i/2] += partial_product;
         }
     }
     
@@ -177,7 +192,7 @@ int main() {
     auto height = 1000;
 
     unsigned char *image = new unsigned char[width*height*3];
-    Sphere RedSphere = Sphere(0,-height,100,200); //creates a sphere at x,y,z = 0, r = 50
+    Sphere RedSphere = Sphere(0,0,100,200); //creates a sphere at x,y,z = 0, r = 50
     world::sunlightPosition = {(float) width, (float) height,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-0,world::sunlightPosition[1]-0,world::sunlightPosition[2]-100};
     Ray::NormaliseVector(&world::sunlightDirection);
@@ -211,31 +226,27 @@ int main() {
         image[i+2] = returnedColor.Blue();
         
     }
+
+//    std::ofstream ofs("./raytrace.ppm", std::ios::out | std::ios::binary);
+//    ofs << "P6\n" << width << " " << height << "\n255\n";
+//    ofs.write((const char*) image, width*height*3*sizeof(unsigned char));
+
     std::ofstream ofs("./raytrace.bmp", std::ios::out | std::ios::binary);
-    std::cout<<sizeof(BYTE)<<"\n"<<sizeof(WORD)<<"\n"<<sizeof(DWORD)<<"\n";
-    ofs << "P6\n" << width << " " << height << "\n255\n";
     WINBMPFILEHEADER BMP_file_header;
     WIN3XBITMAPHEADER BMP_info_header;
     fillBitmapStruct(&BMP_file_header,&BMP_info_header,width,height);
-    //writeBitmapHeaderToStream(&BMP_file_header, &BMP_info_header, &ofs);
-    ofs.write((const char*) &BMP_file_header,sizeof(WINBMPFILEHEADER));
+    writeBitmapHeaderToStream(&BMP_file_header, &BMP_info_header, &ofs);
     ofs.write((const char*) &BMP_info_header,sizeof(WIN3XBITMAPHEADER));
     
-    for(auto i = 0; i<height; i++){
+    for(auto i = height-1; i>=0; i--){
         for (auto j = 0; j < width; j++) {
             for(auto k =2; k>=0; k--){
                 ofs<<image[i*width*3 + k + j*3];
             }
         }
     }
-    //ofs.write((const char*) image, width*height*3*sizeof(unsigned char));
+    
     ofs.close();
-    /*uint8_t* output;
-    size_t output_size = bitmap_encode_rgb(image, width, height, &output);
-    std::ofstream file_output;
-    file_output.open("output.bmp");
-    file_output.write((const char*)output, output_size);
-    file_output.close();*/
     delete [] image;
     return 1;
 }

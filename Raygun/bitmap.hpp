@@ -25,15 +25,15 @@ typedef struct _WinBMPFileHeader
 typedef struct _Win3xBitmapHeader
 {
     DWORD Size;            /* Size of this header in bytes */
-    LONG  Width;           /* Image width in pixels */
-    LONG  Height;          /* Image height in pixels */
+    DWORD  Width;           /* Image width in pixels */
+    DWORD Height;          /* Image height in pixels */
     WORD  Planes;          /* Number of color planes */
     WORD  BitsPerPixel;    /* Number of bits per pixel */
     /* Fields added for Windows 3.x follow this line */
     DWORD Compression;     /* Compression methods used */
     DWORD SizeOfBitmap;    /* Size of bitmap in bytes */
-    LONG  HorzResolution;  /* Horizontal resolution in pixels per meter */
-    LONG  VertResolution;  /* Vertical resolution in pixels per meter */
+    DWORD  HorzResolution;  /* Horizontal resolution in pixels per meter */
+    DWORD  VertResolution;  /* Vertical resolution in pixels per meter */
     DWORD ColorsUsed;      /* Number of colors in the image */
     DWORD ColorsImportant; /* Minimum number of important colors */
 } WIN3XBITMAPHEADER;
