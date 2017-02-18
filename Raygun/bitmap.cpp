@@ -35,15 +35,5 @@ void writeBitmapHeaderToStream(WINBMPFILEHEADER * FileHeader, WIN3XBITMAPHEADER 
     ofs->write((const char*)(&FileHeader->Reserved1),sizeof(FileHeader->Reserved1));
     ofs->write((const char*)(&FileHeader->Reserved2),sizeof(FileHeader->Reserved2));
     ofs->write((const char*)(&FileHeader->BitmapOffset),sizeof(FileHeader->BitmapOffset));
-    /**ofs<<(BitmapHeader->Size);
-    *ofs<<(BitmapHeader->Width);
-    *ofs<<(BitmapHeader->Height);
-    *ofs<<(BitmapHeader->Planes);
-    *ofs<<(BitmapHeader->BitsPerPixel);
-    *ofs<<(BitmapHeader->Compression);
-    *ofs<<(BitmapHeader->SizeOfBitmap);
-    *ofs<<(BitmapHeader->HorzResolution);
-    *ofs<<(BitmapHeader->VertResolution);
-    *ofs<<(BitmapHeader->ColorsUsed);
-    *ofs<<(BitmapHeader->ColorsImportant);*/
+    ofs->write((const char*) BitmapHeader,sizeof(WIN3XBITMAPHEADER));
 }

@@ -236,8 +236,8 @@ int main() {
     WIN3XBITMAPHEADER BMP_info_header;
     fillBitmapStruct(&BMP_file_header,&BMP_info_header,width,height);
     writeBitmapHeaderToStream(&BMP_file_header, &BMP_info_header, &ofs);
-    ofs.write((const char*) &BMP_info_header,sizeof(WIN3XBITMAPHEADER));
     
+    //Bitmap files must be written upside down, with color values back to front (BGR instead of RGB). Dunno why.
     for(auto i = height-1; i>=0; i--){
         for (auto j = 0; j < width; j++) {
             for(auto k =2; k>=0; k--){
