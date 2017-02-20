@@ -9,7 +9,7 @@
 #include <vector>
 #include <assert.h>
 #include <cmath>
-#include <unistd.h>
+//#include <unistd.h>
 
 #include "world.hpp"
 #include "color.hpp"
@@ -191,11 +191,11 @@ private:
 size_t bitmap_encode_rgb(const uint8_t* rgb, int width, int height, uint8_t** output);
 
 int main() {
-    auto width = 1000;
-    auto height = 1000;
+    auto width = 48;
+    auto height = 24;
 
     unsigned char *image = new unsigned char[width*height*3];
-    Sphere RedSphere = Sphere(0,0,100,200); //creates a sphere at x,y,z = 0, r = 50
+    Sphere RedSphere = Sphere(0,0,300,200); //creates a sphere at x,y = 0, r = 50
     world::sunlightPosition = {(float) width, (float) height,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-0,world::sunlightPosition[1]-0,world::sunlightPosition[2]-100};
     Ray::NormaliseVector(&world::sunlightDirection);
@@ -206,25 +206,37 @@ int main() {
     std::vector<float> v_up = std::vector<float>(3);
     std::vector<float> eye_u = std::vector<float>(3);
     std::vector<float> direction = std::vector<float>(3);
+    std::vector<float> L_vector = std::vector<float>(3);
+
     eye_origin = {0,0,-200};
     eye_normal = eye_origin;
+    eye_normal[2] = -eye_normal[2];
     Ray::NormaliseVector(&eye_normal);
-    v_up[0] = (width/2)-eye_origin[0];
-    v_up[1] = (height/2)-eye_origin[1];
-    v_up[2] = 0-eye_origin[2];
-    Ray::NormaliseVector(&v_up);
+    v_up[0] = 0;
+    v_up[1] = 1;
+    v_up[2] = 0;
+    //Ray::NormaliseVector(&v_up);
     eye_u = Ray::VectorCrossProduct(v_up, eye_normal);
     eye_v = Ray::VectorCrossProduct(eye_normal, eye_u);
-    float field_of_view = 90.0f;
-    auto pixel_height = tan((field_of_view/180) * PI)/(2*eye_origin[2]);
-    auto pixel_width = pixel_height * (width/height);
+    float field_of_view = 120.0f;
+    auto pixel_height = tan((field_of_view/360) * PI)*(2*eye_origin[2]);
+    auto pixel_width = pixel_height * ((float)width/(float)height);
+    for (auto i =0; i<3; i++){
+        L_vector[i] = eye_origin[i] + eye_u[i]*(pixel_width/2.0f) + eye_v[i]*(pixel_height/2.0f);
+    }
     
+
     for(auto i = 0; i<width*height*3; i+=3){
         auto image_x = (i/3)%width;
-        auto image_y = (i/3)/height;
-        direction[0] = (width/2)-image_x;
-        direction[1] = (height/2) - image_y;
-        direction[2] = 200; //z direction;
+        auto image_y = (i/3)/width;
+        // direction[0] = (width/2)-image_x;
+        // direction[1] = (height/2) - image_y;
+        // direction[2] = 200; //z direction;
+        for (auto i =0; i<3; i++){
+            direction[i] = L_vector[i] - eye_u[i]*image_x*(pixel_width/(float)width) - eye_v[i]*image_y*(pixel_height/(float)height);
+            std::cout<<"direction["<<i<<"] = "<<direction[i]<<" ";
+        }
+        std::cout<<"\n";
         Ray::NormaliseVector(&direction);
         Ray R = Ray(eye_origin[0],eye_origin[1],eye_origin[2],direction[0],direction[1],direction[2]);
         color returnedColor = RedSphere.AmbientRayInterSection(R);
