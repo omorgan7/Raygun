@@ -163,6 +163,11 @@ public:
             reflectionVector[i] = normal[i]*reflectionFactor - world::sunlightDirection[i];
         }
         auto SpecRay = Ray::DotProduct(ray.GetDirection(),reflectionVector);
+        if(SpecRay<0){
+            return color(0,0,0);
+        }
+        auto intermediateProduct = SphereColor*specularCoeff*powf(SpecRay,20);
+        //std::cout<<SpecRay<<"\n";
         return SphereColor*specularCoeff*powf(SpecRay,20);
     }
     float calculateInterSectionProduct(Ray R, float *dist_dot_product){
@@ -185,12 +190,16 @@ private:
 };
 size_t bitmap_encode_rgb(const uint8_t* rgb, int width, int height, uint8_t** output);
 
-int main() {
-    auto width = 480;
-    auto height = 240;
-
+int main(int argc, char* argv[]) {
+    auto width = 180;
+    auto height = 80;
+    if(argc >1){
+        width = atoi(argv[1]);
+        height = atoi(argv[2]);
+    }
+    
     unsigned char *image = new unsigned char[width*height*3];
-    Sphere RedSphere = Sphere(0,0,300,200); //creates a sphere at x,y = 0, r = 50
+    Sphere RedSphere = Sphere(0,0,300,300); //creates a sphere at x,y = 0, r = 50
     world::sunlightPosition = {(float) width, (float) height,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-0,world::sunlightPosition[1]-0,world::sunlightPosition[2]-100};
     Ray::NormaliseVector(&world::sunlightDirection);
