@@ -16,7 +16,6 @@
 #include "bitmap.hpp"
 
 #define PI 3.14159265f
-const static int CrossProductIndex[6] = {1,2,2,0,1,2};
 class Ray{
 public:
     std::vector<float> GetStartPos(void){
@@ -73,13 +72,9 @@ public:
         assert(u.size() == 3);
         assert(v.size() == 3);
         std::vector<T> crossProduct = std::vector<T>(3);
-        T partial_product = 0;
-        for(auto i = 0; i<6; i++){
-            (i % 2) == 0 ?
-            partial_product = u[CrossProductIndex[i]]*v[CrossProductIndex[i+1]]:
-            partial_product = -u[CrossProductIndex[i]]*v[CrossProductIndex[i-1]];
-            crossProduct[i/2] += partial_product;
-        }
+        crossProduct[0] = u[1]*v[2] - u[2]*v[1];
+        crossProduct[1] = u[2]*v[0] - u[0]*v[2];
+        crossProduct[2] = u[0]*v[1] - u[1]*v[0];
         return crossProduct;
     }
     
@@ -191,8 +186,8 @@ private:
 size_t bitmap_encode_rgb(const uint8_t* rgb, int width, int height, uint8_t** output);
 
 int main() {
-    auto width = 48;
-    auto height = 24;
+    auto width = 480;
+    auto height = 240;
 
     unsigned char *image = new unsigned char[width*height*3];
     Sphere RedSphere = Sphere(0,0,300,200); //creates a sphere at x,y = 0, r = 50
@@ -234,9 +229,8 @@ int main() {
         // direction[2] = 200; //z direction;
         for (auto i =0; i<3; i++){
             direction[i] = L_vector[i] - eye_u[i]*image_x*(pixel_width/(float)width) - eye_v[i]*image_y*(pixel_height/(float)height);
-            std::cout<<"direction["<<i<<"] = "<<direction[i]<<" ";
+            //std::cout<<"direction["<<i<<"] = "<<direction[i]<<" ";
         }
-        std::cout<<"\n";
         Ray::NormaliseVector(&direction);
         Ray R = Ray(eye_origin[0],eye_origin[1],eye_origin[2],direction[0],direction[1],direction[2]);
         color returnedColor = RedSphere.AmbientRayInterSection(R);
