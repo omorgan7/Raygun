@@ -9,7 +9,8 @@
 #ifndef color_hpp
 #define color_hpp
 
-#include <stdio.h>
+#include <assert.h>
+
 class color{
 public:
     color(unsigned char r, unsigned char g, unsigned char b);
