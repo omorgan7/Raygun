@@ -28,9 +28,13 @@ int main(int argc, char* argv[]) {
     }
     
     unsigned char *image = new unsigned char[width*height*3];
+    int sphereCoords[] = {0,0,300};
     Sphere RedSphere = Sphere(0,0,300,300); //creates a sphere at x,y = 0, r = 50
     world::sunlightPosition = {(float) width, (float) height,-400.0f};
-    world::sunlightDirection = {world::sunlightPosition[0]-0,world::sunlightPosition[1]-0,world::sunlightPosition[2]-100};
+    world::sunlightDirection = {world::sunlightPosition[0]-sphereCoords[0],
+                                world::sunlightPosition[1]-sphereCoords[1],
+                                world::sunlightPosition[2]-sphereCoords[2]};
+
     NormaliseVector(&world::sunlightDirection);
     
     std::vector<float> eye_origin = std::vector<float>(3);
