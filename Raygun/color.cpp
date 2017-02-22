@@ -8,6 +8,12 @@
 
 #include "color.hpp"
 
+color::color(){
+    red = 0;
+    green = 0;
+    blue = 0;
+}
+
 color::color(unsigned char r, unsigned char g, unsigned char b){
     red = r;
     green = g;
@@ -44,6 +50,9 @@ color color::operator+(color &c){
         newBlue = blue + c.Blue();
     }
     return color(newRed,newGreen,newBlue);
+}
+color color::operator=(color &c){
+    return color(c.Red(),c.Green(),c.Blue());
 }
 color color::operator-(color &c){
     unsigned char newRed, newGreen, newBlue;

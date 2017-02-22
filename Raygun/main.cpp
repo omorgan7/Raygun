@@ -8,7 +8,7 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
-#include<assert.h>
+//#include<assert.h>
 //#include <unistd.h>
 
 #include "world.hpp"
@@ -30,6 +30,15 @@ int main(int argc, char* argv[]) {
     unsigned char *image = new unsigned char[width*height*3];
     int sphereCoords[] = {0,0,300};
     Sphere RedSphere = Sphere(0,0,300,300); //creates a sphere at x,y = 0, r = 50
+    std::vector<std::vector<float> > triangleVertices = {std::vector<float>(3), 
+                                                        std::vector<float>(3), 
+                                                        std::vector<float>(3)};
+    triangleVertices = {{-300,300,400},{0,-300,400},{300,300,400}};
+    // [0] = {-300,300,200};
+    // triangleVertices[1] = {0,-300,200};
+    // triangleVertices[2] = {300,300,200};
+
+    triangle Triangle = triangle(triangleVertices);
     world::sunlightPosition = {(float) width, (float) height,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-sphereCoords[0],
                                 world::sunlightPosition[1]-sphereCoords[1],
@@ -62,6 +71,8 @@ int main(int argc, char* argv[]) {
         L_vector[i] = eye_origin[i] + eye_u[i]*(pixel_width/2.0f) + eye_v[i]*(pixel_height/2.0f);
     }
     
+    //color ambientColor;
+
 
     for(auto i = 0; i<width*height*3; i+=3){
         auto image_x = (i/3)%width;
@@ -71,15 +82,36 @@ int main(int argc, char* argv[]) {
         }
         NormaliseVector(&direction);
         Ray R = Ray(eye_origin,direction);
-        color returnedColor = RedSphere.AmbientRayInterSection(R);
-        if(returnedColor != world::background_color){
-            auto diffuseColor = RedSphere.DiffuseColorCalc(R);
-            auto specularColor = RedSphere.SpecularColorCalc(R);
-            returnedColor = returnedColor + diffuseColor + specularColor;
+        color returnedTriangleColor = Triangle.AmbientRayInterSection(R);
+        color returnedSphereColor = RedSphere.AmbientRayInterSection(R);
+        auto triangleInterSection = !(returnedTriangleColor == world::background_color);
+        auto sphereInterSection = !(returnedSphereColor == world::background_color);
+        if(!triangleInterSection && !sphereInterSection){//neither intersected
+            image[i] = world::background_color.Red();
+            image[i+1] = world::background_color.Green();
+            image[i+2] = world::background_color.Blue();
+            continue;
         }
-        image[i] = returnedColor.Red();
-        image[i+1] = returnedColor.Green();
-        image[i+2] = returnedColor.Blue();
+        if(sphereInterSection){
+            color diffuseColor = RedSphere.DiffuseColorCalc(R);
+            color specularColor = RedSphere.SpecularColorCalc(R);
+            color returnedColor = returnedSphereColor + diffuseColor + specularColor;
+            image[i] = returnedColor.Red();
+            image[i+1] = returnedColor.Green();
+            image[i+2] = returnedColor.Blue();
+        }
+        else{
+            //std::cout<<"triangle intersection\n";
+            color diffuseColor = Triangle.DiffuseColorCalc();
+            color specularColor = Triangle.SpecularColorCalc(R);
+            color returnedColor = returnedTriangleColor + diffuseColor + specularColor;
+            image[i] = returnedColor.Red();
+            image[i+1] = returnedColor.Green();
+            image[i+2] = returnedColor.Blue();
+        }
+
+
+
         
     }
 

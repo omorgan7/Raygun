@@ -9,10 +9,12 @@
 #ifndef color_hpp
 #define color_hpp
 
-#include <assert.h>
+//#include <assert.h>
+#include <iostream>
 
 class color{
 public:
+    color();
     color(unsigned char r, unsigned char g, unsigned char b);
     unsigned char Red(void);
     unsigned char Green(void);
@@ -21,6 +23,7 @@ public:
     color operator+(color& c);
     color operator*(float f);
     color operator-(color& c);
+    color operator=(color &c);
     bool operator==(color& c);
     bool operator!=(color& c);
 private:

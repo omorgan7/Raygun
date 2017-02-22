@@ -8,7 +8,7 @@
 
 #include <vector>
 #include <cmath>
-#include <assert.h>
+//#include <assert.h>
 
 #ifndef raymath_hpp
 #define raymath_hpp
@@ -29,5 +29,8 @@ private:
 void NormaliseVector(std::vector<float> *vec);
 float Vec3DotProduct(std::vector<float> v1, std::vector<float> v2);
 std::vector<float> Vec3CrossProduct(std::vector<float> u, std::vector<float> v);
+std::vector<float> Vec3Sub(std::vector<float> u, std::vector<float> v);
+std::vector<float> Vec3Add(std::vector<float> u, std::vector<float> v);
+std::vector<float> Vec3ScalarMultiply(std::vector<float> u, float m);
 
 #endif /* raymath_hpp */
