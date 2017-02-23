@@ -74,19 +74,27 @@
 		5A9656C41E546F9E005A8D95 /* Raygun */ = {
 			isa = PBXGroup;
 			children = (
-				5AAE57E31E5E071F00A562A8 /* raymath.hpp */,
-				5AAE57E41E5E071F00A562A8 /* shape.hpp */,
+				5AAE57EA1E5E079000A562A8 /* Headers */,
 				5AAE57E51E5E071F00A562A8 /* raymath.cpp */,
 				5AAE57E61E5E071F00A562A8 /* shape.cpp */,
 				5A9656C51E546F9E005A8D95 /* main.cpp */,
 				5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */,
-				5A7FCFD51E572F9D002BBC75 /* bitmap.hpp */,
 				5A2AF25E1E56376C00910E82 /* color.cpp */,
-				5A2AF25F1E56376C00910E82 /* color.hpp */,
 				5A2AF25B1E56371E00910E82 /* world.cpp */,
-				5A2AF25C1E56371E00910E82 /* world.hpp */,
 			);
 			path = Raygun;
+			sourceTree = "<group>";
+		};
+		5AAE57EA1E5E079000A562A8 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				5AAE57E31E5E071F00A562A8 /* raymath.hpp */,
+				5AAE57E41E5E071F00A562A8 /* shape.hpp */,
+				5A7FCFD51E572F9D002BBC75 /* bitmap.hpp */,
+				5A2AF25F1E56376C00910E82 /* color.hpp */,
+				5A2AF25C1E56371E00910E82 /* world.hpp */,
+			);
+			name = Headers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

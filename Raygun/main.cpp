@@ -39,10 +39,10 @@ int main(int argc, char* argv[]) {
     // triangleVertices[2] = {300,300,200};
 
     triangle Triangle = triangle(triangleVertices);
-    world::sunlightPosition = {(float) width, (float) height,-400.0f};
+    world::sunlightPosition = {(float)width/2,(float)height/2,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-sphereCoords[0],
                                 world::sunlightPosition[1]-sphereCoords[1],
-                                world::sunlightPosition[2]-sphereCoords[2]};
+                                world::sunlightPosition[2]-400};
 
     NormaliseVector(&world::sunlightDirection);
     
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
             //std::cout<<"triangle intersection\n";
             color diffuseColor = Triangle.DiffuseColorCalc();
             color specularColor = Triangle.SpecularColorCalc(R);
-            color returnedColor = returnedTriangleColor + diffuseColor + specularColor;
+        color returnedColor = returnedTriangleColor + diffuseColor + specularColor;
             image[i] = returnedColor.Red();
             image[i+1] = returnedColor.Green();
             image[i+2] = returnedColor.Blue();

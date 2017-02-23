@@ -53,7 +53,7 @@ public:
     float calculateInterSectionProduct(Ray R, int *SUCCESS);
 private:
     color TriangleColor = color(255,0,255);
-    float ambientCoeff = 0.1, diffuseCoeff = 0.45, specularCoeff = 0.45, reflectCoeff;
+    float ambientCoeff = 0.2, diffuseCoeff = 0.4, specularCoeff = 0.4, reflectCoeff;
     std::vector<float> vertex_0, vertex_1, vertex_2;
     std::vector<float> triangleNormal = std::vector<float>(3);
     void ComputeNormal(void);

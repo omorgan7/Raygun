@@ -169,7 +169,7 @@ float triangle::calculateInterSectionProduct(Ray R, int * SUCCESS){
     auto RayDirection = R.GetDirection();
     auto denominator = Vec3DotProduct(triangleNormal,RayDirection);
     //std::cout<<denominator<<"\n";
-    if(abs(denominator) < 0.0000001f){
+    if(fabs(denominator) < 0.0000001f){
         SUCCESS = 0;
         return -1;
     }
@@ -201,6 +201,7 @@ void triangle::ComputeNormal(void){
         RHS[i] = vertex_2[i] - vertex_0[i];
         //std::cout<<"RHS "<<RHS[i]<<"\n";
     }
+    flipNormal();
     triangleNormal = Vec3CrossProduct(LHS,RHS);
     NormaliseVector(&triangleNormal);
     // for(auto i =0; i<3; i++){
