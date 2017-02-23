@@ -13,6 +13,11 @@ color::color(){
     green = 0;
     blue = 0;
 }
+color::color(color &c){
+    red = c.Red();
+    green = c.Green();
+    blue = c.Blue();
+}
 
 color::color(unsigned char r, unsigned char g, unsigned char b){
     red = r;
@@ -27,6 +32,16 @@ unsigned char color::Green(void){
 }
 unsigned char color::Blue(void){
     return blue;
+}
+
+void color::changeRed(unsigned char R){
+    red = R;
+}
+void color::changeGreen(unsigned char G){
+    green = G;
+}
+void color::changeBlue(unsigned char B){
+    blue = B;
 }
 
 color color::operator+(color &c){

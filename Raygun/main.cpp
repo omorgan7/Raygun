@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     
     unsigned char *image = new unsigned char[width*height*3];
     int sphereCoords[] = {0,0,300};
-    Sphere RedSphere = Sphere(0,0,300,300); //creates a sphere at x,y = 0, r = 50
+    //Sphere RedSphere = Sphere(0,0,300,300); //creates a sphere at x,y = 0, r = 50
     std::vector<std::vector<float> > triangleVertices = {std::vector<float>(3), 
                                                         std::vector<float>(3), 
                                                         std::vector<float>(3)};
@@ -37,8 +37,11 @@ int main(int argc, char* argv[]) {
     // [0] = {-300,300,200};
     // triangleVertices[1] = {0,-300,200};
     // triangleVertices[2] = {300,300,200};
-
-    triangle Triangle = triangle(triangleVertices);
+    int numberOfObjects = 2;
+    object ** Objects = new object*[numberOfObjects];
+    Objects[0] = new triangle(triangleVertices);
+    Objects[1] = new Sphere(0,0,300,300);
+    //triangle Triangle = triangle(triangleVertices);
     world::sunlightPosition = {(float)width/2,(float)height/2,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-sphereCoords[0],
                                 world::sunlightPosition[1]-sphereCoords[1],
@@ -67,14 +70,26 @@ int main(int argc, char* argv[]) {
     float field_of_view = 120.0f;
     auto pixel_height = tan((field_of_view/360) * PI)*(2*eye_origin[2]);
     auto pixel_width = pixel_height * ((float)width/(float)height);
+    
     for (auto i =0; i<3; i++){
         L_vector[i] = eye_origin[i] + eye_u[i]*(pixel_width/2.0f) + eye_v[i]*(pixel_height/2.0f);
     }
     
     //color ambientColor;
 
-
+    std::vector<std::vector<float> > interSectionCoordinates = std::vector<std::vector<float> >(numberOfObjects);
+    int * successState = new int[numberOfObjects];
+    std::vector<int> zeroVec = std::vector<int>(numberOfObjects);
+    int objectIndex;
+    for(auto j = 0; j<numberOfObjects; j++){
+        interSectionCoordinates[j] = {0,0,0};
+    }
     for(auto i = 0; i<width*height*3; i+=3){
+        std::fill(interSectionCoordinates.begin(),interSectionCoordinates.end(),std::vector<float>(3));
+        for(auto j = 0; j<numberOfObjects; j++){
+            successState[j] = 1;
+        }
+
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/width;
         for (auto i =0; i<3; i++){
@@ -82,37 +97,37 @@ int main(int argc, char* argv[]) {
         }
         NormaliseVector(&direction);
         Ray R = Ray(eye_origin,direction);
-        color returnedTriangleColor = Triangle.AmbientRayInterSection(R);
-        color returnedSphereColor = RedSphere.AmbientRayInterSection(R);
-        auto triangleInterSection = !(returnedTriangleColor == world::background_color);
-        auto sphereInterSection = !(returnedSphereColor == world::background_color);
-        if(!triangleInterSection && !sphereInterSection){//neither intersected
+
+        for(int j = 0; j<numberOfObjects; j++){
+            auto t = Objects[j]->calculateInterSectionProduct(R,&successState[j]);
+            if(successState[j] == 1){
+                interSectionCoordinates[j]= Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t));
+            }
+        }
+
+        objectIndex = 0;
+        float max_depth = FLT_MAX;
+        for(int j = 0; j<numberOfObjects; j++){
+            if(successState[j]  == 1){
+                if(interSectionCoordinates[j][2] < max_depth){
+                    std::cout<<j<<"\n";
+                    std::cout<<interSectionCoordinates[objectIndex][2]<<"\n";
+                    max_depth = interSectionCoordinates[objectIndex][2];
+                    objectIndex = j;
+                }
+            }
+        }
+        if(max_depth == FLT_MAX){//nothing intersected
             image[i] = world::background_color.Red();
             image[i+1] = world::background_color.Green();
             image[i+2] = world::background_color.Blue();
             continue;
         }
-        if(sphereInterSection){
-            color diffuseColor = RedSphere.DiffuseColorCalc(R);
-            color specularColor = RedSphere.SpecularColorCalc(R);
-            color returnedColor = returnedSphereColor + diffuseColor + specularColor;
-            image[i] = returnedColor.Red();
-            image[i+1] = returnedColor.Green();
-            image[i+2] = returnedColor.Blue();
-        }
-        else{
-            //std::cout<<"triangle intersection\n";
-            color diffuseColor = Triangle.DiffuseColorCalc();
-            color specularColor = Triangle.SpecularColorCalc(R);
-        color returnedColor = returnedTriangleColor + diffuseColor + specularColor;
-            image[i] = returnedColor.Red();
-            image[i+1] = returnedColor.Green();
-            image[i+2] = returnedColor.Blue();
-        }
-
-
-
-        
+        color ambientColor = Objects[objectIndex]->AmbientRayInterSection(R);
+        color returnedColor = ambientColor + Objects[objectIndex]->DiffuseColorCalc() + Objects[objectIndex]->SpecularColorCalc(R);
+        image[i] = returnedColor.Red();
+        image[i+1] = returnedColor.Green();
+        image[i+2] = returnedColor.Blue();
     }
 
 //    std::ofstream ofs("./raytrace.ppm", std::ios::out | std::ios::binary);
@@ -135,6 +150,11 @@ int main(int argc, char* argv[]) {
     }
     
     ofs.close();
-    delete [] image;
+    for(int i = 0; i < numberOfObjects; i++){
+        delete Objects[i];
+    }
+    delete successState;
+    delete Objects;
+    delete image;
     return 1;
 }

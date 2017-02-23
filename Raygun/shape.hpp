@@ -17,7 +17,20 @@
 #ifndef shape_hpp
 #define shape_hpp
 
-class Sphere{
+class object{
+public:
+    color GetColor(void);
+    void SetColor(color C);
+    virtual color AmbientRayInterSection(Ray R) = 0;
+    virtual color DiffuseColorCalc(void) = 0;
+    virtual color SpecularColorCalc(Ray ray) = 0;
+    virtual float calculateInterSectionProduct(Ray ray, int * success) =0;
+protected:
+    color Color;
+    float ambientCoeff, diffuseCoeff, specularCoeff, reflectCoeff;
+};
+
+class Sphere : public object{
 public:
     Sphere(float x, float y, float z, float r);
     color GetColor(void);
@@ -29,18 +42,19 @@ public:
     void SetZ(float z);
     std::vector<float> FindSurfaceNormal(std::vector<float> coords);
     color AmbientRayInterSection(Ray R);
-    color DiffuseColorCalc(Ray R);
+    color DiffuseColorCalc(void);
     color SpecularColorCalc(Ray ray);
-    float calculateInterSectionProduct(Ray R, float *dist_dot_product);
+    float calculateInterSectionProduct(Ray ray, int * success);
     
 private:
-    color SphereColor = color(0,0,255);
     float radius;
-    float ambientCoeff = 0.2, diffuseCoeff = 0.4, specularCoeff = 0.4, reflectCoeff;
     std::vector<float> SphereOrigin = std::vector<float>(3);
+    std::vector<float> surfaceCoordinates = std::vector<float>(3);
+    std::vector<float> normal = std::vector<float>(3);
+    float dist_dot_product;
 };
 
-class triangle{
+class triangle : public object{
 public:
     triangle(std::vector<std::vector<float> > vertices);
     color GetColor(void);
@@ -50,10 +64,8 @@ public:
     color AmbientRayInterSection(Ray R);
     color DiffuseColorCalc(void);
     color SpecularColorCalc(Ray ray);
-    float calculateInterSectionProduct(Ray R, int *SUCCESS);
+    float calculateInterSectionProduct(Ray ray, int * success);
 private:
-    color TriangleColor = color(255,0,255);
-    float ambientCoeff = 0.2, diffuseCoeff = 0.4, specularCoeff = 0.4, reflectCoeff;
     std::vector<float> vertex_0, vertex_1, vertex_2;
     std::vector<float> triangleNormal = std::vector<float>(3);
     void ComputeNormal(void);

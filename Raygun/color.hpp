@@ -15,10 +15,14 @@
 class color{
 public:
     color();
+    color(color &c);
     color(unsigned char r, unsigned char g, unsigned char b);
     unsigned char Red(void);
     unsigned char Green(void);
     unsigned char Blue(void);
+    void changeRed(unsigned char R);
+    void changeGreen(unsigned char G);
+    void changeBlue(unsigned char B);
     //operators
     color operator+(color& c);
     color operator*(float f);
