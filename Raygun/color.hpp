@@ -15,7 +15,6 @@
 class color{
 public:
     color();
-    color(color &c);
     color(unsigned char r, unsigned char g, unsigned char b);
     unsigned char Red(void);
     unsigned char Green(void);

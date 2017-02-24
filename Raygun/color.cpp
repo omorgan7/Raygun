@@ -13,11 +13,6 @@ color::color(){
     green = 0;
     blue = 0;
 }
-color::color(color &c){
-    red = c.Red();
-    green = c.Green();
-    blue = c.Blue();
-}
 
 color::color(unsigned char r, unsigned char g, unsigned char b){
     red = r;

@@ -26,7 +26,7 @@ public:
     virtual color SpecularColorCalc(Ray ray) = 0;
     virtual float calculateInterSectionProduct(Ray ray, int * success) =0;
 protected:
-    color Color;
+    color Color = color(0,0,0);
     float ambientCoeff, diffuseCoeff, specularCoeff, reflectCoeff;
 };
 

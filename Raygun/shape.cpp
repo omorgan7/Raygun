@@ -141,9 +141,9 @@ color triangle::AmbientRayInterSection(Ray R){
     return Color*ambientCoeff;
 }
 color triangle::DiffuseColorCalc(void){
-    auto normal = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
+    auto normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
     //std::cout<<normal<<"\n";
-    return Color*diffuseCoeff*normal;
+    return Color*diffuseCoeff*normalDist;
 }
 color triangle::SpecularColorCalc(Ray ray){
     auto reflectionFactor = 2.0f*Vec3DotProduct(triangleNormal,world::sunlightDirection);
@@ -166,7 +166,7 @@ float triangle::calculateInterSectionProduct(Ray R, int * success){
         return -1;
     }
     auto origin = R.GetStartPos();
-    auto numerator = -1*Vec3DotProduct(triangleNormal,vertex_0) - Vec3DotProduct(triangleNormal,R.GetStartPos() );
+    auto numerator = Vec3DotProduct(triangleNormal,vertex_0) - Vec3DotProduct(triangleNormal,R.GetStartPos() );
     auto t=numerator/denominator;
     auto Q = Vec3Add(origin, Vec3ScalarMultiply(RayDirection,t));
     if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertex_1,vertex_0),Vec3Sub(Q,vertex_0)),triangleNormal)<0){
@@ -195,7 +195,7 @@ void triangle::ComputeNormal(void){
 
     triangleNormal = Vec3CrossProduct(LHS,RHS);
     NormaliseVector(&triangleNormal);
-    flipNormal();
+    //flipNormal();
     // for(auto i =0; i<3; i++){
     //     std::cout<<"Normal "<<triangleNormal[i]<<"\n";
     // }

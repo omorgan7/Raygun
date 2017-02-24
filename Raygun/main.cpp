@@ -8,6 +8,7 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <float.h>
 //#include<assert.h>
 //#include <unistd.h>
 
@@ -33,7 +34,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<float> > triangleVertices = {std::vector<float>(3), 
                                                         std::vector<float>(3), 
                                                         std::vector<float>(3)};
-    triangleVertices = {{-300,300,400},{0,-300,400},{300,300,400}};
+    triangleVertices = {{-500,500,400},{0,-500,400},{500,500,400}};
     // [0] = {-300,300,200};
     // triangleVertices[1] = {0,-300,200};
     // triangleVertices[2] = {300,300,200};
@@ -111,8 +112,8 @@ int main(int argc, char* argv[]) {
             if(successState[j]  == 1){
                 if(interSectionCoordinates[j][2] < max_depth){
                     std::cout<<j<<"\n";
-                    std::cout<<interSectionCoordinates[objectIndex][2]<<"\n";
-                    max_depth = interSectionCoordinates[objectIndex][2];
+                    std::cout<<interSectionCoordinates[j][2]<<"\n";
+                    max_depth = interSectionCoordinates[j][2];
                     objectIndex = j;
                 }
             }
@@ -124,7 +125,9 @@ int main(int argc, char* argv[]) {
             continue;
         }
         color ambientColor = Objects[objectIndex]->AmbientRayInterSection(R);
-        color returnedColor = ambientColor + Objects[objectIndex]->DiffuseColorCalc() + Objects[objectIndex]->SpecularColorCalc(R);
+        color diffuseColor = Objects[objectIndex]->DiffuseColorCalc();
+        color specColor = Objects[objectIndex]->SpecularColorCalc(R);
+        color returnedColor = ambientColor + diffuseColor + specColor;
         image[i] = returnedColor.Red();
         image[i+1] = returnedColor.Green();
         image[i+2] = returnedColor.Blue();
@@ -153,8 +156,8 @@ int main(int argc, char* argv[]) {
     for(int i = 0; i < numberOfObjects; i++){
         delete Objects[i];
     }
-    delete successState;
-    delete Objects;
-    delete image;
+    delete[] successState;
+    delete[] Objects;
+    delete[] image;
     return 1;
 }
