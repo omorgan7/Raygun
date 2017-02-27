@@ -120,20 +120,25 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        Ray shadowRay = Ray(interSectionCoordinates[objectIndex],Vec3ScalarMultiply(world::sunlightDirection, -1));
+        //std::cout<<interSectionCoordinates[objectIndex][0]<<" "<<interSectionCoordinates[objectIndex][1]<<" "<<interSectionCoordinates[objectIndex][2]<<"\n";
+        Ray shadowRay = Ray(interSectionCoordinates[objectIndex],world::sunlightDirection);
         int shadowFlag = -1;
         for(int j = 0; j<numberOfObjects; j++){
             auto t = Objects[j]->calculateInterSectionProduct(shadowRay,&shadowSuccess[j]);
             if(j == objectIndex){
                 continue;
             }
+            if(fabs(interSectionCoordinates[objectIndex][0]) < 0.00001f && fabs(interSectionCoordinates[objectIndex][1]) < 0.00001f && interSectionCoordinates[objectIndex][2] == 400.0f){
+                std::cout<<"index is "<<objectIndex<<" t is "<<t<<"\n";
+            }
             if(shadowSuccess[j] == 1){
+                std::cout<<"shadows\n";
                 shadowFlag = 1;
                 break;
             }
         }
         if(shadowFlag == 1){
-            std::cout<<"shadows\n";
+
             image[i] = 0;
             image[i+1] = 0;
             image[i+2] = 0;

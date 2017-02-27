@@ -84,8 +84,8 @@ float Sphere::calculateInterSectionProduct(Ray R, int * success){
         distance_2norm += difference[i]*difference[i];
     }
     dist_dot_product = Vec3DotProduct(R.GetDirection(), difference);
-    auto quadrant = powf(dist_dot_product,2) + radius*radius - distance_2norm;
-    if(quadrant<0){
+    float quadrant = powf(dist_dot_product,2) + radius*radius - distance_2norm;
+    if(quadrant<0.0001f){
         *success = 0;
         return -1;
     }
