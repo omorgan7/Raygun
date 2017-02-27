@@ -35,13 +35,18 @@ int main(int argc, char* argv[]) {
                                                         std::vector<float>(3), 
                                                         std::vector<float>(3)};
     triangleVertices = {{-500,500,400},{0,-500,400},{500,500,400}};
+    std::vector<std::vector<float> > triangleVertices2 = {std::vector<float>(3),
+        std::vector<float>(3),
+        std::vector<float>(3)};
+    triangleVertices2 = {{800,-500,100},{-800,-500,100},{0,-400,700}};
     // [0] = {-300,300,200};
     // triangleVertices[1] = {0,-300,200};
     // triangleVertices[2] = {300,300,200};
-    int numberOfObjects = 2;
+    int numberOfObjects = 3;
     object ** Objects = new object*[numberOfObjects];
     Objects[0] = new triangle(triangleVertices);
-    Objects[1] = new Sphere(300,300,300,300);
+    Objects[1] = new Sphere(0,0,200,200);
+    Objects[2] = new triangle(triangleVertices2);
     //triangle Triangle = triangle(triangleVertices);
     world::sunlightPosition = {(float)width/2,(float)height/2,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-sphereCoords[0],
@@ -92,7 +97,7 @@ int main(int argc, char* argv[]) {
         std::fill(interSectionCoordinates.begin(),interSectionCoordinates.end(),std::vector<float>(3));
         for(auto j = 0; j<numberOfObjects; j++){
             successState[j] = 1;
-            shadowSuccess[j] = 0;
+            shadowSuccess[j] = 1;
         }
 
         auto image_x = (i/3)%width;
@@ -121,20 +126,20 @@ int main(int argc, char* argv[]) {
             }
         }
         //std::cout<<interSectionCoordinates[objectIndex][0]<<" "<<interSectionCoordinates[objectIndex][1]<<" "<<interSectionCoordinates[objectIndex][2]<<"\n";
-        Ray shadowRay = Ray(interSectionCoordinates[objectIndex],world::sunlightDirection);
+        auto backLightDirection = Vec3ScalarMultiply(world::sunlightDirection,-1);
+        Ray shadowRay = Ray(interSectionCoordinates[objectIndex],backLightDirection);
         int shadowFlag = -1;
         for(int j = 0; j<numberOfObjects; j++){
             auto t = Objects[j]->calculateInterSectionProduct(shadowRay,&shadowSuccess[j]);
             if(j == objectIndex){
                 continue;
             }
-            if(fabs(interSectionCoordinates[objectIndex][0]) < 0.00001f && fabs(interSectionCoordinates[objectIndex][1]) < 0.00001f && interSectionCoordinates[objectIndex][2] == 400.0f){
-                std::cout<<"index is "<<objectIndex<<" t is "<<t<<"\n";
-            }
             if(shadowSuccess[j] == 1){
-                std::cout<<"shadows\n";
-                shadowFlag = 1;
-                break;
+                interSectionCoordinates[j]= Vec3Add(interSectionCoordinates[objectIndex],Vec3ScalarMultiply(backLightDirection,t));
+                if(interSectionCoordinates[j][2] < interSectionCoordinates[objectIndex][2]){
+                    shadowFlag = 1;
+                    break;
+                }
             }
         }
         if(shadowFlag == 1){

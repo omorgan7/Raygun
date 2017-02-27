@@ -79,12 +79,18 @@ float Sphere::calculateInterSectionProduct(Ray R, int * success){
     auto distance_2norm = 0.0f;
     std::vector<float> difference = std::vector<float>(3);
     auto origin = R.GetStartPos();
+//    if(fabs(origin[0]) < 0.00001f && fabs(origin[1]) < 0.00001f && origin[2] == 400.0f){
+//        std::cout<<origin[0]<<" "<<origin[1]<<" "<<origin[2]<<"\n";
+//    }
     for(auto i = 0; i<3; i++){
         difference[i] = origin[i] - SphereOrigin[i];
         distance_2norm += difference[i]*difference[i];
     }
     dist_dot_product = Vec3DotProduct(R.GetDirection(), difference);
     float quadrant = powf(dist_dot_product,2) + radius*radius - distance_2norm;
+//    if(fabs(origin[0]) < 0.00001f && fabs(origin[1]) < 0.00001f && origin[2] == 400.0f){
+//        std::cout<<origin[0]<<" "<<origin[1]<<" "<<origin[2]<<"\n";
+//    }
     if(quadrant<0.0001f){
         *success = 0;
         return -1;
