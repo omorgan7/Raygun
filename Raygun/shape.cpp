@@ -59,14 +59,11 @@ color Sphere::AmbientRayInterSection(Ray ray){
     return Color*ambientCoeff;
 }
 color Sphere::DiffuseColorCalc(void){
-    int success = 1;
     //assert(distance>=0);
     auto lambertRay = Vec3DotProduct(normal,world::sunlightDirection);
-    auto intermediate = Color*diffuseCoeff*lambertRay;
     return Color*diffuseCoeff*lambertRay;
 }
 color Sphere::SpecularColorCalc(Ray ray){
-    int success =1;
     auto reflectionFactor = 2.0f*Vec3DotProduct(normal,world::sunlightDirection);
     std::vector<float> reflectionVector = std::vector<float>(3);
     for(auto i = 0; i<3; i++) {

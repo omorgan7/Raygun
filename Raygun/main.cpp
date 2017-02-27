@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     int numberOfObjects = 2;
     object ** Objects = new object*[numberOfObjects];
     Objects[0] = new triangle(triangleVertices);
-    Objects[1] = new Sphere(0,0,300,300);
+    Objects[1] = new Sphere(300,300,300,300);
     //triangle Triangle = triangle(triangleVertices);
     world::sunlightPosition = {(float)width/2,(float)height/2,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-sphereCoords[0],
@@ -80,15 +80,19 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::vector<float> > interSectionCoordinates = std::vector<std::vector<float> >(numberOfObjects);
     int * successState = new int[numberOfObjects];
+    int * shadowSuccess = new int[numberOfObjects];
+    
     std::vector<int> zeroVec = std::vector<int>(numberOfObjects);
     int objectIndex;
     for(auto j = 0; j<numberOfObjects; j++){
         interSectionCoordinates[j] = {0,0,0};
     }
     for(auto i = 0; i<width*height*3; i+=3){
+        
         std::fill(interSectionCoordinates.begin(),interSectionCoordinates.end(),std::vector<float>(3));
         for(auto j = 0; j<numberOfObjects; j++){
             successState[j] = 1;
+            shadowSuccess[j] = 0;
         }
 
         auto image_x = (i/3)%width;
@@ -105,18 +109,35 @@ int main(int argc, char* argv[]) {
                 interSectionCoordinates[j]= Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t));
             }
         }
-
+        
         objectIndex = 0;
         float max_depth = FLT_MAX;
         for(int j = 0; j<numberOfObjects; j++){
             if(successState[j]  == 1){
                 if(interSectionCoordinates[j][2] < max_depth){
-                    std::cout<<j<<"\n";
-                    std::cout<<interSectionCoordinates[j][2]<<"\n";
                     max_depth = interSectionCoordinates[j][2];
                     objectIndex = j;
                 }
             }
+        }
+        Ray shadowRay = Ray(interSectionCoordinates[objectIndex],Vec3ScalarMultiply(world::sunlightDirection, -1));
+        int shadowFlag = -1;
+        for(int j = 0; j<numberOfObjects; j++){
+            auto t = Objects[j]->calculateInterSectionProduct(shadowRay,&shadowSuccess[j]);
+            if(j == objectIndex){
+                continue;
+            }
+            if(shadowSuccess[j] == 1){
+                shadowFlag = 1;
+                break;
+            }
+        }
+        if(shadowFlag == 1){
+            std::cout<<"shadows\n";
+            image[i] = 0;
+            image[i+1] = 0;
+            image[i+2] = 0;
+            continue;
         }
         if(max_depth == FLT_MAX){//nothing intersected
             image[i] = world::background_color.Red();
