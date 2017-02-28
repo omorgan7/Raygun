@@ -108,9 +108,9 @@ triangle::triangle(std::vector<std::vector<float> > vertices){
     for(int i = 0; i<3; i++){
         SetVertexCoord(vertices[i],i);
     }
-    ambientCoeff=0.2;
+    ambientCoeff=0.1;
     diffuseCoeff = 0.4;
-    specularCoeff = 0.4;
+    specularCoeff = 0.5;
     Color.changeRed(255);
     Color.changeBlue(255);
     std::cout<<(int)Color.Blue()<<"\n";
