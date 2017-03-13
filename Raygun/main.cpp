@@ -17,6 +17,7 @@
 #include "bitmap.hpp"
 #include "shape.hpp"
 #include "raymath.hpp"
+#include "objloader.hpp"
 
 #define PI 3.14159265f
 
@@ -29,37 +30,51 @@ int main(int argc, char* argv[]) {
     }
     
     unsigned char *image = new unsigned char[width*height*3];
+    std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
+    
+    std::vector<std::vector<float> > vertices;
+    std::vector<unsigned int> vertex_indices;
+    int retval = loadSimpleOBJ(objectstring.c_str(),vertices,vertex_indices);
+    
+    
     int sphereCoords[] = {0,0,300};
     //Sphere RedSphere = Sphere(0,0,300,300); //creates a sphere at x,y = 0, r = 50
-    std::vector<std::vector<float> > triangleVertices = {std::vector<float>(3), 
-                                                        std::vector<float>(3), 
-                                                        std::vector<float>(3)};
-    triangleVertices = {{-500,500,400},{0,-500,400},{500,500,400}};
-    std::vector<std::vector<float> > triangleVertices2 = {std::vector<float>(3),
-        std::vector<float>(3),
-        std::vector<float>(3)};
-    std::vector<std::vector<float> > triangleVertices3 = {std::vector<float>(3),
-        std::vector<float>(3),
-        std::vector<float>(3)};
-    triangleVertices2 = {{800,-500,100},{-800,-500,100},{-800,-400,700}};
-    triangleVertices3 = {{800,-500,100},{800,-400,700},{-800,-400,700}};
-    // [0] = {-300,300,200};
-    // triangleVertices[1] = {0,-300,200};
-    // triangleVertices[2] = {300,300,200};
-    int numberOfObjects = 4;
-    object ** Objects = new object*[numberOfObjects];
-    Objects[0] = new triangle(triangleVertices);
-    Objects[1] = new Sphere(0,0,200,200);
-    Objects[2] = new triangle(triangleVertices2);
-    Objects[3] = new triangle(triangleVertices3);
-
-    //triangle Triangle = triangle(triangleVertices);
+//    std::vector<std::vector<float> > triangleVertices = {std::vector<float>(3), 
+//                                                        std::vector<float>(3),
+//                                                        std::vector<float>(3)};
+//    triangleVertices = {{-500,500,400},{0,-500,400},{500,500,400}};
+//    std::vector<std::vector<float> > triangleVertices2 = {std::vector<float>(3),
+//        std::vector<float>(3),
+//        std::vector<float>(3)};
+//    std::vector<std::vector<float> > triangleVertices3 = {std::vector<float>(3),
+//        std::vector<float>(3),
+//        std::vector<float>(3)};
+//    triangleVertices2 = {{800,-500,100},{-800,-500,100},{-800,-400,700}};
+//    triangleVertices3 = {{800,-500,100},{800,-400,700},{-800,-400,700}};
+//    // [0] = {-300,300,200};
+//    // triangleVertices[1] = {0,-300,200};
+//    // triangleVertices[2] = {300,300,200};
     world::sunlightPosition = {(float)width/2,(float)height,-400.0f};
     world::sunlightDirection = {world::sunlightPosition[0]-sphereCoords[0],
-                                world::sunlightPosition[1]-sphereCoords[1],
-                                world::sunlightPosition[2]-400};
-
+        world::sunlightPosition[1]-sphereCoords[1],
+        world::sunlightPosition[2]-400};
+    
     NormaliseVector(&world::sunlightDirection);
+    int numberOfObjects = vertex_indices.size()/3;
+    object ** Objects = new object*[numberOfObjects];
+    std::vector<std::vector<float> > triangleVertices = {std::vector<float>(3),
+                                                                std::vector<float>(3),
+                                                                std::vector<float>(3)};
+    for(int i = 0; i<numberOfObjects; i++){
+        triangleVertices = {vertices[vertex_indices[3*i]],vertices[vertex_indices[3*i+1]],vertices[vertex_indices[3*i+2]]};
+        Objects[i] = new triangle(triangleVertices);
+    }
+//    Objects[0] = new triangle(triangleVertices);
+//    Objects[1] = new Sphere(0,0,200,200);
+//    Objects[2] = new triangle(triangleVertices2);
+//    Objects[3] = new triangle(triangleVertices3);
+
+    //triangle Triangle = triangle(triangleVertices);
     
     std::vector<float> eye_origin = std::vector<float>(3);
     std::vector<float> eye_normal = std::vector<float>(3);
@@ -69,7 +84,7 @@ int main(int argc, char* argv[]) {
     std::vector<float> direction = std::vector<float>(3);
     std::vector<float> L_vector = std::vector<float>(3);
 
-    eye_origin = {0,0,-200};
+    eye_origin = {0,0,-2};
     eye_normal = eye_origin;
     eye_normal[2] = -eye_normal[2];
     NormaliseVector(&eye_normal);
@@ -79,7 +94,7 @@ int main(int argc, char* argv[]) {
     //NormaliseVector(&v_up);
     eye_u = Vec3CrossProduct(v_up, eye_normal);
     eye_v = Vec3CrossProduct(eye_normal, eye_u);
-    float field_of_view = 120.0f;
+    float field_of_view = 90.0f;
     auto pixel_height = tan((field_of_view/360) * PI)*(2*eye_origin[2]);
     auto pixel_width = pixel_height * ((float)width/(float)height);
     
@@ -97,15 +112,11 @@ int main(int argc, char* argv[]) {
     int objectIndex;
     for(auto j = 0; j<numberOfObjects; j++){
         interSectionCoordinates[j] = {0,0,0};
+        successState[j] = 1;
+        shadowSuccess[j] = 1;
     }
     for(auto i = 0; i<width*height*3; i+=3){
         
-        std::fill(interSectionCoordinates.begin(),interSectionCoordinates.end(),std::vector<float>(3));
-        for(auto j = 0; j<numberOfObjects; j++){
-            successState[j] = 1;
-            shadowSuccess[j] = 1;
-        }
-
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/width;
         for (auto i =0; i<3; i++){
@@ -113,29 +124,32 @@ int main(int argc, char* argv[]) {
         }
         NormaliseVector(&direction);
         Ray R = Ray(eye_origin,direction);
-
-        for(int j = 0; j<numberOfObjects; j++){
-            auto t = Objects[j]->calculateInterSectionProduct(R,&successState[j]);
-            if(successState[j] == 1){
-                interSectionCoordinates[j]= Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t));
-            }
-        }
         
         objectIndex = 0;
         float max_depth = FLT_MAX;
         for(int j = 0; j<numberOfObjects; j++){
-            if(successState[j]  == 1){
+            auto t = Objects[j]->calculateInterSectionProduct(R,&successState[j]);
+            if(successState[j] == 1){
+                interSectionCoordinates[j]= Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t));
+                //Objects[j]->inputIntersectionCoords(interSectionCoordinates[j]);
                 if(interSectionCoordinates[j][2] < max_depth){
                     max_depth = interSectionCoordinates[j][2];
                     objectIndex = j;
                 }
             }
         }
-        //std::cout<<interSectionCoordinates[objectIndex][0]<<" "<<interSectionCoordinates[objectIndex][1]<<" "<<interSectionCoordinates[objectIndex][2]<<"\n";
+        
+
         auto backLightDirection = Vec3ScalarMultiply(world::sunlightDirection,-1);
         Ray shadowRay = Ray(interSectionCoordinates[objectIndex],backLightDirection);
         int shadowFlag = -1;
         int shadowIndex = 0;
+        if(max_depth == FLT_MAX){//nothing intersected
+            image[i] = world::background_color.Red();
+            image[i+1] = world::background_color.Green();
+            image[i+2] = world::background_color.Blue();
+            continue;
+        }
         for(int j = 0; j<numberOfObjects; j++){
             auto t = Objects[j]->calculateInterSectionProduct(shadowRay,&shadowSuccess[j]);
             if(j == objectIndex){
@@ -155,12 +169,6 @@ int main(int argc, char* argv[]) {
             image[i] = 0;
             image[i+1] = 0;
             image[i+2] = 0;
-            continue;
-        }
-        if(max_depth == FLT_MAX){//nothing intersected
-            image[i] = world::background_color.Red();
-            image[i+1] = world::background_color.Green();
-            image[i+2] = world::background_color.Blue();
             continue;
         }
         color ambientColor = Objects[objectIndex]->AmbientRayInterSection(R);

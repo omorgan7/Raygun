@@ -25,7 +25,7 @@ public:
     virtual color DiffuseColorCalc(void) = 0;
     virtual color SpecularColorCalc(Ray ray) = 0;
     virtual float calculateInterSectionProduct(Ray ray, int * success) =0;
-    virtual void inputIntersectionCoords(std::vector<float> coords)= 0;
+    virtual void inputIntersectionCoords(std::vector<float> &coords)= 0;
 protected:
     color Color = color(0,0,0);
     float ambientCoeff, diffuseCoeff, specularCoeff, reflectCoeff;
@@ -46,7 +46,7 @@ public:
     color DiffuseColorCalc(void);
     color SpecularColorCalc(Ray ray);
     float calculateInterSectionProduct(Ray ray, int * success);
-    void inputIntersectionCoords(std::vector<float> coords){};
+    void inputIntersectionCoords(std::vector<float> &coords){};
     
     
 private:
@@ -68,12 +68,16 @@ public:
     color DiffuseColorCalc(void);
     color SpecularColorCalc(Ray ray);
     float calculateInterSectionProduct(Ray ray, int * success);
-    void inputIntersectionCoords(std::vector<float> coords){};
+    void inputIntersectionCoords(std::vector<float> &coords);
 private:
     std::vector<float> vertex_0, vertex_1, vertex_2;
     std::vector<float> triangleNormal = std::vector<float>(3);
+    std::vector<float> rayintersectioncoords = std::vector<float>(3);
     void ComputeNormal(void);
     void flipNormal(void);
+    float normalDist;
+    std::vector<float> reflectionVector;
+    
 };
 
 #endif /* shape_hpp */

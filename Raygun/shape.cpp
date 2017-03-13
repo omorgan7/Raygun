@@ -113,8 +113,9 @@ triangle::triangle(std::vector<std::vector<float> > vertices){
     specularCoeff = 0.5;
     Color.changeRed(255);
     Color.changeBlue(255);
-    std::cout<<(int)Color.Blue()<<"\n";
     ComputeNormal();
+    normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
+    reflectionVector = Vec3Sub(Vec3ScalarMultiply(triangleNormal, 2.0f*Vec3DotProduct(triangleNormal,world::sunlightDirection)), world::sunlightDirection);
 }
 void triangle::SetVertexCoord(std::vector<float> vertex, int vertex_index){
     switch(vertex_index){
@@ -135,25 +136,12 @@ void triangle::ChangeVertexCoord(std::vector<float> vertex, int vertex_index){
 }
 
 color triangle::AmbientRayInterSection(Ray R){
-    int success = 1;
-    auto distance = calculateInterSectionProduct(R, &success);
-    //std::cout<<distance<<"\n";
-    if(distance<0 || success == 0){
-        return world::background_color;
-    }
     return Color*ambientCoeff;
 }
 color triangle::DiffuseColorCalc(void){
-    auto normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
-    //std::cout<<normal<<"\n";
     return Color*diffuseCoeff*normalDist;
 }
 color triangle::SpecularColorCalc(Ray ray){
-    auto reflectionFactor = 2.0f*Vec3DotProduct(triangleNormal,world::sunlightDirection);
-    std::vector<float> reflectionVector = std::vector<float>(3);
-    for(auto i = 0; i<3; i++) {
-        reflectionVector[i] = triangleNormal[i]*reflectionFactor - world::sunlightDirection[i];
-    }
     auto SpecRay = Vec3DotProduct(ray.GetDirection(),reflectionVector);
     if(SpecRay<0){
         return color(0,0,0);
@@ -184,6 +172,7 @@ float triangle::calculateInterSectionProduct(Ray R, int * success){
         *success = 0;
         return -1;
     }
+    *success = 1;
     return t;
 }
 void triangle::ComputeNormal(void){
@@ -198,14 +187,14 @@ void triangle::ComputeNormal(void){
 
     triangleNormal = Vec3CrossProduct(LHS,RHS);
     NormaliseVector(&triangleNormal);
-    //flipNormal();
-    // for(auto i =0; i<3; i++){
-    //     std::cout<<"Normal "<<triangleNormal[i]<<"\n";
-    // }
 }
 
 void triangle::flipNormal(void){
     triangleNormal[0] *=-1;
     triangleNormal[1] *=-1;
     triangleNormal[2] *=-1;
+}
+
+void triangle::inputIntersectionCoords(std::vector<float> &vector){
+    rayintersectioncoords = vector;
 };
