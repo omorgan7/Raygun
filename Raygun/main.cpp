@@ -9,6 +9,7 @@
 #include <vector>
 #include <cmath>
 #include <float.h>
+#include <algorithm>
 //#include<assert.h>
 //#include <unistd.h>
 
@@ -17,6 +18,7 @@
 #include "bitmap.hpp"
 #include "shape.hpp"
 #include "raymath.hpp"
+#include "aabb.hpp"
 #include "objloader.hpp"
 
 #define PI 3.14159265f
@@ -30,7 +32,8 @@ int main(int argc, char* argv[]) {
     }
     
     unsigned char *image = new unsigned char[width*height*3];
-    std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
+    //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
+    std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -65,10 +68,24 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<float> > triangleVertices = {std::vector<float>(3),
                                                                 std::vector<float>(3),
                                                                 std::vector<float>(3)};
+
     for(int i = 0; i<numberOfObjects; i++){
         triangleVertices = {vertices[vertex_indices[3*i]],vertices[vertex_indices[3*i+1]],vertices[vertex_indices[3*i+2]]};
         Objects[i] = new triangle(triangleVertices);
     }
+    AABB root;
+    root.vertex_indices = vertex_indices;
+    Mesh_Stats xyz;
+    getminmaxmed(&root,&vertices, &xyz);
+    std::cout<<"80\n";
+    for(int i = 0; i<3; i++){
+        root.corners[2*i] = xyz.min[i];
+        root.corners[2*i+1] = xyz.max[i];
+    };
+    int depth = buildAABBTree(&root, &vertices, 1);
+    std::cout<<"depth = "<<depth<<"\n";
+    return 0;
+
 //    Objects[0] = new triangle(triangleVertices);
 //    Objects[1] = new Sphere(0,0,200,200);
 //    Objects[2] = new triangle(triangleVertices2);
