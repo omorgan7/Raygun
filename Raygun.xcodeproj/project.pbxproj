@@ -81,17 +81,24 @@
 			isa = PBXGroup;
 			children = (
 				5AAE57EA1E5E079000A562A8 /* Headers */,
+				5A9DFB391E772DA400BA3B30 /* Source */,
+			);
+			path = Raygun;
+			sourceTree = "<group>";
+		};
+		5A9DFB391E772DA400BA3B30 /* Source */ = {
+			isa = PBXGroup;
+			children = (
 				5AAE57E51E5E071F00A562A8 /* raymath.cpp */,
 				5A41A8CA1E72C457002D2E72 /* objloader.cpp */,
 				5AAE57E61E5E071F00A562A8 /* shape.cpp */,
 				5A9656C51E546F9E005A8D95 /* main.cpp */,
 				5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */,
-				5A9DFB361E772D8300BA3B30 /* aabb.hpp */,
 				5A9DFB371E772D8300BA3B30 /* aabb.cpp */,
 				5A2AF25E1E56376C00910E82 /* color.cpp */,
 				5A2AF25B1E56371E00910E82 /* world.cpp */,
 			);
-			path = Raygun;
+			name = Source;
 			sourceTree = "<group>";
 		};
 		5AAE57EA1E5E079000A562A8 /* Headers */ = {
@@ -103,6 +110,7 @@
 				5A7FCFD51E572F9D002BBC75 /* bitmap.hpp */,
 				5A2AF25F1E56376C00910E82 /* color.hpp */,
 				5A2AF25C1E56371E00910E82 /* world.hpp */,
+				5A9DFB361E772D8300BA3B30 /* aabb.hpp */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -207,7 +215,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -257,7 +265,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;

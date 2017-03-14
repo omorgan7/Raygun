@@ -2,7 +2,7 @@
 
 int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int depth){
     depth++;
-    if(root->vertex_indices.size() <= 6){
+    if(root->vertex_indices.size() <= 3){
         return depth;
     }
     Mesh_Stats xyz;
@@ -33,7 +33,7 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
         root->rightbox->corners[2*i] = xyz.min[i];
         root->rightbox->corners[2*i+1] = xyz.max[i];
     };
-    std::cout<<root->vertex_indices.size()<<"\n";
+    //std::cout<<root->vertex_indices.size()<<"\n";
     for(int i =0; i<root->vertex_indices.size(); i+=3){
         int leftcount = 0;
         if((*vertices)[root->vertex_indices[i]][maxrange_index] <= xyz.med[maxrange_index]){
@@ -55,6 +55,12 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
             root->rightbox->vertex_indices.push_back(root->vertex_indices[i+1]);
             root->rightbox->vertex_indices.push_back(root->vertex_indices[i+2]);
         }
+    }
+    if(root->leftbox->vertex_indices.size() == root->vertex_indices.size() || root->rightbox->vertex_indices.size() == root->vertex_indices.size()){
+        delete root->leftbox;
+        delete root->rightbox;
+        delete root;
+        return --depth;
     }
     int leftdepth = buildAABBTree(root->leftbox,vertices,depth);
     int rightdepth = buildAABBTree(root->rightbox,vertices,depth);

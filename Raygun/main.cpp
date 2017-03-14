@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
     }
     
     unsigned char *image = new unsigned char[width*height*3];
-    //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
-    std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
+    std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
+    //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
         root.corners[2*i] = xyz.min[i];
         root.corners[2*i+1] = xyz.max[i];
     };
-    int depth = buildAABBTree(&root, &vertices, 1);
+    int depth = buildAABBTree(&root, &vertices, 0);
     std::cout<<"depth = "<<depth<<"\n";
     return 0;
 
