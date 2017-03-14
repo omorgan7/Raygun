@@ -20,12 +20,15 @@ public:
     void SetRayOrigin(float x, float y, float z);
     std::vector<float> GetDirection(void);
     void SetDirection(float x, float y, float z);
+    std::vector<float> Ray::GetInvDirection(void);
 
 private:
     std::vector<float> RayOrigin = std::vector<float>(3);
     std::vector<float> RayDirection = std::vector<float>(3);
+    std::vector<float> InvDirection = std::vector<float>(3);
 };
 
+////////////// INLINE MATH FUNCTIONS ///////////////////////
 inline void NormaliseVector(std::vector<float> *vec){
     double length = 0.0f;
     for(auto i = vec->begin(); i != vec->end(); i++){
@@ -78,12 +81,13 @@ inline std::vector<float> Vec3ScalarMultiply(std::vector<float> u, float m){
     MProduct[1] = u[1]*m;
     MProduct[2] = u[2]*m;
     return MProduct;
+}
+
+template<typename T>
+inline void swap(T * a, T * b){
+    T temp = *a;
+    *a = *b;
+    *b = temp;
 };
-//void NormaliseVector(std::vector<float> *vec);
-//float Vec3DotProduct(std::vector<float> v1, std::vector<float> v2);
-//std::vector<float> Vec3CrossProduct(std::vector<float> u, std::vector<float> v);
-//std::vector<float> Vec3Sub(std::vector<float> u, std::vector<float> v);
-//std::vector<float> Vec3Add(std::vector<float> u, std::vector<float> v);
-//std::vector<float> Vec3ScalarMultiply(std::vector<float> u, float m);
 
 #endif /* raymath_hpp */

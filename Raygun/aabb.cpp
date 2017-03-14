@@ -111,3 +111,45 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
     stats->max[2] = z_vertices[z_vertices.size()-1];
     stats->med[2] = z_vertices[z_vertices.size()/2];
 }
+bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices){
+
+    std::vector<float> tmin = std::vector<float>(3);
+    std::vector<float> tmax = std::vector<float>(3);
+    std::vector<float> InvDirection = R->GetInvDirection();
+    std::vector<float> origin = R->GetStartPos();
+    for(int j =0; j<3; j++){
+        tmin[j] = (root->corners[2*j] - origin[j])*InvDirection[j];
+        tmax[j] = (root->corners[2*j+1]-origin[j])*InvDirection[j];
+        if(tmin[j]>tmax[j]){
+            swap(&tmin[j],&tmax[j]);
+        }
+    }
+
+    if(tmin[0] > tmax[1] || tmin[1] > tmax[0]){
+        return 0;
+    }
+    if(tmin[1] > tmin[0]){
+        swap(&tmin[1],&tmin[0]);
+    }
+    if(tmax[1] > tmax[0]){
+        swap(&tmax[1],&tmax[0]);
+    }
+    if(tmin[0] > tmax[2] || tmin[2] > tmax[0]){
+        return 0;
+    }
+    bool leftret=1, rightret=1;
+    if(root->leftbox != nullptr || root->rightbox != nullptr){
+        if(root->leftbox != nullptr){
+            leftret = AABBRayIntersection(root->leftbox,R,intersectedVertices);
+        }
+        if(root->rightbox != nullptr){
+            rightret = AABBRayIntersection(root->rightbox,R,intersectedVertices);
+        }
+        return leftret || rightret;
+    }
+    else{
+        *intersectedVertices = root->vertex_indices;
+        return 1;
+    }
+
+}

@@ -8,9 +8,6 @@
 
 #include "raymath.hpp"
 
-////////////// INLINE MATH FUNCTIONS ///////////////////////
-
-
 //////////////////////// RAY CLASS ////////////////////////////
 std::vector<float> Ray::GetStartPos(void){
     return RayOrigin;
@@ -18,6 +15,7 @@ std::vector<float> Ray::GetStartPos(void){
 Ray::Ray(std::vector<float> origin, std::vector<float> direction){
     RayOrigin = origin;
     RayDirection = direction;
+    InvDirection = {1.0f/RayDirection[0],1.0f/RayDirection[1],1.0f/RayDirection[2]};
 }
 void Ray::SetRayOrigin(float x, float y, float z){
     RayOrigin[0] = x;
@@ -26,6 +24,9 @@ void Ray::SetRayOrigin(float x, float y, float z){
 }
 std::vector<float> Ray::GetDirection(void){
     return RayDirection;
+}
+std::vector<float> Ray::GetInvDirection(void){
+    return InvDirection;
 }
 void Ray::SetDirection(float x, float y, float z){
     RayDirection[0] = x;

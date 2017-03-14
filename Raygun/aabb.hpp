@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include "raymath.hpp"
 
 struct Mesh_Stats{
     float min[3];
@@ -29,6 +30,8 @@ struct AABB{
 int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int depth);
 
 void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh_Stats * stats);
+
+bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices);
 
 void cleanupAABBTree(AABB * root);
 
