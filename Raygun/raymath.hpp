@@ -20,7 +20,7 @@ public:
     void SetRayOrigin(float x, float y, float z);
     std::vector<float> GetDirection(void);
     void SetDirection(float x, float y, float z);
-    std::vector<float> Ray::GetInvDirection(void);
+    std::vector<float> GetInvDirection(void);
 
 private:
     std::vector<float> RayOrigin = std::vector<float>(3);
@@ -88,6 +88,13 @@ inline void swap(T * a, T * b){
     T temp = *a;
     *a = *b;
     *b = temp;
+}
+template<typename T>
+inline T sign(T a){
+    if(a> 0){
+        return 1;
+    }
+    return -1;
 };
 
 #endif /* raymath_hpp */

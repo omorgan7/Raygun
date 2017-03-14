@@ -64,15 +64,19 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "1280 720"
-            isEnabled = "YES">
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "100 100"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "320 180"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "640 480"
-            isEnabled = "NO">
+            argument = "640 360"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>

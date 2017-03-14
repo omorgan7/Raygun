@@ -159,16 +159,21 @@ float triangle::calculateInterSectionProduct(Ray R, int * success){
     auto origin = R.GetStartPos();
     auto numerator = Vec3DotProduct(triangleNormal,vertex_0) - Vec3DotProduct(triangleNormal,R.GetStartPos() );
     auto t=numerator/denominator;
-    auto Q = Vec3Add(origin, Vec3ScalarMultiply(RayDirection,t));
-    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertex_1,vertex_0),Vec3Sub(Q,vertex_0)),triangleNormal)<0){
-        *success = 0;
-        return -1;        
-    }
-    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertex_2,vertex_1),Vec3Sub(Q,vertex_1)),triangleNormal)<0){
+    if(t<0){
         *success = 0;
         return -1;
     }
-    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertex_0,vertex_2),Vec3Sub(Q,vertex_2)),triangleNormal)<0){
+    //std::cout<<"t positive\n";
+    auto Q = Vec3Add(origin, Vec3ScalarMultiply(RayDirection,t));
+    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertex_1,vertex_0),Vec3Sub(Q,vertex_0)),triangleNormal)<0.0f){
+        *success = 0;
+        return -1;        
+    }
+    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertex_2,vertex_1),Vec3Sub(Q,vertex_1)),triangleNormal)<0.0f){
+        *success = 0;
+        return -1;
+    }
+    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertex_0,vertex_2),Vec3Sub(Q,vertex_2)),triangleNormal)<0.0f){
         *success = 0;
         return -1;
     }
@@ -187,6 +192,7 @@ void triangle::ComputeNormal(void){
 
     triangleNormal = Vec3CrossProduct(LHS,RHS);
     NormaliseVector(&triangleNormal);
+    //triangleNormal = Vec3ScalarMultiply(triangleNormal, sign(triangleNormal[2]));
 }
 
 void triangle::flipNormal(void){
