@@ -37,12 +37,15 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
     for(int i =0; i<root->vertex_indices.size(); i+=3){
         int leftcount = 0;
         if((*vertices)[root->vertex_indices[i]][maxrange_index] <= xyz.med[maxrange_index]){
+			//std::cout << (*vertices)[root->vertex_indices[i]][maxrange_index] << "\n";
             leftcount++;
         }
         if((*vertices)[root->vertex_indices[i+1]][maxrange_index] <= xyz.med[maxrange_index]){
+			//std::cout << (*vertices)[root->vertex_indices[i+1]][maxrange_index] << "\n";
             leftcount++;
         }
         if((*vertices)[root->vertex_indices[i+2]][maxrange_index] <= xyz.med[maxrange_index]){
+			//std::cout << (*vertices)[root->vertex_indices[i+2]][maxrange_index] << "\n";
             leftcount++;
         }
         if(leftcount >= 2){
@@ -65,9 +68,9 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
         return --depth;
     }
     int leftdepth = buildAABBTree(root->leftbox,vertices,depth);
-    std::cout<<"left node has "<<root->leftbox->vertex_indices.size()<<"\n";
+    //std::cout<<"left node has "<<root->leftbox->vertex_indices.size()<<"\n";
     int rightdepth = buildAABBTree(root->rightbox,vertices,depth);
-    std::cout<<"right node has "<<root->rightbox->vertex_indices.size()<<"\n";
+    //std::cout<<"right node has "<<root->rightbox->vertex_indices.size()<<"\n";
     //assert(root->leftbox->vertex_indices.size() + root->rightbox->vertex_indices.size() == root->vertex_indices.size());
     if(leftdepth > rightdepth){
         return leftdepth;
@@ -118,20 +121,19 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
 }
 bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its){
     its++;
-    if(its == 4){
-        *intersectedVertices = root->vertex_indices;
-        return 1;
-    }
+    //if(its == 6){
+    //    *intersectedVertices = root->vertex_indices;
+    //    return 1;
+    //}
     std::vector<float> tmin = std::vector<float>(3);
     std::vector<float> tmax = std::vector<float>(3);
     std::vector<float> InvDirection = R->GetInvDirection();
+	std::vector<bool> InvDirectionSign = R->GetInvDirectionSign();
     std::vector<float> origin = R->GetStartPos();
+
     for(int j =0; j<3; j++){
-        tmin[j] = (root->corners[2*j] - origin[j])*InvDirection[j];
-        tmax[j] = (root->corners[2*j+1]-origin[j])*InvDirection[j];
-        if(tmin[j]>tmax[j]){
-            swap(&tmin[j],&tmax[j]);
-        }
+        tmin[j] = (root->corners[2*j+1-InvDirectionSign[j]] - origin[j])*InvDirection[j];
+        tmax[j] = (root->corners[2*j+InvDirectionSign[j]]-origin[j])*InvDirection[j];
     }
 
     if(tmin[0] > tmax[1] || tmin[1] > tmax[0]){
@@ -140,25 +142,25 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
     if(tmin[1] > tmin[0]){
         swap(&tmin[1],&tmin[0]);
     }
-    if(tmax[1] > tmax[0]){
+    if(tmax[1] < tmax[0]){
         swap(&tmax[1],&tmax[0]);
     }
     if(tmin[0] > tmax[2] || tmin[2] > tmax[0]){
         return 0;
     }
-    bool leftret=1, rightret=1;
-    if(root->leftbox != nullptr || root->rightbox != nullptr){
-        if(root->leftbox != nullptr){
-            leftret = AABBRayIntersection(root->leftbox,R,intersectedVertices,its);
-        }
-        if(root->rightbox != nullptr){
-            rightret = AABBRayIntersection(root->rightbox,R,intersectedVertices,its);
-        }
-        return leftret || rightret;
+    bool leftret=0, rightret=0;
+	if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
+		*intersectedVertices = root->vertex_indices;
+		return 1;
+	}
+    if(root->leftbox != nullptr){
+        leftret = AABBRayIntersection(root->leftbox,R,intersectedVertices,its);
     }
-    else{
-        *intersectedVertices = root->vertex_indices;
-        return 1;
+    if(root->rightbox != nullptr){
+        rightret = AABBRayIntersection(root->rightbox,R,intersectedVertices,its);
     }
+
+    return leftret || rightret;
+
 
 }

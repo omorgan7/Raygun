@@ -21,11 +21,13 @@ public:
     std::vector<float> GetDirection(void);
     void SetDirection(float x, float y, float z);
     std::vector<float> GetInvDirection(void);
+	std::vector<bool> GetInvDirectionSign(void);
 
 private:
     std::vector<float> RayOrigin = std::vector<float>(3);
     std::vector<float> RayDirection = std::vector<float>(3);
     std::vector<float> InvDirection = std::vector<float>(3);
+	std::vector<bool> InvDirSign = std::vector<bool>(3);
 };
 
 ////////////// INLINE MATH FUNCTIONS ///////////////////////

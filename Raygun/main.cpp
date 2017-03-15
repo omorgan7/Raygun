@@ -33,8 +33,8 @@ int main(int argc, char* argv[]) {
     unsigned char *image = new unsigned char[width*height*3];
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
-	//std::string objectstring = "donut.obj";
-    std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
+	std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
+   //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -97,16 +97,20 @@ int main(int argc, char* argv[]) {
     NormaliseVector(&eye_normal);
     v_up[0] = 0;
     v_up[1] = 1;
-    v_up[2] = 0;
-    //NormaliseVector(&v_up);
-    eye_u = Vec3CrossProduct(v_up, eye_normal);
-    eye_v = Vec3CrossProduct(eye_normal, eye_u);
+    v_up[2] = eye_origin[2];
+    NormaliseVector(&v_up);
+	std::vector<float> w = Vec3Sub(eye_origin,eye_normal);
+	NormaliseVector(&w);
+    eye_u = Vec3CrossProduct(v_up, w);
+	NormaliseVector(&eye_u);
+    eye_v = Vec3CrossProduct(w, eye_u);
     float field_of_view = 90.0f;
     auto pixel_height = tan((field_of_view/360) * PI)*(2*eye_origin[2]);
     auto pixel_width = pixel_height * ((float)width/(float)height);
+	//std::vector<float> c = { 0,0,0 };
     
     for (auto i =0; i<3; i++){
-        L_vector[i] = eye_origin[i] - eye_u[i]*(pixel_width/2.0f) - eye_v[i]*(pixel_height/2.0f);
+        L_vector[i] = 0.0f + eye_u[i]*(pixel_width/2.0f) - eye_v[i]*(pixel_height/2.0f);
     }
     
     //color ambientColor;
@@ -127,12 +131,16 @@ int main(int argc, char* argv[]) {
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/width;
         for (auto i =0; i<3; i++){
-            direction[i] = L_vector[i] + eye_u[i]*image_x*(pixel_width/(float)width) + eye_v[i]*image_y*(pixel_height/(float)height);
+            direction[i] = L_vector[i] - eye_u[i]*image_x*(pixel_width/(float)width) + eye_v[i]*image_y*(pixel_height/(float)height);
         }
+		direction = Vec3Sub(direction, eye_origin);
         NormaliseVector(&direction);
-        direction[2] *= sign(direction[2]);
+        //direction[2] *= sign(direction[2]);
+		//direction = Vec3ScalarMultiply(direction,sign(direction[2]));
+
         Ray R = Ray(eye_origin,direction);
 		std::vector<unsigned int> intersectedVertices;
+
 		auto retval = AABBRayIntersection(&root, &R, &intersectedVertices,0);
 		
 		if(!retval){
@@ -141,7 +149,7 @@ int main(int argc, char* argv[]) {
 			image[i+2] = 0;
 		}
 		else{
-			
+
 			unsigned int numTris = intersectedVertices.size()/3;
 			//std::cout<<numTris<<"\n";
 			triangle ** tris = new triangle*[numTris];
@@ -174,46 +182,45 @@ int main(int argc, char* argv[]) {
 					delete tris[j];
 				}
 				delete[] tris;
-				//delete successState;
 				continue;
 			}
 			for(int j =0; j<numTris; j++){
 				delete tris[j];
 			}
 			delete[] tris;
-			//delete successState;
 			image[i] = 255;
 			image[i+1] = 0;
 			image[i+2] = 255;
 		}
         
-//         successState = std::vector<int>(numberOfObjects);
-//         interSectionCoordinates = std::vector<std::vector<float> >(numberOfObjects);
-//         objectIndex = 0;
-//         float max_depth = FLT_MAX;
-//         for(int j = 0; j<numberOfObjects; j++){
-//             auto t = Objects[j]->calculateInterSectionProduct(R,&successState[j]);
-//             if(successState[j] == 1){
-//                 interSectionCoordinates[j]= Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t));
-//                 //Objects[j]->inputIntersectionCoords(interSectionCoordinates[j]);
-//                 if(interSectionCoordinates[j][2] < max_depth){
-//                     max_depth = interSectionCoordinates[j][2];
-//                     objectIndex = j;
-//                 }
-//             }
-//         }
-//        
-//         if(max_depth == FLT_MAX){//nothing intersected
-//             image[i] = world::background_color.Red();
-//             image[i+1] = world::background_color.Green();
-//             image[i+2] = world::background_color.Blue();
-//             
-//         }
-//         else{
-//             image[i] = 255;
-//             image[i+1] = 0;
-//             image[i+2] = 255;
-//         }
+     //    successState = std::vector<int>(numberOfObjects);
+     //    interSectionCoordinates = std::vector<std::vector<float> >(numberOfObjects);
+     //    objectIndex = 0;
+     //    float max_depth = FLT_MAX;
+     //    for(int j = 0; j<numberOfObjects; j++){
+     //        auto t = Objects[j]->calculateInterSectionProduct(R,&successState[j]);
+     //        if(successState[j] == 1){
+     //            interSectionCoordinates[j]= Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t));
+     //            //Objects[j]->inputIntersectionCoords(interSectionCoordinates[j]);
+     //            if(interSectionCoordinates[j][2] < max_depth){
+     //                max_depth = interSectionCoordinates[j][2];
+     //                objectIndex = j;
+     //            }
+				 //break;
+     //        }
+     //    }
+     //   
+     //    if(max_depth == FLT_MAX){//nothing intersected
+     //        image[i] = world::background_color.Red();
+     //        image[i+1] = world::background_color.Green();
+     //        image[i+2] = world::background_color.Blue();
+     //        
+     //    }
+     //    else{
+     //        image[i] = 255;
+     //        image[i+1] = 0;
+     //        image[i+2] = 255;
+     //    }
         // auto backLightDirection = Vec3ScalarMultiply(world::sunlightDirection,-1);
         // Ray shadowRay = Ray(interSectionCoordinates[objectIndex],backLightDirection);
         // int shadowFlag = -1;

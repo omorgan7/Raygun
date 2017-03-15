@@ -16,6 +16,7 @@ Ray::Ray(std::vector<float> origin, std::vector<float> direction){
     RayOrigin = origin;
     RayDirection = direction;
     InvDirection = {1.0f/RayDirection[0],1.0f/RayDirection[1],1.0f/RayDirection[2]};
+	InvDirSign = { InvDirection[0] > 0,InvDirection[1] > 0,InvDirection[2] > 0 };
 }
 void Ray::SetRayOrigin(float x, float y, float z){
     RayOrigin[0] = x;
@@ -27,6 +28,9 @@ std::vector<float> Ray::GetDirection(void){
 }
 std::vector<float> Ray::GetInvDirection(void){
     return InvDirection;
+}
+std::vector<bool> Ray::GetInvDirectionSign(void) {
+	return InvDirSign;
 }
 void Ray::SetDirection(float x, float y, float z){
     RayDirection[0] = x;
