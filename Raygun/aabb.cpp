@@ -132,8 +132,8 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
     std::vector<float> origin = R->GetStartPos();
 
     for(int j =0; j<3; j++){
-        tmin[j] = (root->corners[2*j+1-InvDirectionSign[j]] - origin[j])*InvDirection[j];
-        tmax[j] = (root->corners[2*j+InvDirectionSign[j]]-origin[j])*InvDirection[j];
+        tmin[j] = (root->corners[2*j+InvDirectionSign[j]] - origin[j])*InvDirection[j];
+        tmax[j] = (root->corners[2*j+1-InvDirectionSign[j]]-origin[j])*InvDirection[j];
     }
 
     if(tmin[0] > tmax[1] || tmin[1] > tmax[0]){
