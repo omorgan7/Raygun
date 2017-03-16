@@ -27,6 +27,9 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
             root->leftbox->corners[2*i] = xyz.min[i];
             root->leftbox->corners[2*i+1] = xyz.min[i] + range[maxrange_index]/2.0f;
             root->rightbox->corners[2*i] = xyz.min[i] + range[maxrange_index]/2.0f;
+//            root->leftbox->corners[2*i+1] = xyz.med[i];
+//            root->rightbox->corners[2*i] = xyz.med[i];
+            
             root->rightbox->corners[2*i+1] = xyz.max[i];
             continue;
         }
@@ -64,6 +67,25 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
         if(vertex_2 > xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
             rightcount++;
         }
+//        if(vertex_0 < xyz.med[maxrange_index]){
+//            leftcount++;
+//        }
+//        if(vertex_0 > xyz.med[maxrange_index]){
+//            rightcount++;
+//        }
+//        if(vertex_1 < xyz.med[maxrange_index]){
+//            leftcount++;
+//        }
+//        if(vertex_1 > xyz.med[maxrange_index]){
+//            rightcount++;
+//        }
+//        if(vertex_2 < xyz.med[maxrange_index]){
+//            leftcount++;
+//        }
+//        if(vertex_2 > xyz.med[maxrange_index]){
+//            rightcount++;
+//        }
+        
         if(leftcount > rightcount){
             root->leftbox->vertex_indices.push_back(root->vertex_indices[i]);
             root->leftbox->vertex_indices.push_back(root->vertex_indices[i+1]);
@@ -138,55 +160,50 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
     stats->max[2] = z_vertices[z_vertices.size()-1];
     stats->med[2] = z_vertices[z_vertices.size()/2];
 }
+
 bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its){
     its++;
-//    if(its == 15){
-//        for(int i = 0; i<root->vertex_indices.size(); i++){
-//            (*intersectedVertices).push_back(root->vertex_indices[i]);
-//        }
-//        return 1;
-//    }
+        if(its == 15){
+            for(int i = 0; i<root->vertex_indices.size(); i++){
+                (*intersectedVertices).push_back(root->vertex_indices[i]);
+            }
+            return 1;
+        }
     
-    std::vector<float> tmin = std::vector<float>(3);
-    std::vector<float> tmax = std::vector<float>(3);
     std::vector<float> InvDirection = R->GetInvDirection();
-	std::vector<bool> InvDirectionSign = R->GetInvDirectionSign();
     std::vector<float> origin = R->GetStartPos();
-
-    for(int j =0; j<3; j++){
-        tmin[j] = (root->corners[2*j+InvDirectionSign[j]] - origin[j])*InvDirection[j];
-        tmax[j] = (root->corners[2*j+1-InvDirectionSign[j]]-origin[j])*InvDirection[j];
+    
+    float t1 = (root->corners[0] - origin[0])*InvDirection[0];
+    float t2 = (root->corners[1] - origin[0])*InvDirection[0];
+    
+    float tmin = std::min(t1, t2);
+    float tmax = std::max(t1, t2);
+    
+    for (int i = 1; i < 3; i++) {
+        t1 = (root->corners[2*i] - origin[i])*InvDirection[i];
+        t2 = (root->corners[2*i+1] - origin[i])*InvDirection[i];
+        
+        tmin = std::max(tmin, std::min(t1, t2));
+        tmax = std::min(tmax, std::max(t1, t2));
     }
-
-    if(tmin[0] > tmax[1] || tmin[1] > tmax[0]){
-        return 0;
-    }
-    if(tmin[1] > tmin[0]){
-        swap(&tmin[1],&tmin[0]);
-    }
-    if(tmax[1] < tmax[0]){
-        swap(&tmax[1],&tmax[0]);
-    }
-    if(tmin[0] > tmax[2] || tmin[2] > tmax[0]){
+    if((tmax > std::max(tmin, 0.0f))==0){
         return 0;
     }
     bool leftret=0, rightret=0;
-
-	if (root->leftbox == nullptr || root->rightbox == nullptr) {//at a leaf node.
+    if (root->leftbox == nullptr || root->rightbox == nullptr) {//at a leaf node.
         for(int i = 0; i<root->vertex_indices.size(); i++){
           (*intersectedVertices).push_back(root->vertex_indices[i]);
         }
         //(*intersectedVertices) = root->vertex_indices;
-		return 1;
-	}
+        return 1;
+    }
     if(root->leftbox != nullptr){
         leftret = AABBRayIntersection(root->leftbox,R,intersectedVertices,its);
     }
     if(root->rightbox != nullptr){
         rightret = AABBRayIntersection(root->rightbox,R,intersectedVertices,its);
     }
-
     return leftret || rightret;
-
-
 }
+    
+

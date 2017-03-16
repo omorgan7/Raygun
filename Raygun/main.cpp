@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     std::vector<float> direction = std::vector<float>(3);
     std::vector<float> L_vector = std::vector<float>(3);
 
-    eye_origin = {0,0,-3};
+    eye_origin = {0,0,-2};
     eye_normal = eye_origin;
     eye_normal[2] = -eye_normal[2];
     NormaliseVector(&eye_normal);
@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
 
         Ray R = Ray(eye_origin,direction);
 		
-        if(image_x == 320 && image_y == 187){
+        if(image_x == 161 && image_y == 57){
             std::cout<<"";
         }
         intersectedVertices.clear();
@@ -184,12 +184,12 @@ int main(int argc, char* argv[]) {
 					}
 				}
 			}
-//            if(image_x == 320 && image_y == 187){
-//                for(int j = 0; j<numTris; j++){
-//                    std::cout<<intersectedVertices[3*j]<<" "<<intersectedVertices[3*j+1]<<" "<<intersectedVertices[3*j+2]<<"\n";
-//                }
-//                std::cout<<objectIndex<<"\n";
-//            }
+            if(image_x == 161 && image_y == 57){
+                for(int j = 0; j<numTris; j++){
+                    std::cout<<intersectedVertices[3*j]<<" "<<intersectedVertices[3*j+1]<<" "<<intersectedVertices[3*j+2]<<"\n";
+                }
+                std::cout<<objectIndex<<"\n";
+            }
 			if(max_depth == FLT_MAX){//nothing intersected
 //                std::cout<<"intersected box but not the returned triangles\n";
 //                for(int j = 0; j<numTris; j++){
@@ -197,7 +197,7 @@ int main(int argc, char* argv[]) {
 //                }
 //                std::cout<<"index x = "<<image_x<<" index y = "<<image_y<<"\n";
 //                std::cout<<"ray direction = {"<<direction[0]<<" "<<direction[1]<<" "<<direction[2]<<"\n";
-				image[i] = 0;//world::background_color.Red();
+				image[i] = 100;//world::background_color.Red();
 				image[i+1] = 0;//world::background_color.Green();
 				image[i+2] = 0;//world::background_color.Blue();
 				for(int j =0; j<numTris; j++){
