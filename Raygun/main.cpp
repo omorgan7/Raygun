@@ -32,9 +32,10 @@ int main(int argc, char* argv[]) {
     
     unsigned char *image = new unsigned char[width*height*3];
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
+    //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
-	std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
-   //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
+	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
+    std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -91,7 +92,7 @@ int main(int argc, char* argv[]) {
     std::vector<float> direction = std::vector<float>(3);
     std::vector<float> L_vector = std::vector<float>(3);
 
-    eye_origin = {0,0,-2};
+    eye_origin = {0,0,-3};
     eye_normal = eye_origin;
     eye_normal[2] = -eye_normal[2];
     NormaliseVector(&eye_normal);
@@ -105,12 +106,12 @@ int main(int argc, char* argv[]) {
 	NormaliseVector(&eye_u);
     eye_v = Vec3CrossProduct(w, eye_u);
     float field_of_view = 90.0f;
-    auto pixel_height = tan((field_of_view/360) * PI)*(2*eye_origin[2]);
-    auto pixel_width = pixel_height * ((float)width/(float)height);
-	//std::vector<float> c = { 0,0,0 };
+    float pixel_height = tan((field_of_view/360) * PI)*(2*eye_origin[2]);
+    float pixel_width = pixel_height * ((float)width/(float)height);
+	std::vector<float> c = { 0.0f,0.0f,0.0f };
     
     for (auto i =0; i<3; i++){
-        L_vector[i] = 0.0f + eye_u[i]*(pixel_width/2.0f) - eye_v[i]*(pixel_height/2.0f);
+        L_vector[i] = c[i] + eye_u[i]*(pixel_width/2.0f) - eye_v[i]*(pixel_height/2.0f);
     }
     
     //color ambientColor;
@@ -126,6 +127,7 @@ int main(int argc, char* argv[]) {
     //     shadowSuccess[j] = 1;
     // }
     std::vector<int> successState;
+    std::vector<unsigned int> intersectedVertices;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
@@ -139,11 +141,16 @@ int main(int argc, char* argv[]) {
 		//direction = Vec3ScalarMultiply(direction,sign(direction[2]));
 
         Ray R = Ray(eye_origin,direction);
-		std::vector<unsigned int> intersectedVertices;
-
-		auto retval = AABBRayIntersection(&root, &R, &intersectedVertices,0);
 		
-		if(!retval){
+        if(image_x == 320 && image_y == 187){
+            std::cout<<"";
+        }
+        intersectedVertices.clear();
+		auto intersection = AABBRayIntersection(&root, &R, &intersectedVertices,0);
+        if((fabs(direction[0]) < 0.00001f || fabs(direction[1]) < 0.00001) && intersection){
+            std::cout<<"";
+        }
+		if(!intersection){
 			image[i] = 0;
 			image[i+1] = 0;
 			image[i+2] = 0;
@@ -160,7 +167,11 @@ int main(int argc, char* argv[]) {
 			objectIndex = 0;
 			float max_depth = FLT_MAX;
 			for(int j = 0; j<numTris; j++){
-				triangleVertices = {vertices[intersectedVertices[3*j]],vertices[intersectedVertices[3*j+1]],vertices[intersectedVertices[3*j+2]]};
+				triangleVertices = {
+                    vertices[intersectedVertices[3*j]],
+                    vertices[intersectedVertices[3*j+1]],
+                    vertices[intersectedVertices[3*j+2]]
+                };
 				tris[j] = new triangle(triangleVertices);
 				successState[j] = 1;
 				auto t = tris[j]->calculateInterSectionProduct(R,&successState[j]);
@@ -173,8 +184,19 @@ int main(int argc, char* argv[]) {
 					}
 				}
 			}
-			
+//            if(image_x == 320 && image_y == 187){
+//                for(int j = 0; j<numTris; j++){
+//                    std::cout<<intersectedVertices[3*j]<<" "<<intersectedVertices[3*j+1]<<" "<<intersectedVertices[3*j+2]<<"\n";
+//                }
+//                std::cout<<objectIndex<<"\n";
+//            }
 			if(max_depth == FLT_MAX){//nothing intersected
+//                std::cout<<"intersected box but not the returned triangles\n";
+//                for(int j = 0; j<numTris; j++){
+//                    std::cout<<intersectedVertices[3*j]<<" "<<intersectedVertices[3*j+1]<<" "<<intersectedVertices[3*j+2]<<"\n";
+//                }
+//                std::cout<<"index x = "<<image_x<<" index y = "<<image_y<<"\n";
+//                std::cout<<"ray direction = {"<<direction[0]<<" "<<direction[1]<<" "<<direction[2]<<"\n";
 				image[i] = 0;//world::background_color.Red();
 				image[i+1] = 0;//world::background_color.Green();
 				image[i+2] = 0;//world::background_color.Blue();
