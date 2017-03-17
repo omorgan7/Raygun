@@ -190,26 +190,17 @@ int main(int argc, char* argv[]) {
                 }
                 std::cout<<objectIndex<<"\n";
             }
+            for(int j =0; j<numTris; j++){
+                delete tris[j];
+            }
+            delete[] tris;
 			if(max_depth == FLT_MAX){//nothing intersected
-//                std::cout<<"intersected box but not the returned triangles\n";
-//                for(int j = 0; j<numTris; j++){
-//                    std::cout<<intersectedVertices[3*j]<<" "<<intersectedVertices[3*j+1]<<" "<<intersectedVertices[3*j+2]<<"\n";
-//                }
-//                std::cout<<"index x = "<<image_x<<" index y = "<<image_y<<"\n";
-//                std::cout<<"ray direction = {"<<direction[0]<<" "<<direction[1]<<" "<<direction[2]<<"\n";
-				image[i] = 100;//world::background_color.Red();
+				image[i] = 0;//world::background_color.Red();
 				image[i+1] = 0;//world::background_color.Green();
 				image[i+2] = 0;//world::background_color.Blue();
-				for(int j =0; j<numTris; j++){
-					delete tris[j];
-				}
-				delete[] tris;
+
 				continue;
 			}
-			for(int j =0; j<numTris; j++){
-				delete tris[j];
-			}
-			delete[] tris;
 			image[i] = 255;
 			image[i+1] = 0;
 			image[i+2] = 255;

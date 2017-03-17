@@ -20,9 +20,7 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
             maxrange_index = i;
         }
     }
-    if(maxrange	==0.311138988f){
-        std::cout<<"";
-    }
+
     root->leftbox = new AABB;
     root->rightbox = new AABB;
 
@@ -55,64 +53,39 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
         vertex_1 = (*vertices)[root->vertex_indices[i+1]][maxrange_index];
         vertex_2 = (*vertices)[root->vertex_indices[i+2]][maxrange_index];
         
-        if(vertex_0 < xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
+        if(vertex_0 <= xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
             leftcount++;
         }
         if(vertex_0 > xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
             rightcount++;
         }
-        if(vertex_1 < xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
+        if(vertex_1 <= xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
             leftcount++;
         }
         if(vertex_1 > xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
             rightcount++;
         }
-        if(vertex_2 < xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
+        if(vertex_2 <= xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
             leftcount++;
         }
         if(vertex_2 > xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
             rightcount++;
         }
-//        if(vertex_0 < xyz.med[maxrange_index]){
-//            leftcount++;
-//        }
-//        if(vertex_0 > xyz.med[maxrange_index]){
-//            rightcount++;
-//        }
-//        if(vertex_1 < xyz.med[maxrange_index]){
-//            leftcount++;
-//        }
-//        if(vertex_1 > xyz.med[maxrange_index]){
-//            rightcount++;
-//        }
-//        if(vertex_2 < xyz.med[maxrange_index]){
-//            leftcount++;
-//        }
-//        if(vertex_2 > xyz.med[maxrange_index]){
-//            rightcount++;
-//        }
         
-        if(leftcount == 3){
+        if(leftcount >rightcount){
             root->leftbox->vertex_indices.push_back(root->vertex_indices[i]);
             root->leftbox->vertex_indices.push_back(root->vertex_indices[i+1]);
             root->leftbox->vertex_indices.push_back(root->vertex_indices[i+2]);
-        }
-        else if(rightcount == 3){
-            root->rightbox->vertex_indices.push_back(root->vertex_indices[i]);
-            root->rightbox->vertex_indices.push_back(root->vertex_indices[i+1]);
-            root->rightbox->vertex_indices.push_back(root->vertex_indices[i+2]);
         }
         else{
-            root->leftbox->vertex_indices.push_back(root->vertex_indices[i]);
-            root->leftbox->vertex_indices.push_back(root->vertex_indices[i+1]);
-            root->leftbox->vertex_indices.push_back(root->vertex_indices[i+2]);
             root->rightbox->vertex_indices.push_back(root->vertex_indices[i]);
             root->rightbox->vertex_indices.push_back(root->vertex_indices[i+1]);
             root->rightbox->vertex_indices.push_back(root->vertex_indices[i+2]);
         }
     }
-    bool leftnul = root->leftbox->vertex_indices.size() == root->vertex_indices.size();
-    bool rightnul = root->rightbox->vertex_indices.size() == root->vertex_indices.size();
+
+    bool leftnul = root->leftbox->vertex_indices.size() == 0;//root->vertex_indices.size();
+    bool rightnul = root->rightbox->vertex_indices.size() == 0;//root->vertex_indices.size();
     if(leftnul){
         delete root->leftbox;
         root->leftbox = nullptr;
@@ -121,14 +94,32 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
         delete root->rightbox;
         root->rightbox = nullptr;
     }
+
     int leftdepth=0,rightdepth=0;
     if(!leftnul){
+        Mesh_Stats left;
+        getminmaxmed(root->leftbox, vertices, &left);
+        for(int i = 0; i<3; i++){
+            root->leftbox->corners[2*i] = left.min[i];
+            root->leftbox->corners[2*i+1] = left.max[i];
+        };
+
+    }
+    if(!rightnul){
+        Mesh_Stats right;
+        getminmaxmed(root->rightbox, vertices, &right);
+        for(int i = 0; i<3; i++){
+            root->rightbox->corners[2*i] = right.min[i];
+            root->rightbox->corners[2*i+1] = right.max[i];
+        };
+    }
+    if(!leftnul && root->leftbox->vertex_indices.size() != root->vertex_indices.size()){
         leftdepth = buildAABBTree(root->leftbox,vertices,depth);
     }
-    
-    if(!rightnul){
+    if(!rightnul && root->rightbox->vertex_indices.size() != root->vertex_indices.size() && !rightnul){
         rightdepth = buildAABBTree(root->rightbox,vertices,depth);
     }
+    
     if(leftdepth > rightdepth){
         return leftdepth;
     }
@@ -164,18 +155,6 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
         z_vertices.push_back((*vertices)[VI_sorted[i]][2]);
         
     }
-//    for(int i =0; i<root->vertex_indices.size(); i+=3){
-//        medians.push_back({
-//            (*vertices)[root->vertex_indices[i]][0]/3.0f + (*vertices)[root->vertex_indices[i+1]][0]/3.0f + (*vertices)[root->vertex_indices[i+2]][0]/3.0f,
-//            (*vertices)[root->vertex_indices[i]][1]/3.0f + (*vertices)[root->vertex_indices[i+1]][1]/3.0f + (*vertices)[root->vertex_indices[i+2]][1]/3.0f,
-//            (*vertices)[root->vertex_indices[i]][2]/3.0f + (*vertices)[root->vertex_indices[i+1]][2]/3.0f + (*vertices)[root->vertex_indices[i+2]][2]/3.0f,
-//        });
-//    }
-//    for(int i= 0; i<medians.size(); i++){
-//        x_vertices.push_back(medians[i][0]);
-//        y_vertices.push_back(medians[i][1]);
-//        z_vertices.push_back(medians[i][2]);
-//    }
     std::sort(x_vertices.begin(),x_vertices.end());
     std::sort(y_vertices.begin(),y_vertices.end());
     std::sort(z_vertices.begin(),z_vertices.end());
@@ -193,13 +172,7 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
 
 bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its){
     its++;
-//        if(its == 6){
-//            for(int i = 0; i<root->vertex_indices.size(); i++){
-//                (*intersectedVertices).push_back(root->vertex_indices[i]);
-//            }
-//            return 1;
-//        }
-    
+
     std::vector<float> InvDirection = R->GetInvDirection();
     std::vector<float> origin = R->GetStartPos();
     
@@ -224,7 +197,6 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
         for(int i = 0; i<root->vertex_indices.size(); i++){
           (*intersectedVertices).push_back(root->vertex_indices[i]);
         }
-        //(*intersectedVertices) = root->vertex_indices;
         return 1;
     }
     if(root->leftbox != nullptr){
