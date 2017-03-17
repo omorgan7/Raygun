@@ -11,13 +11,23 @@
 
 #include <stdio.h>
 #include "color.hpp"
+#include "raymath.hpp"
 #include <vector>
+
+#define PI 3.14159265f
 
 class world{
 public:
     static color background_color;
     static std::vector<float> sunlightPosition;
     static std::vector<float> sunlightDirection;
+    static void assembleCameraCoords(std::vector<float> *eye_origin,
+                                     std::vector<float> *camera_center,
+                                     int width, int height, float field_of_view,
+                                     std::vector<float> *eye_u,
+                                     std::vector<float> *eye_v,
+                                     std::vector<float> *L_vector,
+                                     float * pixel_width, float* pixel_height);
 };
 
 #endif /* world_hpp */

@@ -11,7 +11,6 @@
 struct Mesh_Stats{
     float min[3];
     float max[3];
-    float med[3];
 };
 
 struct AABB{
@@ -20,6 +19,7 @@ struct AABB{
     AABB * leftbox = nullptr;
     AABB * rightbox = nullptr;
     std::vector<unsigned int> vertex_indices;
+    std::vector<unsigned int> triNumber;
 
     /*
     corners[0] holds x min, corners[1] holds x max, corners[2] holds y min etc. the box is completely defined by these 6 parameters.
@@ -29,7 +29,11 @@ struct AABB{
     */
 };
 
-int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int depth);
+int buildAABBTree(AABB * root,
+                  std::vector<std::vector<float> > * vertices,
+                  std::vector<unsigned int> *vertex_indices,
+                  std::vector<std::vector<float> > * medians,
+                  int depth);
 
 void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh_Stats * stats);
 
@@ -37,7 +41,7 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
 
 void cleanupAABBTree(AABB * root);
 
-void quicksort(int * A, int low, int high);
+void quicksort(int * A, int low, int high, int axis,std::vector<std::vector<float> > *vertices);
 
 template <typename Ta,typename Tb>
 Tb triangle_quicksort_partition(Ta * A, Tb low, Tb high);

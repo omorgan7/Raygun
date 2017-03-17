@@ -1,13 +1,17 @@
 #include "aabb.hpp"
 
-int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int depth){
+int buildAABBTree(AABB * root,
+                  std::vector<std::vector<float> > * vertices,
+                  std::vector<unsigned int> *vertex_indices,
+                  std::vector<std::vector<float> > * medians,
+                  int depth){
     //int axes = depth%3;
     depth++;
+    
     if(root->vertex_indices.size() <= 3){
         return depth;
     }
-    
-
+ 
     Mesh_Stats xyz;
     getminmaxmed(root,vertices, &xyz);
 
@@ -21,66 +25,30 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
         }
     }
 
+    int axes = maxrange_index;//0==x 1==y or 2==z
+    std::vector<float > median_subset = std::vector<float>(root->vertex_indices.size()/3);
+    for(int i= 0;i<root->triNumber.size(); i++){
+        median_subset[i] = (*medians)[root->triNumber[i]][axes];
+    }
+    
+    std::sort(root->triNumber.begin(),root->triNumber.end(),[&median_subset](size_t i1, size_t i2){return median_subset[i1]<median_subset[i2];});
+    std::sort(median_subset.begin(),median_subset.end());
+
     root->leftbox = new AABB;
     root->rightbox = new AABB;
-    //maxrange_index = depth%3;
-    for(int i = 0; i<3; i++){
-        if(i == maxrange_index){
-            root->leftbox->corners[2*i] = xyz.min[i];
-            root->leftbox->corners[2*i+1] = xyz.min[i] + range[maxrange_index]/2.0f;
-            root->rightbox->corners[2*i] = xyz.min[i] + range[maxrange_index]/2.0f;
-//            root->leftbox->corners[2*i+1] = xyz.med[i];
-//            root->rightbox->corners[2*i] = xyz.med[i];
-            
-            root->rightbox->corners[2*i+1] = xyz.max[i];
-            continue;
-        }
-        root->leftbox->corners[2*i] = xyz.min[i];
-        root->leftbox->corners[2*i+1] = xyz.max[i];
-        root->rightbox->corners[2*i] = xyz.min[i];
-        root->rightbox->corners[2*i+1] = xyz.max[i];
-    };
-    //std::cout<<root->vertex_indices.size()<<"\n";
-    int leftcount = 0;
-    int rightcount = 0;
-    float vertex_0, vertex_1, vertex_2;
     
-    for(int i =0; i<root->vertex_indices.size(); i+=3){
-        leftcount = 0;
-        rightcount = 0;
-        
-        vertex_0 = (*vertices)[root->vertex_indices[i]][maxrange_index];
-        vertex_1 = (*vertices)[root->vertex_indices[i+1]][maxrange_index];
-        vertex_2 = (*vertices)[root->vertex_indices[i+2]][maxrange_index];
-        
-        if(vertex_0 < root->leftbox->corners[2*maxrange_index+1]){
-            leftcount++;
-        }
-        if(vertex_0 > root->leftbox->corners[2*maxrange_index+1]){
-            rightcount++;
-        }
-        if(vertex_1 < root->leftbox->corners[2*maxrange_index+1]){
-            leftcount++;
-        }
-        if(vertex_1 > root->leftbox->corners[2*maxrange_index+1]){
-            rightcount++;
-        }
-        if(vertex_2 < root->leftbox->corners[2*maxrange_index+1]){
-            leftcount++;
-        }
-        if(vertex_2 > root->leftbox->corners[2*maxrange_index+1]){
-            rightcount++;
-        }
-        
-        if(leftcount >rightcount){
-            root->leftbox->vertex_indices.push_back(root->vertex_indices[i]);
-            root->leftbox->vertex_indices.push_back(root->vertex_indices[i+1]);
-            root->leftbox->vertex_indices.push_back(root->vertex_indices[i+2]);
+    for(int i =0; i<root->triNumber.size(); i++){
+        if(i < root->triNumber.size()/2){
+            root->leftbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]]);
+            root->leftbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]+1]);
+            root->leftbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]+2]);
+            root->leftbox->triNumber.push_back(root->triNumber[i]);
         }
         else{
-            root->rightbox->vertex_indices.push_back(root->vertex_indices[i]);
-            root->rightbox->vertex_indices.push_back(root->vertex_indices[i+1]);
-            root->rightbox->vertex_indices.push_back(root->vertex_indices[i+2]);
+            root->rightbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]]);
+            root->rightbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]+1]);
+            root->rightbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]+2]);
+            root->rightbox->triNumber.push_back(root->triNumber[i]);
         }
     }
 
@@ -114,10 +82,10 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
         };
     }
     if(!leftnul && root->leftbox->vertex_indices.size() != root->vertex_indices.size()){
-        leftdepth = buildAABBTree(root->leftbox,vertices,depth);
+        leftdepth = buildAABBTree(root->leftbox,vertices,vertex_indices,medians,depth);
     }
     if(!rightnul && root->rightbox->vertex_indices.size() != root->vertex_indices.size() && !rightnul){
-        rightdepth = buildAABBTree(root->rightbox,vertices,depth);
+        rightdepth = buildAABBTree(root->rightbox,vertices,vertex_indices,medians,depth);
     }
     
     if(leftdepth > rightdepth){
@@ -142,7 +110,7 @@ void cleanupAABBTree(AABB * root){
 };
 
 void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh_Stats * stats){
-    std::vector<float> x_vertices, y_vertices, z_vertices;
+    std::vector<float> x,y,z;
     std::vector<std::vector<float> > medians;
     std::vector<unsigned int> VI_sorted = root->vertex_indices;
 
@@ -150,24 +118,27 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
     auto last = std::unique(VI_sorted.begin(), VI_sorted.end());
     VI_sorted.erase(last, VI_sorted.end()); 
     for(int i =0; i<VI_sorted.size(); i++){
-        x_vertices.push_back((*vertices)[VI_sorted[i]][0]);
-        y_vertices.push_back((*vertices)[VI_sorted[i]][1]);
-        z_vertices.push_back((*vertices)[VI_sorted[i]][2]);
+        x.push_back((*vertices)[VI_sorted[i]][0]);
+        y.push_back((*vertices)[VI_sorted[i]][1]);
+        z.push_back((*vertices)[VI_sorted[i]][2]);
         
     }
-    std::sort(x_vertices.begin(),x_vertices.end());
-    std::sort(y_vertices.begin(),y_vertices.end());
-    std::sort(z_vertices.begin(),z_vertices.end());
-
-    stats->min[0] = x_vertices[0];
-    stats->max[0] = x_vertices[x_vertices.size()-1];
-    stats->med[0] = /*std::accumulate(x_vertices.begin(),x_vertices.end(),0.0f)/x_vertices.size();*/ x_vertices[x_vertices.size()/2];
-    stats->min[1] = y_vertices[0];
-    stats->max[1] = y_vertices[y_vertices.size()-1];
-    stats->med[1] = /*std::accumulate(y_vertices.begin(),y_vertices.end(),0.0f)/y_vertices.size();*/y_vertices[y_vertices.size()/2];
-    stats->min[2] = z_vertices[0];
-    stats->max[2] = z_vertices[z_vertices.size()-1];
-    stats->med[2] = /*std::accumulate(z_vertices.begin(),z_vertices.end(),0.0f)/z_vertices.size();*/z_vertices[z_vertices.size()/2];
+//    std::sort(x.begin(),x.end());
+//    std::sort(y.begin(),y.end());
+//    std::sort(z.begin(),z.end());
+//
+//    stats->min[0] = x[0];
+//    stats->max[0] = x[x.size()-1];
+//    stats->min[1] = y[0];
+//    stats->max[1] = y[y.size()-1];
+//    stats->min[2] = z[0];
+//    stats->max[2] = z[z.size()-1];
+    stats->min[0] = *std::min_element(x.begin(),x.end());
+    stats->max[0] = *std::max_element(x.begin(),x.end());
+    stats->min[1] = *std::min_element(y.begin(),y.end());
+    stats->max[1] = *std::max_element(y.begin(),y.end());
+    stats->min[2] = *std::min_element(z.begin(),z.end());
+    stats->max[2] = *std::max_element(z.begin(),z.end());
 }
 
 bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its){
@@ -200,7 +171,7 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
         for(int i = 0; i<root->vertex_indices.size(); i++){
           (*intersectedVertices).push_back(root->vertex_indices[i]);
         }
-        //*intersectedVertices =root->vertex_indices;
+//        *intersectedVertices =root->vertex_indices;
         return 1;
     }
     if(root->leftbox != nullptr){
@@ -211,26 +182,4 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
     }
     return leftret || rightret;
 }
-template <typename Ta, typename Tb>
-Tb triangle_quicksort_partition(Ta * A, Tb low, Tb high, std::vector<std::vector<float> > *vertices, Tb axis){
-    Ta pivot = A[high];
-    Tb i = low-1;
-    for(Tb j = low; j<high; j++){
-        if(A[j] <= pivot){
-            swap(&A[j],&A[++i]);
-        }
-    }
-    swap(&A[++i],&A[high]);
-    return i;
-};
-
-void quicksort(int * A, int low, int high){
-    if(low < high){
-        int p = triangle_quicksort_partition(A, low, high);
-        quicksort(A,low, p-1);
-        quicksort(A,p+1,high);
-    }
-    return;
-};
-    
 
