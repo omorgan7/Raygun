@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
 
         Ray R = Ray(eye_origin,direction);
 		
-        if(image_x == 161 && image_y == 57){
+        if(image_x == 320 && image_y == 80){
             std::cout<<"";
         }
         intersectedVertices.clear();
@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 					}
 				}
 			}
-            if(image_x == 161 && image_y == 57){
+            if(image_x == 321 && image_y == 80){
                 for(int j = 0; j<numTris; j++){
                     std::cout<<intersectedVertices[3*j]<<" "<<intersectedVertices[3*j+1]<<" "<<intersectedVertices[3*j+2]<<"\n";
                 }

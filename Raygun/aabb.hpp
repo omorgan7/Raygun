@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <iostream>
 #include "raymath.hpp"
 #include <assert.h>
