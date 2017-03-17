@@ -23,7 +23,7 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
 
     root->leftbox = new AABB;
     root->rightbox = new AABB;
-
+    //maxrange_index = depth%3;
     for(int i = 0; i<3; i++){
         if(i == maxrange_index){
             root->leftbox->corners[2*i] = xyz.min[i];
@@ -53,22 +53,22 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, int 
         vertex_1 = (*vertices)[root->vertex_indices[i+1]][maxrange_index];
         vertex_2 = (*vertices)[root->vertex_indices[i+2]][maxrange_index];
         
-        if(vertex_0 <= xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
+        if(vertex_0 < root->leftbox->corners[2*maxrange_index+1]){
             leftcount++;
         }
-        if(vertex_0 > xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
+        if(vertex_0 > root->leftbox->corners[2*maxrange_index+1]){
             rightcount++;
         }
-        if(vertex_1 <= xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
+        if(vertex_1 < root->leftbox->corners[2*maxrange_index+1]){
             leftcount++;
         }
-        if(vertex_1 > xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
+        if(vertex_1 > root->leftbox->corners[2*maxrange_index+1]){
             rightcount++;
         }
-        if(vertex_2 <= xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
+        if(vertex_2 < root->leftbox->corners[2*maxrange_index+1]){
             leftcount++;
         }
-        if(vertex_2 > xyz.min[maxrange_index] + range[maxrange_index]/2.0f){
+        if(vertex_2 > root->leftbox->corners[2*maxrange_index+1]){
             rightcount++;
         }
         
@@ -193,10 +193,14 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
         return 0;
     }
     bool leftret=0, rightret=0;
-    if (root->leftbox == nullptr || root->rightbox == nullptr) {//at a leaf node.
+    if(intersectedVertices ==nullptr){
+        return 1;
+    }
+    if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
         for(int i = 0; i<root->vertex_indices.size(); i++){
           (*intersectedVertices).push_back(root->vertex_indices[i]);
         }
+        //*intersectedVertices =root->vertex_indices;
         return 1;
     }
     if(root->leftbox != nullptr){
@@ -207,5 +211,26 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
     }
     return leftret || rightret;
 }
+template <typename Ta, typename Tb>
+Tb triangle_quicksort_partition(Ta * A, Tb low, Tb high, std::vector<std::vector<float> > *vertices, Tb axis){
+    Ta pivot = A[high];
+    Tb i = low-1;
+    for(Tb j = low; j<high; j++){
+        if(A[j] <= pivot){
+            swap(&A[j],&A[++i]);
+        }
+    }
+    swap(&A[++i],&A[high]);
+    return i;
+};
+
+void quicksort(int * A, int low, int high){
+    if(low < high){
+        int p = triangle_quicksort_partition(A, low, high);
+        quicksort(A,low, p-1);
+        quicksort(A,p+1,high);
+    }
+    return;
+};
     
 

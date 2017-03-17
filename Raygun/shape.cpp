@@ -100,14 +100,11 @@ float Sphere::calculateInterSectionProduct(Ray R, int * success){
 
 };
 
-triangle::triangle(std::vector<std::vector<float> > vertices){
-    vertex_0 = std::vector<float>(3);
-    vertex_1 = std::vector<float>(3);
-    vertex_2 = std::vector<float>(3);
-
-    for(int i = 0; i<3; i++){
-        SetVertexCoord(vertices[i],i);
-    }
+triangle::triangle(std::vector<std::vector<float> > * vertices, unsigned int v0, unsigned int v1, unsigned int v2){
+    vertex_0 = (*vertices)[v0];
+    vertex_1 = (*vertices)[v1];
+    vertex_2 = (*vertices)[v2];
+    
     ambientCoeff=0.1;
     diffuseCoeff = 0.4;
     specularCoeff = 0.5;
@@ -116,6 +113,15 @@ triangle::triangle(std::vector<std::vector<float> > vertices){
     ComputeNormal();
     normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
     reflectionVector = Vec3Sub(Vec3ScalarMultiply(triangleNormal, 2.0f*Vec3DotProduct(triangleNormal,world::sunlightDirection)), world::sunlightDirection);
+    
+    tribox.vertex_indices = {v0,v1,v2};
+    Mesh_Stats xyz;
+    getminmaxmed(&tribox,vertices, &xyz);
+    for(int i = 0; i<3; i++){
+        tribox.corners[2*i] = xyz.min[i];
+        tribox.corners[2*i+1] = xyz.max[i];
+    };
+
 }
 void triangle::SetVertexCoord(std::vector<float> vertex, int vertex_index){
     switch(vertex_index){
@@ -150,6 +156,10 @@ color triangle::SpecularColorCalc(Ray ray){
 
 }
 float triangle::calculateInterSectionProduct(Ray R, int * success){
+    if(AABBRayIntersection(&tribox, &R, nullptr, 0) == 0){
+        *success = 0;
+        return -1;
+    }
     auto RayDirection = R.GetDirection();
     auto denominator = Vec3DotProduct(triangleNormal,RayDirection);
     if(fabs(denominator) < 0.0000001f){

@@ -37,4 +37,10 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
 
 void cleanupAABBTree(AABB * root);
 
+void quicksort(int * A, int low, int high);
+
+template <typename Ta,typename Tb>
+Tb triangle_quicksort_partition(Ta * A, Tb low, Tb high);
+
+
 #endif

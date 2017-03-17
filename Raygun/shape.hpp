@@ -13,6 +13,7 @@
 #include "color.hpp"
 #include "raymath.hpp"
 #include "world.hpp"
+#include "aabb.hpp"
 
 #ifndef shape_hpp
 #define shape_hpp
@@ -59,7 +60,7 @@ private:
 
 class triangle : public object{
 public:
-    triangle(std::vector<std::vector<float> > vertices);
+    triangle(std::vector<std::vector<float> > * vertices, unsigned int v0, unsigned int v1, unsigned int v2);
     color GetColor(void);
     void SetColor(color C);
     void SetVertexCoord(std::vector<float> vertex, int vertex_index);   
@@ -77,6 +78,7 @@ private:
     void flipNormal(void);
     float normalDist;
     std::vector<float> reflectionVector;
+    AABB tribox;
     
 };
 

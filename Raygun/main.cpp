@@ -52,18 +52,18 @@ int main(int argc, char* argv[]) {
     NormaliseVector(&world::sunlightDirection);
     int numberOfObjects = vertex_indices.size()/3;
 
-    object ** Objects = new object*[numberOfObjects];
-    std::vector<std::vector<float> > triangleVertices = {std::vector<float>(3),
-                                                                std::vector<float>(3),
-                                                                std::vector<float>(3)};
-    for(int i = 0; i<numberOfObjects; i++){
-        triangleVertices = {vertices[vertex_indices[3*i]],vertices[vertex_indices[3*i+1]],vertices[vertex_indices[3*i+2]]};
-        Objects[i] = new triangle(triangleVertices);
-    }
-     for(int i = 0; i<numberOfObjects; i++){
-         triangleVertices = {vertices[vertex_indices[3*i]],vertices[vertex_indices[3*i+1]],vertices[vertex_indices[3*i+2]]};
-         Objects[i] = new triangle(triangleVertices);
-     }
+//    object ** Objects = new object*[numberOfObjects];
+//    std::vector<std::vector<float> > triangleVertices = {std::vector<float>(3),
+//                                                                std::vector<float>(3),
+//                                                                std::vector<float>(3)};
+//    for(int i = 0; i<numberOfObjects; i++){
+//        triangleVertices = {vertices[vertex_indices[3*i]],vertices[vertex_indices[3*i+1]],vertices[vertex_indices[3*i+2]]};
+//        Objects[i] = new triangle(triangleVertices);
+//    }
+//     for(int i = 0; i<numberOfObjects; i++){
+//         triangleVertices = {vertices[vertex_indices[3*i]],vertices[vertex_indices[3*i+1]],vertices[vertex_indices[3*i+2]]};
+//         Objects[i] = new triangle(triangleVertices);
+//     }
     AABB root;
     root.vertex_indices = vertex_indices;
     Mesh_Stats xyz;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<float> > interSectionCoordinates;
     //int * shadowSuccess = new int[numberOfObjects];
     
-    std::vector<int> zeroVec = std::vector<int>(numberOfObjects);
+    //std::vector<int> zeroVec = std::vector<int>(numberOfObjects);
     int objectIndex;
     // for(auto j = 0; j<numberOfObjects; j++){
     //     interSectionCoordinates[j] = {0,0,0};
@@ -142,10 +142,8 @@ int main(int argc, char* argv[]) {
 
         Ray R = Ray(eye_origin,direction);
 		
-        if(image_x == 320 && image_y == 80){
-            std::cout<<"";
-        }
         intersectedVertices.clear();
+        interSectionCoordinates.clear();
 		auto intersection = AABBRayIntersection(&root, &R, &intersectedVertices,0);
         if((fabs(direction[0]) < 0.00001f || fabs(direction[1]) < 0.00001) && intersection){
             std::cout<<"";
@@ -160,51 +158,51 @@ int main(int argc, char* argv[]) {
 			unsigned int numTris = intersectedVertices.size()/3;
 			//std::cout<<numTris<<"\n";
 			triangle ** tris = new triangle*[numTris];
-           successState = std::vector<int>(numTris);
-			interSectionCoordinates = std::vector<std::vector<float> >(numTris);
+//            std::cout<<numTris<<"\n";
+            successState = std::vector<int>(numTris);
+            
 
     		//int * shadowSuccess = new int[numberOfObjects];
 			objectIndex = 0;
-			float max_depth = FLT_MAX;
+			float max_depth = INFINITY;
 			for(int j = 0; j<numTris; j++){
-				triangleVertices = {
-                    vertices[intersectedVertices[3*j]],
-                    vertices[intersectedVertices[3*j+1]],
-                    vertices[intersectedVertices[3*j+2]]
-                };
-				tris[j] = new triangle(triangleVertices);
+				tris[j] = new triangle(&vertices,
+                                       intersectedVertices[3*j],
+                                       intersectedVertices[3*j+1],
+                                       intersectedVertices[3*j+2]);
+                int intersectionCount = -1;
 				successState[j] = 1;
 				auto t = tris[j]->calculateInterSectionProduct(R,&successState[j]);
+//                int firsttime = 1;
 				if(successState[j] == 1){
-					interSectionCoordinates[j]= Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t));
+//                    if(firsttime){
+//                        firsttime= !firsttime;
+//                    }
+					interSectionCoordinates.push_back(Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t)));
+                    intersectionCount++;
 					//Objects[j]->inputIntersectionCoords(interSectionCoordinates[j]);
-					if(interSectionCoordinates[j][2] < max_depth){
-						max_depth = interSectionCoordinates[j][2];
+					if(interSectionCoordinates[intersectionCount][2] < max_depth){
+						max_depth = interSectionCoordinates[intersectionCount][2];
 						objectIndex = j;
 					}
 				}
 			}
-            if(image_x == 321 && image_y == 80){
-                for(int j = 0; j<numTris; j++){
-                    std::cout<<intersectedVertices[3*j]<<" "<<intersectedVertices[3*j+1]<<" "<<intersectedVertices[3*j+2]<<"\n";
-                }
-                std::cout<<objectIndex<<"\n";
-            }
-            for(int j =0; j<numTris; j++){
-                delete tris[j];
-            }
-            delete[] tris;
-			if(max_depth == FLT_MAX){//nothing intersected
+
+
+			if(max_depth == INFINITY){//nothing intersected
 				image[i] = 0;//world::background_color.Red();
 				image[i+1] = 0;//world::background_color.Green();
 				image[i+2] = 0;//world::background_color.Blue();
-
+                for(int j =0; j<numTris; j++){
+                    delete tris[j];
+                }
+                delete[] tris;
 				continue;
 			}
-			image[i] = 255;
-			image[i+1] = 0;
-			image[i+2] = 255;
-		}
+//			image[i] = 255;
+//			image[i+1] = 0;
+//			image[i+2] = 255;
+//		}
         
      //    successState = std::vector<int>(numberOfObjects);
      //    interSectionCoordinates = std::vector<std::vector<float> >(numberOfObjects);
@@ -260,13 +258,18 @@ int main(int argc, char* argv[]) {
         //     image[i+2] = 0;
         //     continue;
         // }
-        // color ambientColor = Objects[objectIndex]->AmbientRayInterSection(R);
-        // color diffuseColor = Objects[objectIndex]->DiffuseColorCalc();
-        // color specColor = Objects[objectIndex]->SpecularColorCalc(R);
-        // color returnedColor = ambientColor + diffuseColor + specColor;
-        // image[i] = returnedColor.Red();
-        // image[i+1] = returnedColor.Green();
-        // image[i+2] = returnedColor.Blue();
+            color ambientColor = tris[objectIndex]->AmbientRayInterSection(R);
+            color diffuseColor = tris[objectIndex]->DiffuseColorCalc();
+            color specColor = tris[objectIndex]->SpecularColorCalc(R);
+            color returnedColor = ambientColor + diffuseColor + specColor;
+            for(int j =0; j<numTris; j++){
+                delete tris[j];
+            }
+            delete[] tris;
+            image[i] = returnedColor.Red();
+            image[i+1] = returnedColor.Green();
+            image[i+2] = returnedColor.Blue();
+        }
     }
 	//std::cout<<"\n";
 //    std::ofstream ofs("./raytrace.ppm", std::ios::out | std::ios::binary);
