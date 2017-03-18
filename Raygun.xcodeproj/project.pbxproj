@@ -18,14 +18,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		5A9656C01E546F9E005A8D95 /* Copy Files */ = {
+		5A9656C01E546F9E005A8D95 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
 			);
-			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -125,7 +124,7 @@
 			buildPhases = (
 				5A9656BE1E546F9E005A8D95 /* Sources */,
 				5A9656BF1E546F9E005A8D95 /* Frameworks */,
-				5A9656C01E546F9E005A8D95 /* Copy Files */,
+				5A9656C01E546F9E005A8D95 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -221,7 +220,6 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				GCC_VERSION = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -268,7 +266,6 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_VERSION = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
