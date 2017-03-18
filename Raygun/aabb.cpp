@@ -168,8 +168,11 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
         return 1;
     }
     if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
-        for(int i = 0; i<root->vertex_indices.size(); i++){
-          (*intersectedVertices).push_back(root->vertex_indices[i]);
+//        for(int i = 0; i<root->vertex_indices.size(); i++){
+//          (*intersectedVertices).push_back(root->vertex_indices[i]);
+//        }
+        for(int i = 0; i<root->triNumber.size(); i++){
+            (*intersectedVertices).push_back(root->triNumber[i]);
         }
 //        *intersectedVertices =root->vertex_indices;
         return 1;
