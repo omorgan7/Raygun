@@ -34,9 +34,10 @@ int main(int argc, char* argv[]) {
     unsigned char *image = new unsigned char[width*height*3];
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
+    std::string objectstring = "/Users/Owen/Dropbox/suzanne.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
-    std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
+    //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -51,7 +52,7 @@ int main(int argc, char* argv[]) {
     }
     
 
-    world::sunlightPosition = {(float)width/2,(float)height,-400.0f};
+    world::sunlightPosition = {(float)width/2,(float)height/2,0};
     world::sunlightDirection = {world::sunlightPosition[0],
         world::sunlightPosition[1],
         world::sunlightPosition[2]-400};
@@ -71,11 +72,17 @@ int main(int argc, char* argv[]) {
     int depth = buildAABBTree(&root, &vertices, &vertex_indices, &medians,0);
     std::cout<<"aabb tree depth = "<<depth<<"\n";
 
+    triangle** tris = new triangle * [vertex_indices.size()/3];
+    
+    for(int i =0; i<vertex_indices.size()/3; i++){
+        tris[i] = new triangle(&vertices,vertex_indices[3*i],vertex_indices[3*i+1],vertex_indices[3*i+2]);
+    };
+    
     
     std::vector<float> eye_v;
     std::vector<float> eye_u;
-    std::vector<float> c = { 0.0f,0.0f,0.0f };
-    std::vector<float> eye_origin = {0.0f,0.0f,-2.0f};
+    std::vector<float> c = { 0.0f,0.0f,-1.0f };
+    std::vector<float> eye_origin = {0.0f,0.0f,-3.0f};
     std::vector<float> L_vector = std::vector<float>(3);
     std::vector<float> direction = std::vector<float>(3);
     float pixel_height, pixel_width;
@@ -100,52 +107,79 @@ int main(int argc, char* argv[]) {
 		
         intersectedVertices.clear();
         interSectionCoordinates.clear();
-		auto intersection = AABBRayIntersection(&root, &R, &intersectedVertices,0);
-        if((fabs(direction[0]) < 0.00001f || fabs(direction[1]) < 0.00001) && intersection){
-            std::cout<<"";
-        }
+		auto intersection = AABBRayIntersection(&root, &R, &intersectedVertices,0,0);
+//        if((fabs(direction[0]) < 0.00001f || fabs(direction[1]) < 0.00001) && intersection){
+//            std::cout<<"";
+//        }
 		if(!intersection){
 			image[i] = 0;
 			image[i+1] = 0;
 			image[i+2] = 0;
 		}
 		else{
-
-			unsigned int numTris = intersectedVertices.size()/3;
-			//std::cout<<numTris<<"\n";
-			triangle ** tris = new triangle*[numTris];
+//
+//			unsigned int numTris = intersectedVertices.size()/3;
+//			//std::cout<<numTris<<"\n";
+//			triangle ** tris = new triangle*[numTris];
+//            //std::cout<<numTris<<"\n";
+//            successState = std::vector<int>(numTris);
+//            
+//			objectIndex = 0;
+//			float max_depth = INFINITY;
+//			for(int j = 0; j<numTris; j++){
+//				tris[j] = new triangle(&vertices,
+//                                       intersectedVertices[3*j],
+//                                       intersectedVertices[3*j+1],
+//                                       intersectedVertices[3*j+2]);
+//                int intersectionCount = -1;
+//				successState[j] = 1;
+//				auto t = tris[j]->calculateInterSectionProduct(R,&successState[j]);
+//				if(successState[j] == 1){
+//					interSectionCoordinates.push_back(Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t)));
+//                    intersectionCount++;
+//					if(interSectionCoordinates[intersectionCount][2] < max_depth){
+//						max_depth = interSectionCoordinates[intersectionCount][2];
+//						objectIndex = intersectionCount;
+//					}
+//				}
+//			}
+            
+            unsigned int numTris = intersectedVertices.size();
+            //std::cout<<numTris<<"\n";
+//            std::cout<<"intersected triangles on pixel "<<image_x<<" "<<image_y<<" :\n";
+//            for(int j =0; j<numTris; j++){
+//                std::cout<<intersectedVertices[j]<<" ";
+//            }
+//            std::cout<<"\n";
             //std::cout<<numTris<<"\n";
             successState = std::vector<int>(numTris);
             
-			objectIndex = 0;
-			float max_depth = INFINITY;
-			for(int j = 0; j<numTris; j++){
-				tris[j] = new triangle(&vertices,
-                                       intersectedVertices[3*j],
-                                       intersectedVertices[3*j+1],
-                                       intersectedVertices[3*j+2]);
+            objectIndex = 0;
+            float max_depth = INFINITY;
+            for(int j = 0; j<numTris; j++){
                 int intersectionCount = -1;
-				successState[j] = 1;
-				auto t = tris[j]->calculateInterSectionProduct(R,&successState[j]);
-				if(successState[j] == 1){
-					interSectionCoordinates.push_back(Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t)));
+                successState[j] = 1;
+                auto t = tris[intersectedVertices[j]]->calculateInterSectionProduct(R,&successState[j]);
+                if(successState[j] == 1){
+                    interSectionCoordinates.push_back(Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t)));
                     intersectionCount++;
-					if(interSectionCoordinates[intersectionCount][2] < max_depth){
-						max_depth = interSectionCoordinates[intersectionCount][2];
-						objectIndex = intersectionCount;
-					}
-				}
-			}
+                    if(interSectionCoordinates[intersectionCount][2] < max_depth){
+                        max_depth = interSectionCoordinates[intersectionCount][2];
+                        objectIndex = j;
+                    }
+                }
+            }
+
 
 
 			if(max_depth == INFINITY){//nothing intersected
 				image[i] = 0;//world::background_color.Red();
 				image[i+1] = 0;//world::background_color.Green();
 				image[i+2] = 0;//world::background_color.Blue();
-                for(int j =0; j<numTris; j++){
-                    delete tris[j];
-                }
-                delete[] tris;
+//                for(int j =0; j<numTris; j++){
+//                    delete tris[j];
+//                }
+//                delete[] tris;
 				continue;
 			}
             
@@ -200,14 +234,25 @@ int main(int argc, char* argv[]) {
 //                 image[i+2] = 0;
 //                 continue;
 //             }
-                color ambientColor = tris[objectIndex]->AmbientRayInterSection(R);
-                color diffuseColor = tris[objectIndex]->DiffuseColorCalc();
-                color specColor = tris[objectIndex]->SpecularColorCalc(R);
+//            if(intersectedVertices[objectIndex] == 2){
+//                int count = -1;
+//                for(int j = 0; j<numTris; j++){
+//                    if(successState[j] ==1){
+//                        std::cout<<intersectedVertices[j]<<" ";
+//                       std::cout<<interSectionCoordinates[++count][2]<<"\n";
+//                    }
+//                }
+//                std::cout<<"\n";
+//            }
+//                std::cout<<intersectedVertices[objectIndex]<<" succeeded.\n";
+                color ambientColor = tris[intersectedVertices[objectIndex]]->AmbientRayInterSection(R);
+                color diffuseColor = tris[intersectedVertices[objectIndex]]->DiffuseColorCalc();
+                color specColor = tris[intersectedVertices[objectIndex]]->SpecularColorCalc(R);
                 color returnedColor = ambientColor + diffuseColor + specColor;
-                for(int j =0; j<numTris; j++){
-                    delete tris[j];
-                }
-                delete[] tris;
+//                for(int j =0; j<numTris; j++){
+//                    delete tris[j];
+//                }
+//                delete[] tris;
                 image[i] = returnedColor.Red();
                 image[i+1] = returnedColor.Green();
                 image[i+2] = returnedColor.Blue();
@@ -239,6 +284,11 @@ int main(int argc, char* argv[]) {
     // }
     //delete[] successState;
     // delete[] Objects;
+    for(int j =0; j<vertex_indices.size()/3; j++){
+        delete tris[j];
+    }
+    delete[] tris;
+
     delete[] image;
     return 1;
 }

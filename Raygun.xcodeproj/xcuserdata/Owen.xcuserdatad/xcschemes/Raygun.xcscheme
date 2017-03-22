@@ -67,6 +67,14 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "128 72"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "64 36 "
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "1920 1080"
             isEnabled = "YES">
          </CommandLineArgument>

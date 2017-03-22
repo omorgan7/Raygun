@@ -37,7 +37,7 @@ int buildAABBTree(AABB * root,
 
 void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh_Stats * stats);
 
-bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices,int its);
+bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its, int readonly);
 
 void cleanupAABBTree(AABB * root);
 
