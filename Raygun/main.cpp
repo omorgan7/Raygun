@@ -38,12 +38,13 @@ int main(int argc, char* argv[]) {
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
-    std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere.obj";
+    std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
     
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
-    int retval = loadSimpleOBJ(objectstring.c_str(),vertices,vertex_indices);
+    std::vector<std::vector<float> > normals;
+    int retval = loadSimpleOBJ(objectstring.c_str(),vertices,vertex_indices,normals);
     std::vector<std::vector<float> > medians = std::vector<std::vector<float> >(vertex_indices.size()/3);
     for(int i =0; i<vertex_indices.size()/3; i++){
         medians[i] = std::vector<float>({
