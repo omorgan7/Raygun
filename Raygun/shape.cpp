@@ -154,10 +154,10 @@ color triangle::SpecularColorCalc(Ray ray){
 
 }
 float triangle::calculateInterSectionProduct(Ray R, int * success){
-    if(AABBRayIntersection(&tribox, &R, nullptr, 0) == 0){
-        *success = 0;
-        return -1;
-    }
+//    if(AABBRayIntersection(&tribox, &R, nullptr, 0,1) == 0){
+//        *success = 0;
+//        return -1;
+//    }
     auto RayDirection = R.GetDirection();
     auto denominator = Vec3DotProduct(triangleNormal,RayDirection);
     if(fabs(denominator) < 0.0000001f){

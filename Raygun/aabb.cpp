@@ -111,7 +111,7 @@ void cleanupAABBTree(AABB * root){
 
 void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh_Stats * stats){
     std::vector<float> x,y,z;
-    std::vector<std::vector<float> > medians;
+    //std::vector<std::vector<float> > medians;
     std::vector<unsigned int> VI_sorted = root->vertex_indices;
 
     std::sort(VI_sorted.begin(), VI_sorted.end());
@@ -141,7 +141,7 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
     stats->max.z = *std::max_element(z.begin(),z.end());
 }
 
-bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its){
+bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its, int readonly){
     its++;
 
     std::vector<float> InvDirection = R->GetInvDirection();
@@ -164,21 +164,28 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
         return 0;
     }
     bool leftret=0, rightret=0;
-    if(intersectedVertices ==nullptr){
+    if(readonly == 1){
         return 1;
     }
     if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
-        for(int i = 0; i<root->vertex_indices.size(); i++){
-          (*intersectedVertices).push_back(root->vertex_indices[i]);
+//        for(int i = 0; i<root->vertex_indices.size(); i++){
+//          (*intersectedVertices).push_back(root->vertex_indices[i]);
+//        }
+        for(int i = 0; i<root->triNumber.size(); i++){
+          (*intersectedVertices).push_back(root->triNumber[i]);
+            if(root->triNumber[i] > 5000){
+                std::cout<<"";
+            }
         }
+//        (*intersectedVertices) = root->triNumber;
 //        *intersectedVertices =root->vertex_indices;
         return 1;
     }
     if(root->leftbox != nullptr){
-        leftret = AABBRayIntersection(root->leftbox,R,intersectedVertices,its);
+        leftret = AABBRayIntersection(root->leftbox,R,intersectedVertices,its,readonly);
     }
     if(root->rightbox != nullptr){
-        rightret = AABBRayIntersection(root->rightbox,R,intersectedVertices,its);
+        rightret = AABBRayIntersection(root->rightbox,R,intersectedVertices,its,readonly);
     }
     return leftret || rightret;
 }
