@@ -24,10 +24,10 @@ class object{
 public:
     color GetColor(void);
     void SetColor(color C);
-    virtual color AmbientRayInterSection(Ray R) = 0;
+    virtual color AmbientRayInterSection(Ray * ray) = 0;
     virtual color DiffuseColorCalc(void) = 0;
-    virtual color SpecularColorCalc(Ray ray) = 0;
-    virtual float calculateInterSectionProduct(Ray ray, int * success) =0;
+    virtual color SpecularColorCalc(Ray * ray) = 0;
+    virtual float calculateInterSectionProduct(Ray * ray, int * success) =0;
     virtual void inputIntersectionCoords(std::vector<float> &coords)= 0;
 protected:
     color Color = color(0,0,0);
@@ -45,10 +45,10 @@ public:
     void SetY(float y);  
     void SetZ(float z);
     std::vector<float> FindSurfaceNormal(std::vector<float> coords);
-    color AmbientRayInterSection(Ray R);
+    color AmbientRayInterSection(Ray * ray);
     color DiffuseColorCalc(void);
     color SpecularColorCalc(Ray ray);
-    float calculateInterSectionProduct(Ray ray, int * success);
+    float calculateInterSectionProduct(Ray * ray, int * success);
     void inputIntersectionCoords(std::vector<float> &coords){};
     
     
@@ -72,10 +72,10 @@ public:
     void SetColor(color C);
     void SetVertexCoord(std::vector<float> vertex, int vertex_index);   
     void ChangeVertexCoord(std::vector<float> vertex, int vertex_index);
-    color AmbientRayInterSection(Ray R);
+    color AmbientRayInterSection(Ray * ray);
     color DiffuseColorCalc(void);
-    color SpecularColorCalc(Ray ray);
-    float calculateInterSectionProduct(Ray ray, int * success);
+    color SpecularColorCalc(Ray * ray);
+    float calculateInterSectionProduct(Ray * ray, int * success);
     void inputIntersectionCoords(std::vector<float> &coords);
 private:
     //std::vector<float> vertex_0, vertex_1, vertex_2;
@@ -83,22 +83,22 @@ private:
     vec3f normals[3];
     //std::vector<float> triangleNormal = std::vector<float>(3);
     //std::vector<float> rayintersectioncoords = std::vector<float>(3);
-    void ComputeNormal(void);
-    void flipNormal(void);
+    //void ComputeNormal(void);
+    //void flipNormal(void);
     float normalDist;
     std::vector<float> reflectionVector;
     AABB tribox;
     
 };
 
-class mesh{
+class Mesh{
     public:
-        mesh(
+        Mesh(
             std::vector<std::vector<float> > * v, 
             std::vector<unsigned int> * v_indices, 
             std::vector<std::vector<float> > * v_norms, 
             std::vector<unsigned int> * v_norm_indices);
-        ~mesh();
+        ~Mesh();
         bool RayIntersection(Ray * ray);
     private:
         size_t num_tris;

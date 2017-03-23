@@ -147,15 +147,15 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
     std::vector<float> InvDirection = R->GetInvDirection();
     std::vector<float> origin = R->GetStartPos();
     
-    float t1 = (root->corners[0] - origin[0])*InvDirection[0];
-    float t2 = (root->corners[1] - origin[0])*InvDirection[0];
+    float t1 = (root->min.x - origin[0])*InvDirection[0];
+    float t2 = (root->max.x - origin[0])*InvDirection[0];
     
     float tmin = std::min(t1, t2);
     float tmax = std::max(t1, t2);
     
     for (int i = 1; i < 3; i++) {
-        t1 = (root->corners[2*i] - origin[i])*InvDirection[i];
-        t2 = (root->corners[2*i+1] - origin[i])*InvDirection[i];
+        t1 = (root->min.coords[i] - origin[i])*InvDirection[i];
+        t2 = (root->max.coords[i] - origin[i])*InvDirection[i];
         
         tmin = std::max(tmin, std::min(std::min(t1, t2), tmax));
         tmax = std::min(tmax, std::max(std::max(t1, t2), tmin));
