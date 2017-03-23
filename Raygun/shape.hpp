@@ -18,6 +18,8 @@
 #ifndef shape_hpp
 #define shape_hpp
 
+
+
 class object{
 public:
     color GetColor(void);
@@ -60,7 +62,12 @@ private:
 
 class triangle : public object{
 public:
-    triangle(std::vector<std::vector<float> > * vertices, unsigned int v0, unsigned int v1, unsigned int v2);
+    triangle(
+        std::vector<std::vector<float> > * input_vertices, 
+        unsigned int * indices, 
+        std::vector<std::vector<float> > * input_norms, 
+        unsigned int * norm_indices);
+
     color GetColor(void);
     void SetColor(color C);
     void SetVertexCoord(std::vector<float> vertex, int vertex_index);   
@@ -71,9 +78,11 @@ public:
     float calculateInterSectionProduct(Ray ray, int * success);
     void inputIntersectionCoords(std::vector<float> &coords);
 private:
-    std::vector<float> vertex_0, vertex_1, vertex_2;
-    std::vector<float> triangleNormal = std::vector<float>(3);
-    std::vector<float> rayintersectioncoords = std::vector<float>(3);
+    //std::vector<float> vertex_0, vertex_1, vertex_2;
+    vec3f vertices[3];
+    vec3f normals[3];
+    //std::vector<float> triangleNormal = std::vector<float>(3);
+    //std::vector<float> rayintersectioncoords = std::vector<float>(3);
     void ComputeNormal(void);
     void flipNormal(void);
     float normalDist;
@@ -81,5 +90,19 @@ private:
     AABB tribox;
     
 };
+
+class mesh{
+    public:
+        mesh(
+            std::vector<std::vector<float> > * v, 
+            std::vector<unsigned int> * v_indices, 
+            std::vector<std::vector<float> > * v_norms, 
+            std::vector<unsigned int> * v_norm_indices);
+        ~mesh();
+        bool RayIntersection(Ray * ray);
+    private:
+        size_t num_tris;
+        triangle ** tris;
+        AABB BVH;
 
 #endif /* shape_hpp */

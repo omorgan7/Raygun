@@ -100,41 +100,39 @@ float Sphere::calculateInterSectionProduct(Ray R, int * success){
 
 };
 
-triangle::triangle(std::vector<std::vector<float> > * vertices, unsigned int v0, unsigned int v1, unsigned int v2){
-    vertex_0 = (*vertices)[v0];
-    vertex_1 = (*vertices)[v1];
-    vertex_2 = (*vertices)[v2];
-    
+triangle::triangle(
+        std::vector<std::vector<float> > * input_vertices, 
+        unsigned int * indices, 
+        std::vector<std::vector<float> > * input_norms, 
+        unsigned int * norm_indices){
+
+    // vertex_0 = (*vertices)[v0];
+    // vertex_1 = (*vertices)[v1];
+    // vertex_2 = (*vertices)[v2];
+    for(int i=0; i<3; i++){
+        for(int j=0; j<3; j++){
+            vertices[i].coords[j] = (*input_vertices)[indices[i]][j];
+            normals[i].coords[j] = (*input_norms)[norm_indices[i]][j];
+        }
+    }
     ambientCoeff=0.1;
     diffuseCoeff = 0.4;
     specularCoeff = 0.5;
     Color.changeRed(255);
     Color.changeBlue(255);
-    ComputeNormal();
+    //ComputeNormal();
     normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
     reflectionVector = Vec3Sub(Vec3ScalarMultiply(triangleNormal, 2.0f*Vec3DotProduct(triangleNormal,world::sunlightDirection)), world::sunlightDirection);
     
-    tribox.vertex_indices = {v0,v1,v2};
+    //tribox.vertex_indices = {v0,v1,v2};
+    std::copy(tribox.vertex_indices,std::end(tribox.vertex_indices),indices);
     Mesh_Stats xyz;
-    getminmaxmed(&tribox,vertices, &xyz);
+    getminmaxmed(&tribox,input_vertices, &xyz);
     for(int i = 0; i<3; i++){
-        tribox.corners[2*i] = xyz.min[i];
-        tribox.corners[2*i+1] = xyz.max[i];
+        tribox.corners[2*i] = xyz.min.coords[i];
+        tribox.corners[2*i+1] = xyz.max.coords[i];
     };
 
-}
-void triangle::SetVertexCoord(std::vector<float> vertex, int vertex_index){
-    switch(vertex_index){
-        case(0): 
-            vertex_0 = vertex;
-            break;
-        case(1):
-            vertex_1 = vertex;
-            break;
-        case(2):
-            vertex_2 = vertex;
-            break;
-    }
 }
 void triangle::ChangeVertexCoord(std::vector<float> vertex, int vertex_index){
     SetVertexCoord(vertex,vertex_index);
@@ -213,4 +211,58 @@ void triangle::flipNormal(void){
 
 void triangle::inputIntersectionCoords(std::vector<float> &vector){
     rayintersectioncoords = vector;
+}
+
+mesh::mesh(
+    std::vector<std::vector<float> > * v, 
+    std::vector<unsigned int> * v_indices, 
+    std::vector<std::vector<float> > * v_norms, 
+    std::vector<unsigned int> * v_norm_indices){
+    
+    num_tris = v_indices->size()/3;
+    tris = new triangle* [num_tris];
+    // vec3<unsigned int> v_i;
+    // vec3<unsigned int> v_n;
+    for(size_t i = 0; i<num_tris){
+        unsigned int v_i[] = {(*v_indices)[3*i],(*v_indices)[3*i+1],(*v_indices)[3*i+2]};
+        unsigned int v_n[] = {(*v_norms)[3*i],(*v_norms)[3*i+1],(*v_norms)[3*i+2]};
+        tris[i] = new triangle(v,&v_i,v_norms,&v_n)
+    }
+
+    BVH.vertex_indices = *v_indices;
+    Mesh_Stats xyz;
+    getminmaxmed(&root,v, &xyz);
+    for(int i = 0; i<3; i++){
+        BVH.corners[2*i] = xyz.min[i];
+        BVH.corners[2*i+1] = xyz.max[i];
+    };
+    
+    BVH.triNumber = std::vector<unsigned int>(num_tris);
+    std::iota(BVH.triNumber.begin(),BVH.triNumber.end(),0);
+    std::vector<std::vector<float> > medians = std::vector<std::vector<float> >(num_tris);
+    for(int i =0; i<num_tris; i++){
+        medians[i] = std::vector<float>({
+            (*v)[(*v_indices)[3*i]][0]/3.0f + (*v)[(*v_indices)[3*i+1]][0]/3.0f + (*v)[(*v_indices)[3*i+2]][0]/3.0f,
+            (*v)[(*v_indices)[3*i]][1]/3.0f + (*v)[(*v_indices)[3*i+1]][1]/3.0f + (*v)[(*v_indices)[3*i+2]][1]/3.0f,
+            (*v)[(*v_indices)[3*i]][2]/3.0f + (*v)[(*v_indices)[3*i+1]][2]/3.0f + (*v)[(*v_indices)[3*i+2]][2]/3.0f,
+        });
+    }
+    int depth = buildAABBTree(&BVH, v, v_indices, &medians,0);
+    std::cout<<"aabb tree depth = "<<depth<<"\n";
+
+
+}
+mesh::~mesh(){
+    for(size_t i = 0; i<num_tris){
+        delete tris[i];
+    }
+    delete[] tris;
+}
+bool mesh::RayIntersection(Ray * ray){
+    std::vector<unsigned int> intersectedTris;
+    bool intersection = AABBRayIntersection(&BVH, ray, &intersectedTris,0);
+    if(intersection == 0){
+        return 0;
+    }
+    
 };

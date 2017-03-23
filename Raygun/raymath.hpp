@@ -13,6 +13,18 @@
 #ifndef raymath_hpp
 #define raymath_hpp
 
+template <typename T>
+struct vec3{
+    union{
+        struct{
+            T x, y, z;
+        };
+        T coords[3];
+    };
+};
+
+typedef vec3<float> vec3f;
+
 class Ray{
 public:
     std::vector<float> GetStartPos(void);
