@@ -19,8 +19,8 @@
 class world{
 public:
     static color background_color;
-    static std::vector<float> sunlightPosition;
-    static std::vector<float> sunlightDirection;
+    static vec3f sunlightPosition;
+    static vec3f sunlightDirection;
     static void assembleCameraCoords(std::vector<float> *eye_origin,
                                      std::vector<float> *camera_center,
                                      int width, int height, float field_of_view,

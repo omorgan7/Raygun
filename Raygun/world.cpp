@@ -9,8 +9,8 @@
 #include "world.hpp"
 
 color world::background_color = color(5,5,5);
-std::vector<float> world::sunlightPosition = std::vector<float>(3);
-std::vector<float> world::sunlightDirection = std::vector<float>(3);
+vec3f world::sunlightPosition;
+vec3f world::sunlightDirection;
 
 void world::assembleCameraCoords(std::vector<float> *eye_origin,std::vector<float> *camera_center, int width, int height, float field_of_view, std::vector<float> *eye_u, std::vector<float> *eye_v, std::vector<float> *L_vector,float * pixel_width, float* pixel_height){
     

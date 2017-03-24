@@ -33,125 +33,66 @@ int main(int argc, char* argv[]) {
     
     unsigned char *image = new unsigned char[width*height*3];
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
-    //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
+    std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
-    std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
+    //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
     
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
     std::vector<std::vector<float> > normals;
-    int retval = loadSimpleOBJ(objectstring.c_str(),vertices,vertex_indices,normals);
-    std::vector<std::vector<float> > medians = std::vector<std::vector<float> >(vertex_indices.size()/3);
-    for(int i =0; i<vertex_indices.size()/3; i++){
-        medians[i] = std::vector<float>({
-            vertices[vertex_indices[i]][0]/3.0f + vertices[vertex_indices[i+1]][0]/3.0f + vertices[vertex_indices[i+2]][0]/3.0f,
-            vertices[vertex_indices[i]][1]/3.0f + vertices[vertex_indices[i+1]][1]/3.0f + vertices[vertex_indices[i+2]][2]/3.0f,
-            vertices[vertex_indices[i]][1]/3.0f + vertices[vertex_indices[i+1]][1]/3.0f + vertices[vertex_indices[i+2]][2]/3.0f,
-        });
-    }
+    std::vector<unsigned int> normal_indices;
+    int retval = loadSimpleOBJ(
+                                objectstring.c_str(),
+                                vertices,vertex_indices,
+                                normals,
+                                normal_indices);
     
-    world::sunlightPosition = {(float)width/2,(float)height/2,0};
-    world::sunlightDirection = {world::sunlightPosition[0],
-        world::sunlightPosition[1],
-        world::sunlightPosition[2]-400};
+
+    world::sunlightPosition.x = (float)width/2;
+    world::sunlightPosition.y = (float)height/2;
+    world::sunlightPosition.z = 0;
+    
+    world::sunlightDirection.x = world::sunlightPosition.x;
+    world::sunlightDirection.y = world::sunlightPosition.y;
+    world::sunlightDirection.z = world::sunlightPosition.z -400.0f;
     
     NormaliseVector(&world::sunlightDirection);
-    AABB root;
-    root.vertex_indices = vertex_indices;
-    Mesh_Stats xyz;
-    getminmaxmed(&root,&vertices, &xyz);
-    for(int i = 0; i<3; i++){
-        root.corners[2*i] = xyz.min[i];
-        root.corners[2*i+1] = xyz.max[i];
-    };
-    
-    root.triNumber = std::vector<unsigned int>(root.vertex_indices.size()/3);
-    std::iota(root.triNumber.begin(),root.triNumber.end(),0);
-    int depth = buildAABBTree(&root, &vertices, &vertex_indices, &medians,0);
-    std::cout<<"aabb tree depth = "<<depth<<"\n";
+    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices);
 
-    triangle** tris = new triangle * [vertex_indices.size()/3];
-    
-    for(int i =0; i<vertex_indices.size()/3; i++){
-        tris[i] = new triangle(&vertices,vertex_indices[3*i],vertex_indices[3*i+1],vertex_indices[3*i+2]);
-    };
-    
-    
     std::vector<float> eye_v;
     std::vector<float> eye_u;
-    std::vector<float> c = { 0.0f,0.0f,-1.0f };
+    std::vector<float> c = { 0.0f,0.0f,0.0f };
     std::vector<float> eye_origin = {0.0f,0.0f,-3.0f};
     std::vector<float> L_vector = std::vector<float>(3);
-    std::vector<float> direction = std::vector<float>(3);
+    vec3f direction;
+    vec3f eyevec {0.0f,0.0f,-3.0f};
     float pixel_height, pixel_width;
     
     world::assembleCameraCoords(&eye_origin,&c,width, height, 90.0f,&eye_u,&eye_v,&L_vector,&pixel_width, &pixel_height);
     std::vector<std::vector<float> > interSectionCoordinates;
 
-    int objectIndex;
 
-    std::vector<int> successState;
-    std::vector<unsigned int> intersectedVertices;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/width;
         for (auto j =0; j<3; j++){
-            direction[j] = L_vector[j] - eye_u[j]*image_x*(pixel_width/(float)width) + eye_v[j]*image_y*(pixel_height/(float)height);
+            direction.coords[j] = L_vector[j] - eye_u[j]*image_x*(pixel_width/(float)width) + eye_v[j]*image_y*(pixel_height/(float)height);
         }
-		direction = Vec3Sub(direction, eye_origin);
+		direction = Vec3Sub(direction, eyevec);
         NormaliseVector(&direction);
-        Ray R = Ray(eye_origin,direction);
-		
-        intersectedVertices.clear();
-        interSectionCoordinates.clear();
-		auto intersection = AABBRayIntersection(&root, &R, &intersectedVertices,0,0);
+        Ray R = Ray(eyevec,direction);
+        color outColor;
+        mesh.RayIntersection(&R,&outColor);
         
-		if(!intersection){
-			image[i] = 0;
-			image[i+1] = 0;
-			image[i+2] = 0;
-		}
-		else{
-            unsigned int numTris = intersectedVertices.size();
-            successState = std::vector<int>(numTris);
-            
-            objectIndex = 0;
-            float max_depth = INFINITY;
-            for(int j = 0; j<numTris; j++){
-                int intersectionCount = -1;
-                successState[j] = 1;
-                auto t = tris[intersectedVertices[j]]->calculateInterSectionProduct(R,&successState[j]);
-                if(successState[j] == 1){
-                    interSectionCoordinates.push_back(Vec3Add(eye_origin,Vec3ScalarMultiply(direction,t)));
-                    intersectionCount++;
-                    if(interSectionCoordinates[intersectionCount][2] < max_depth){
-                        max_depth = interSectionCoordinates[intersectionCount][2];
-                        objectIndex = j;
-                    }
-                }
-            }
-            
-			if(max_depth == INFINITY){//nothing intersected
-				image[i] = 0;//world::background_color.Red();
-				image[i+1] = 0;//world::background_color.Green();
-				image[i+2] = 0;//world::background_color.Blue();
+        image[i] = outColor.Red();
+        image[i+1] = outColor.Green();
+        image[i+2]= outColor.Blue();
 
-				continue;
-			}
-            
-                color ambientColor = tris[intersectedVertices[objectIndex]]->AmbientRayInterSection(R);
-                color diffuseColor = tris[intersectedVertices[objectIndex]]->DiffuseColorCalc();
-                color specColor = tris[intersectedVertices[objectIndex]]->SpecularColorCalc(R);
-                color returnedColor = ambientColor + diffuseColor + specColor;
-                image[i] = returnedColor.Red();
-                image[i+1] = returnedColor.Green();
-                image[i+2] = returnedColor.Blue();
-        }
     }
 //    std::ofstream ofs("./raytrace.ppm", std::ios::out | std::ios::binary);
 //    ofs << "P6\n" << width << " " << height << "\n255\n";
@@ -173,16 +114,6 @@ int main(int argc, char* argv[]) {
     }
     
     ofs.close();
-    // for(int i = 0; i < numberOfObjects; i++){
-    //     delete Objects[i];
-    // }
-    //delete[] successState;
-    // delete[] Objects;
-    for(int j =0; j<vertex_indices.size()/3; j++){
-        delete tris[j];
-    }
-    delete[] tris;
-
     delete[] image;
     return 1;
 }

@@ -9,12 +9,14 @@
 #include <assert.h>
 
 struct Mesh_Stats{
-    float min[3];
-    float max[3];
+    vec3f min;
+    vec3f max;
 };
 
 struct AABB{
-    float corners[6];
+    //float corners[6];
+    vec3f min;
+    vec3f max;
 
     AABB * leftbox = nullptr;
     AABB * rightbox = nullptr;

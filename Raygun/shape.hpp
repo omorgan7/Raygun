@@ -18,68 +18,92 @@
 #ifndef shape_hpp
 #define shape_hpp
 
+
+
 class object{
 public:
     color GetColor(void);
     void SetColor(color C);
-    virtual color AmbientRayInterSection(Ray R) = 0;
+    virtual color AmbientRayInterSection(Ray * ray) = 0;
     virtual color DiffuseColorCalc(void) = 0;
-    virtual color SpecularColorCalc(Ray ray) = 0;
-    virtual float calculateInterSectionProduct(Ray ray, int * success) =0;
-    virtual void inputIntersectionCoords(std::vector<float> &coords)= 0;
+    virtual color SpecularColorCalc(Ray * ray) = 0;
+    virtual float calculateInterSectionProduct(Ray * ray, int * success) =0;
+    //virtual void inputIntersectionCoords(std::vector<float> &coords)= 0;
 protected:
     color Color = color(0,0,0);
     float ambientCoeff, diffuseCoeff, specularCoeff, reflectCoeff;
 };
 
-class Sphere : public object{
-public:
-    Sphere(float x, float y, float z, float r);
-    color GetColor(void);
-    void SetColor(color C);
-    float GetRadius(void);
-    void SetRadius(float newRadius);
-    void SetX(float x);
-    void SetY(float y);  
-    void SetZ(float z);
-    std::vector<float> FindSurfaceNormal(std::vector<float> coords);
-    color AmbientRayInterSection(Ray R);
-    color DiffuseColorCalc(void);
-    color SpecularColorCalc(Ray ray);
-    float calculateInterSectionProduct(Ray ray, int * success);
-    void inputIntersectionCoords(std::vector<float> &coords){};
-    
-    
-private:
-    float radius;
-    std::vector<float> SphereOrigin = std::vector<float>(3);
-    std::vector<float> surfaceCoordinates = std::vector<float>(3);
-    std::vector<float> normal = std::vector<float>(3);
-    float dist_dot_product;
-};
+//class Sphere : public object{
+//public:
+//    Sphere(float x, float y, float z, float r);
+//    color GetColor(void);
+//    void SetColor(color C);
+//    float GetRadius(void);
+//    void SetRadius(float newRadius);
+//    void SetX(float x);
+//    void SetY(float y);  
+//    void SetZ(float z);
+//    std::vector<float> FindSurfaceNormal(std::vector<float> coords);
+//    color AmbientRayInterSection(Ray * ray);
+//    color DiffuseColorCalc(void);
+//    color SpecularColorCalc(Ray * ray);
+//    float calculateInterSectionProduct(Ray * ray, int * success);
+//    void inputIntersectionCoords(std::vector<float> &coords){};
+//    
+//    
+//private:
+//    float radius;
+//    std::vector<float> SphereOrigin = std::vector<float>(3);
+//    std::vector<float> surfaceCoordinates = std::vector<float>(3);
+//    std::vector<float> normal = std::vector<float>(3);
+//    float dist_dot_product;
+//};
 
 class triangle : public object{
 public:
-    triangle(std::vector<std::vector<float> > * vertices, unsigned int v0, unsigned int v1, unsigned int v2);
+    triangle(
+        std::vector<std::vector<float> > * input_vertices, 
+        unsigned int * indices, 
+        std::vector<std::vector<float> > * input_norms, 
+        unsigned int * norm_indices);
+
     color GetColor(void);
     void SetColor(color C);
     void SetVertexCoord(std::vector<float> vertex, int vertex_index);   
     void ChangeVertexCoord(std::vector<float> vertex, int vertex_index);
-    color AmbientRayInterSection(Ray R);
+    color AmbientRayInterSection(Ray * ray);
     color DiffuseColorCalc(void);
-    color SpecularColorCalc(Ray ray);
-    float calculateInterSectionProduct(Ray ray, int * success);
-    void inputIntersectionCoords(std::vector<float> &coords);
+    color SpecularColorCalc(Ray * ray);
+    float calculateInterSectionProduct(Ray * ray, int * success);
+    //void inputIntersectionCoords(std::vector<float> &coords);
 private:
-    std::vector<float> vertex_0, vertex_1, vertex_2;
-    std::vector<float> triangleNormal = std::vector<float>(3);
-    std::vector<float> rayintersectioncoords = std::vector<float>(3);
+    //std::vector<float> vertex_0, vertex_1, vertex_2;
+    vec3f vertices[3];
+    vec3f normals[3];
+    vec3f triangleNormal;
+    //std::vector<float> rayintersectioncoords = std::vector<float>(3);
     void ComputeNormal(void);
-    void flipNormal(void);
+    //void flipNormal(void);
     float normalDist;
-    std::vector<float> reflectionVector;
+    vec3f reflectionVector;
     AABB tribox;
     
+};
+
+class Mesh{
+    public:
+        Mesh(
+            std::vector<std::vector<float> > * v, 
+            std::vector<unsigned int> * v_indices, 
+            std::vector<std::vector<float> > * v_norms, 
+            std::vector<unsigned int> * v_norm_indices);
+        ~Mesh();
+        bool RayIntersection(Ray * ray, color * outColor);
+    private:
+        size_t num_tris;
+        triangle ** tris;
+        AABB * BVH;
 };
 
 #endif /* shape_hpp */

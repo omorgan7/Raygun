@@ -17,7 +17,7 @@
 // - More secure. Change another line and you can inject code.
 // - Loading from memory, stream, etc
 
-bool loadSimpleOBJ(const char * path, std::vector<std::vector<float> > & out_vertices, std::vector<unsigned int> & out_vertex_indices, std::vector<std::vector<float> > & out_vertex_norms){
+bool loadSimpleOBJ(const char * path, std::vector<std::vector<float> > & out_vertices, std::vector<unsigned int> & out_vertex_indices, std::vector<std::vector<float> > & out_vertex_norms,std::vector<unsigned int> & out_norm_indices){
     printf("Loading OBJ file %s...\n", path);
     
     FILE * file = fopen(path, "r");
@@ -49,19 +49,25 @@ bool loadSimpleOBJ(const char * path, std::vector<std::vector<float> > & out_ver
         }
         else if ( strcmp( lineHeader, "f" ) == 0 ){
             unsigned int vertexIndex[3], normalIndex[3];
-            int matches = fscanf(file, "%d//%d %d//%d %d//%d\n", &vertexIndex[0], &normalIndex[0],&vertexIndex[1],&normalIndex[1], &vertexIndex[2],&normalIndex[2]);
-            if(matches !=6){
-                std::cout<<"File can't be read by this simple parser.\n";
-                fclose(file);
-                return false;
-            }
+//            int matches = fscanf(file, "%d//%d %d//%d %d//%d\n", &vertexIndex[0], &normalIndex[0],&vertexIndex[1],&normalIndex[1], &vertexIndex[2],&normalIndex[2]);
+            int matches = fscanf(file, "%d %d %d\n", &vertexIndex[0], &vertexIndex[1],&vertexIndex[2]);
+            if(matches !=3){
+                    std::cout<<"File can't be read by this simple parser.\n";
+                    fclose(file);
+                    return false;
+                }
+//            if(matches !=6){
+//                std::cout<<"File can't be read by this simple parser.\n";
+//                fclose(file);
+//                return false;
+//            }
             
             out_vertex_indices.push_back(vertexIndex[0]-1);
             out_vertex_indices.push_back(vertexIndex[1]-1);
             out_vertex_indices.push_back(vertexIndex[2]-1);
-            temp_norm_indices.push_back(normalIndex[0]-1);
-            temp_norm_indices.push_back(normalIndex[1]-1);
-            temp_norm_indices.push_back(normalIndex[2]-1);
+//            temp_norm_indices.push_back(normalIndex[0]-1);
+//            temp_norm_indices.push_back(normalIndex[1]-1);
+//            temp_norm_indices.push_back(normalIndex[2]-1);
         }else{
             // Probably a comment, eat up the rest of the line
             char stupidBuffer[1000];
@@ -71,11 +77,11 @@ bool loadSimpleOBJ(const char * path, std::vector<std::vector<float> > & out_ver
     }
     
     for(auto i=0; i<out_vertex_indices.size(); i++){
-        unsigned int normalIndex = temp_norm_indices[i];
-        auto normal = temp_norms[normalIndex];
-        out_vertex_norms.push_back(normal);
+        //unsigned int normalIndex = temp_norm_indices[i];
+        //auto normal = temp_norms[normalIndex];
+        //out_vertex_norms.push_back(normal);
     }
-    
+    //out_norm_indices = temp_norm_indices;
     fclose(file);
     return true;
 }
