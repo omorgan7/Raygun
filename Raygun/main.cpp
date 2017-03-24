@@ -33,12 +33,12 @@ int main(int argc, char* argv[]) {
     
     unsigned char *image = new unsigned char[width*height*3];
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
-    //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
+    std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
-    std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
+    //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
     
     
     std::vector<std::vector<float> > vertices;
@@ -52,20 +52,24 @@ int main(int argc, char* argv[]) {
                                 normal_indices);
     
 
-    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices);
-    world::sunlightPosition = {(float)width/2,(float)height/2,0};
-    world::sunlightDirection = {world::sunlightPosition[0],
-        world::sunlightPosition[1],
-        world::sunlightPosition[2]-400};
+    world::sunlightPosition.x = (float)width/2;
+    world::sunlightPosition.y = (float)height/2;
+    world::sunlightPosition.z = 0;
+    
+    world::sunlightDirection.x = world::sunlightPosition.x;
+    world::sunlightDirection.y = world::sunlightPosition.y;
+    world::sunlightDirection.z = world::sunlightPosition.z -400.0f;
     
     NormaliseVector(&world::sunlightDirection);
+    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices);
 
     std::vector<float> eye_v;
     std::vector<float> eye_u;
-    std::vector<float> c = { 0.0f,0.0f,-1.0f };
+    std::vector<float> c = { 0.0f,0.0f,0.0f };
     std::vector<float> eye_origin = {0.0f,0.0f,-3.0f};
     std::vector<float> L_vector = std::vector<float>(3);
-    std::vector<float> direction = std::vector<float>(3);
+    vec3f direction;
+    vec3f eyevec {0.0f,0.0f,-3.0f};
     float pixel_height, pixel_width;
     
     world::assembleCameraCoords(&eye_origin,&c,width, height, 90.0f,&eye_u,&eye_v,&L_vector,&pixel_width, &pixel_height);
@@ -77,13 +81,17 @@ int main(int argc, char* argv[]) {
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/width;
         for (auto j =0; j<3; j++){
-            direction[j] = L_vector[j] - eye_u[j]*image_x*(pixel_width/(float)width) + eye_v[j]*image_y*(pixel_height/(float)height);
+            direction.coords[j] = L_vector[j] - eye_u[j]*image_x*(pixel_width/(float)width) + eye_v[j]*image_y*(pixel_height/(float)height);
         }
-		direction = Vec3Sub(direction, eye_origin);
+		direction = Vec3Sub(direction, eyevec);
         NormaliseVector(&direction);
-        Ray R = Ray(eye_origin,direction);
-        color * outColor;
-		mesh.RayIntersection()
+        Ray R = Ray(eyevec,direction);
+        color outColor;
+        mesh.RayIntersection(&R,&outColor);
+        
+        image[i] = outColor.Red();
+        image[i+1] = outColor.Green();
+        image[i+2]= outColor.Blue();
 
     }
 //    std::ofstream ofs("./raytrace.ppm", std::ios::out | std::ios::binary);
@@ -106,16 +114,6 @@ int main(int argc, char* argv[]) {
     }
     
     ofs.close();
-    // for(int i = 0; i < numberOfObjects; i++){
-    //     delete Objects[i];
-    // }
-    //delete[] successState;
-    // delete[] Objects;
-    for(int j =0; j<vertex_indices.size()/3; j++){
-        delete tris[j];
-    }
-    delete[] tris;
-
     delete[] image;
     return 1;
 }

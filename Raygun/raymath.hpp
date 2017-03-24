@@ -27,19 +27,17 @@ typedef vec3<float> vec3f;
 
 class Ray{
 public:
-    std::vector<float> GetStartPos(void);
-    Ray(std::vector<float> origin, std::vector<float> direction);
-    void SetRayOrigin(float x, float y, float z);
-    std::vector<float> GetDirection(void);
-    void SetDirection(float x, float y, float z);
-    std::vector<float> GetInvDirection(void);
-	std::vector<bool> GetInvDirectionSign(void);
+    vec3f GetStartPos(void);
+    Ray(vec3f origin, vec3f direction);
+    void SetRayOrigin(vec3f origin);
+    vec3f GetDirection(void);
+    void SetDirection(vec3f direction);
+    vec3f GetInvDirection(void);
+	vec3<bool> GetInvDirectionSign(void);
 
 private:
-    std::vector<float> RayOrigin = std::vector<float>(3);
-    std::vector<float> RayDirection = std::vector<float>(3);
-    std::vector<float> InvDirection = std::vector<float>(3);
-	std::vector<bool> InvDirSign = std::vector<bool>(3);
+    vec3f RayOrigin, RayDirection, InvDirection;
+    vec3<bool> InvDirSign;
 };
 
 ////////////// INLINE MATH FUNCTIONS ///////////////////////
@@ -94,6 +92,56 @@ inline std::vector<float> Vec3ScalarMultiply(std::vector<float> u, float m){
     MProduct[0] = u[0]*m;
     MProduct[1] = u[1]*m;
     MProduct[2] = u[2]*m;
+    return MProduct;
+}
+template<typename T>
+inline void NormaliseVector(vec3<T> *vec){
+    float length = 0.0f;
+    for(auto i = 0; i <3; i++){
+        length += vec->coords[i]*vec->coords[i];
+    }
+    length = powf(length,0.5f);
+    for(auto i = 0; i <3; i++){
+        vec->coords[i] /= length;
+    }
+}
+
+template<typename T>
+inline float Vec3DotProduct(vec3<T> v1, vec3<T> v2){
+    return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+}
+
+template<typename T>
+inline vec3<T> Vec3CrossProduct(vec3<T> u, vec3<T> v){
+    vec3<T> crossProduct;
+    crossProduct.x = u.y*v.z - u.z*v.y;
+    crossProduct.y = u.z*v.x - u.x*v.z;
+    crossProduct.z = u.x*v.y - u.y*v.x;
+    return crossProduct;
+}
+
+template<typename T>
+inline vec3<T> Vec3Sub(vec3<T> u, vec3<T> v){
+    vec3<T> subProduct;
+    subProduct.x = u.x - v.x;
+    subProduct.y = u.y - v.y;
+    subProduct.z = u.z - v.z;
+    return subProduct;
+}
+template<typename T>
+inline vec3<T> Vec3Add(vec3<T> u, vec3<T> v){
+    vec3<T> addProduct;
+    addProduct.x = u.x + v.x;
+    addProduct.y = u.y + v.y;
+    addProduct.z = u.z + v.z;
+    return addProduct;
+}
+template <typename T>
+inline vec3<T> Vec3ScalarMultiply(vec3<T> u, T m){
+    vec3<T> MProduct;
+    MProduct.x = u.x*m;
+    MProduct.y = u.y*m;
+    MProduct.z = u.z*m;
     return MProduct;
 }
 

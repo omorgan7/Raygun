@@ -30,7 +30,7 @@ int buildAABBTree(AABB * root,
     for(int i= 0;i<root->triNumber.size(); i++){
         median_subset[i] = (*medians)[root->triNumber[i]][axes];
     }
-    
+    std::cout<<"";
     std::sort(root->triNumber.begin(),root->triNumber.end(),[&median_subset](size_t i1, size_t i2){return median_subset[i1]<median_subset[i2];});
     std::sort(median_subset.begin(),median_subset.end());
 
@@ -144,18 +144,18 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
 bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its, int readonly){
     its++;
 
-    std::vector<float> InvDirection = R->GetInvDirection();
-    std::vector<float> origin = R->GetStartPos();
+    vec3f InvDirection = R->GetInvDirection();
+    vec3f origin = R->GetStartPos();
     
-    float t1 = (root->min.x - origin[0])*InvDirection[0];
-    float t2 = (root->max.x - origin[0])*InvDirection[0];
+    float t1 = (root->min.x - origin.x)*InvDirection.x;
+    float t2 = (root->max.x - origin.x)*InvDirection.x;
     
     float tmin = std::min(t1, t2);
     float tmax = std::max(t1, t2);
     
     for (int i = 1; i < 3; i++) {
-        t1 = (root->min.coords[i] - origin[i])*InvDirection[i];
-        t2 = (root->max.coords[i] - origin[i])*InvDirection[i];
+        t1 = (root->min.coords[i] - origin.coords[i])*InvDirection.coords[i];
+        t2 = (root->max.coords[i] - origin.coords[i])*InvDirection.coords[i];
         
         tmin = std::max(tmin, std::min(std::min(t1, t2), tmax));
         tmax = std::min(tmax, std::max(std::max(t1, t2), tmin));

@@ -9,32 +9,35 @@
 #include "raymath.hpp"
 
 //////////////////////// RAY CLASS ////////////////////////////
-std::vector<float> Ray::GetStartPos(void){
+vec3f Ray::GetStartPos(void){
     return RayOrigin;
 }
-Ray::Ray(std::vector<float> origin, std::vector<float> direction){
-    RayOrigin = origin;
-    RayDirection = direction;
-    InvDirection = {1.0f/RayDirection[0],1.0f/RayDirection[1],1.0f/RayDirection[2]};
-	InvDirSign = { InvDirection[0] < 0,InvDirection[1] < 0,InvDirection[2] < 0 };
+
+Ray::Ray(vec3f origin, vec3f direction){
+    for(int i =0; i<3; i++){
+        RayOrigin.coords[i] = origin.coords[i];
+        RayDirection.coords[i] = direction.coords[i];
+        InvDirection.coords[i] = 1.0f/RayDirection.coords[i];
+        InvDirSign.coords[i] = InvDirection.coords[i] < 0;
+    }
 }
-void Ray::SetRayOrigin(float x, float y, float z){
-    RayOrigin[0] = x;
-    RayOrigin[1] = y;
-    RayOrigin[2] = z;
+void Ray::SetRayOrigin(vec3f origin){
+    RayOrigin.x = origin.x;
+    RayOrigin.y = origin.y;
+    RayOrigin.z = origin.z;
 }
-std::vector<float> Ray::GetDirection(void){
+vec3f Ray::GetDirection(void){
     return RayDirection;
 }
-std::vector<float> Ray::GetInvDirection(void){
+vec3f Ray::GetInvDirection(void){
     return InvDirection;
 }
-std::vector<bool> Ray::GetInvDirectionSign(void) {
+vec3<bool> Ray::GetInvDirectionSign(void) {
 	return InvDirSign;
 }
-void Ray::SetDirection(float x, float y, float z){
-    RayDirection[0] = x;
-    RayDirection[1] = y;
-    RayDirection[2] = z;
+void Ray::SetDirection(vec3f direction){
+    RayDirection.x = direction.x;
+    RayDirection.y = direction.y;
+    RayDirection.z = direction.z;
 };
 
