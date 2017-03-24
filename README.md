@@ -1,4 +1,4 @@
-# Raygun
+#Raygun
 
 ![Pew pew!](https://raw.githubusercontent.com/omorgan7/Raygun/master/Results/raytrace.bmp)
 
