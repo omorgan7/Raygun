@@ -25,7 +25,7 @@ public:
     color GetColor(void);
     void SetColor(color C);
     virtual color AmbientRayInterSection(Ray * ray) = 0;
-    virtual color DiffuseColorCalc(void) = 0;
+    virtual color DiffuseColorCalc(Ray * ray) = 0;
     virtual color SpecularColorCalc(Ray * ray) = 0;
     virtual float calculateInterSectionProduct(Ray * ray, int * success) =0;
     //virtual void inputIntersectionCoords(std::vector<float> &coords)= 0;
@@ -73,16 +73,19 @@ public:
     void SetVertexCoord(std::vector<float> vertex, int vertex_index);   
     void ChangeVertexCoord(std::vector<float> vertex, int vertex_index);
     color AmbientRayInterSection(Ray * ray);
-    color DiffuseColorCalc(void);
+    color DiffuseColorCalc(Ray * ray);
     color SpecularColorCalc(Ray * ray);
     float calculateInterSectionProduct(Ray * ray, int * success);
-    //void inputIntersectionCoords(std::vector<float> &coords);
+    void inputIntersectionCoords(vec3f &coords);
+    
 private:
     //std::vector<float> vertex_0, vertex_1, vertex_2;
     vec3f vertices[3];
     vec3f normals[3];
-    vec3f triangleNormal;
-    //std::vector<float> rayintersectioncoords = std::vector<float>(3);
+    vec3f triangleNormal,edgeA,edgeB, barycentrics,rayintersectioncoords;
+    void computeBarycentrics(Ray * ray);
+    //float barycentricDivisor;
+
     void ComputeNormal(void);
     //void flipNormal(void);
     float normalDist;

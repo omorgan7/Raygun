@@ -157,6 +157,10 @@ inline T sign(T a){
         return 1;
     }
     return -1;
+}
+template<typename T>
+inline vec3<T> Vec3ElementProduct(vec3<T> v1, vec3<T> v2){
+    return {v1.x*v2.x , v1.y*v2.y , v1.z*v2.z};
 };
 
 #endif /* raymath_hpp */

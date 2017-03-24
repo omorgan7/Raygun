@@ -112,17 +112,19 @@ triangle::triangle(
     for(int i=0; i<3; i++){
         for(int j=0; j<3; j++){
             vertices[i].coords[j] = (*input_vertices)[indices[i]][j];
-            //normals[i].coords[j] = (*input_norms)[norm_indices[i]][j];
+            normals[i].coords[j] = (*input_norms)[norm_indices[i]][j];
         }
         tribox.vertex_indices.push_back(indices[i]);
     }
-    ambientCoeff=0.1;
-    diffuseCoeff = 0.4;
-    specularCoeff = 0.5;
+    edgeA = Vec3Sub(vertices[1],vertices[0]);
+    edgeB = Vec3Sub(vertices[2],vertices[0]);
+    ambientCoeff=0.3;
+    diffuseCoeff = 0.6;
+    specularCoeff = 0.8;
     Color.changeRed(255);
     Color.changeBlue(255);
     ComputeNormal();
-    normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
+//    normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
     //reflectionVector = Vec3Sub(Vec3ScalarMultiply(triangleNormal, 2.0f*Vec3DotProduct(triangleNormal,world::sunlightDirection)), world::sunlightDirection);
     
     //tribox.vertex_indices = {v0,v1,v2};
@@ -144,15 +146,31 @@ triangle::triangle(
 color triangle::AmbientRayInterSection(Ray * ray){
     return Color*ambientCoeff;
 }
-color triangle::DiffuseColorCalc(void){
+color triangle::DiffuseColorCalc(Ray * ray){
+    vec3f interpNormal = Vec3Add(Vec3ScalarMultiply(normals[0], barycentrics.x),Vec3Add(Vec3ScalarMultiply(normals[1],barycentrics.y), Vec3ScalarMultiply(normals[2],barycentrics.z)));
+    normalDist = fabs(Vec3DotProduct(interpNormal,world::sunlightDirection));
+    
+    //normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
+//    std::cout<<"barycentrics:\n";
+//    std::cout<<barycentrics.x<<" "<<barycentrics.y<<" "<<barycentrics.z<<"\n";
+//    std::cout<<"normals:\n";
+//    std::cout<<normals[0].x<<" "<<normals[0].y<<" "<<normals[0].z<<"\n";
+//    std::cout<<normals[1].x<<" "<<normals[1].y<<" "<<normals[1].z<<"\n";
+//    std::cout<<normals[2 ].x<<" "<<normals[2].y<<" "<<normals[2].z<<"\n";
     return Color*diffuseCoeff*normalDist;
 }
 color triangle::SpecularColorCalc(Ray * ray){
-    reflectionVector = Vec3Sub(Vec3ScalarMultiply(triangleNormal, 2.0f*Vec3DotProduct(triangleNormal,world::sunlightDirection)), world::sunlightDirection);
+    vec3f interpNormal = Vec3Add(Vec3ScalarMultiply(normals[0], barycentrics.x),
+                                 Vec3Add(Vec3ScalarMultiply(normals[1],barycentrics.y), Vec3ScalarMultiply(normals[2],barycentrics.z)));
+    normalDist = fabs(Vec3DotProduct(interpNormal,world::sunlightDirection));
+    //normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
+    reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNormal, 2.0f*Vec3DotProduct(interpNormal,world::sunlightDirection)), world::sunlightDirection);
+    //reflectionVector = Vec3Sub(Vec3ScalarMultiply(triangleNormal, 2.0f*Vec3DotProduct(triangleNormal,world::sunlightDirection)), world::sunlightDirection);
     auto SpecRay = Vec3DotProduct(ray->GetDirection(),reflectionVector);
     if(SpecRay<0){
         return color(0,0,0);
     }
+    //std::cout<<SpecRay<<"\n";
     return Color*specularCoeff*powf(SpecRay,20);
 
 }
@@ -176,19 +194,39 @@ float triangle::calculateInterSectionProduct(Ray * ray, int * success){
     }
     //std::cout<<"t positive\n";
     auto Q = Vec3Add(origin, Vec3ScalarMultiply(RayDirection,t));
-    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[1],vertices[0]),Vec3Sub(Q,vertices[0])),triangleNormal)<0.0f){
-        *success = 0;
-        return -1;        
+    bool firstNorm = (Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[1],vertices[0]),Vec3Sub(Q,vertices[0])),triangleNormal)>=0.0f )&&
+                    (Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[2],vertices[1]),Vec3Sub(Q,vertices[1])),triangleNormal)>=0.0f )&&
+                    (Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[0],vertices[2]),Vec3Sub(Q,vertices[2])),triangleNormal)>=0.0f);
+    if(firstNorm){
+        *success = 1;
+        computeBarycentrics(ray);
+        return t;
     }
-    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[2],vertices[1]),Vec3Sub(Q,vertices[1])),triangleNormal)<0.0f){
-        *success = 0;
-        return -1;
+    bool secondNorm = (
+    Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[1],vertices[0]),Vec3Sub(Q,vertices[0])),Vec3ScalarMultiply(triangleNormal, -1.0f))>=0.0f )&&
+    (Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[2],vertices[1]),Vec3Sub(Q,vertices[1])),Vec3ScalarMultiply(triangleNormal, -1.0f))>=0.0f )&&
+    (Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[0],vertices[2]),Vec3Sub(Q,vertices[2])),Vec3ScalarMultiply(triangleNormal, -1.0f))>=0.0f);
+    if(secondNorm){
+        *success = 1;
+        computeBarycentrics(ray);
+        return t;
     }
-    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[0],vertices[2]),Vec3Sub(Q,vertices[2])),triangleNormal)<0.0f){
-        *success = 0;
-        return -1;
-    }
+    *success = 0;
+    return -1;
+//    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[1],vertices[0]),Vec3Sub(Q,vertices[0])),triangleNormal)<0.0f){
+//        *success = 0;
+//        return -1;        
+//    }
+//    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[2],vertices[1]),Vec3Sub(Q,vertices[1])),triangleNormal)<0.0f){
+//        *success = 0;
+//        return -1;
+//    }
+//    if(Vec3DotProduct(Vec3CrossProduct(Vec3Sub(vertices[0],vertices[2]),Vec3Sub(Q,vertices[2])),triangleNormal)<0.0f){
+//        *success = 0;
+//        return -1;
+//    }
     *success = 1;
+    computeBarycentrics(ray);
     return t;
     //todo: calculate the rest of the barycentric coordinates.
 }
@@ -204,15 +242,22 @@ float triangle::calculateInterSectionProduct(Ray * ray, int * success){
      //triangleNormal = Vec3ScalarMultiply(triangleNormal, sign(triangleNormal[2]));
  }
 
+void triangle::computeBarycentrics(Ray * ray){
+    auto barycentricDivisor = 1.0f/(Vec3DotProduct(Vec3CrossProduct(ray->GetDirection(), edgeB), edgeA));
+    barycentrics.x = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(ray->GetDirection(), edgeB), Vec3Sub(ray->GetStartPos(),vertices[0]));
+    barycentrics.y = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(Vec3Sub(ray->GetStartPos(),vertices[0]), edgeA), ray->GetDirection());
+    barycentrics.z = 1.0f - barycentrics.x - barycentrics.y;
+}
+
 // void triangle::flipNormal(void){
 //     triangleNormal[0] *=-1;
 //     triangleNormal[1] *=-1;
 //     triangleNormal[2] *=-1;
 // }
 
-// void triangle::inputIntersectionCoords(std::vector<float> &vector){
-//     rayintersectioncoords = vector;
-// }
+ void triangle::inputIntersectionCoords(vec3f &vector){
+     rayintersectioncoords = vector;
+ }
 
 Mesh::Mesh(
     std::vector<std::vector<float> > * v, 
@@ -227,8 +272,8 @@ Mesh::Mesh(
     // vec3<unsigned int> v_n;
     for(size_t i = 0; i<num_tris; i++){
         unsigned int v_i[] = {(*v_indices)[3*i],(*v_indices)[3*i+1],(*v_indices)[3*i+2]};
-        //unsigned int v_n[] = {(*v_norm_indices)[3*i],(*v_norm_indices)[3*i+1],(*v_norm_indices)[3*i+2]};
-        unsigned int v_n[3] = {};
+        unsigned int v_n[] = {(*v_norm_indices)[3*i],(*v_norm_indices)[3*i+1],(*v_norm_indices)[3*i+2]};
+        //unsigned int v_n[3] = {};
         tris[i] = new triangle(v,v_i,v_norms,v_n);
     }
 
@@ -296,8 +341,9 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
         outColor->changeBlue(0);
         return 0;
     }
+    //std::cout<<intersectedTris[objectIndex]<<"\n";
     color ambientColor = tris[intersectedTris[objectIndex]]->AmbientRayInterSection(ray);
-    color diffuseColor = tris[intersectedTris[objectIndex]]->DiffuseColorCalc();
+    color diffuseColor = tris[intersectedTris[objectIndex]]->DiffuseColorCalc(ray);
     //color diffuseColor = color(0,0,0);
     color specColor = tris[intersectedTris[objectIndex]]->SpecularColorCalc(ray);
     outColor->changeRed(ambientColor.Red() + diffuseColor.Red() + specColor.Red());

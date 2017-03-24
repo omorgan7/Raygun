@@ -27,12 +27,13 @@ int buildAABBTree(AABB * root,
 
     int axes = maxrange_index;//0==x 1==y or 2==z
     std::vector<float > median_subset = std::vector<float>(root->vertex_indices.size()/3);
-    for(int i= 0;i<root->triNumber.size(); i++){
-        median_subset[i] = (*medians)[root->triNumber[i]][axes];
-    }
+//    for(int i= 0;i<root->triNumber.size(); i++){
+//        median_subset[i] = (*medians)[root->triNumber[i]][axes];
+//    }
     std::cout<<"";
-    std::sort(root->triNumber.begin(),root->triNumber.end(),[&median_subset](size_t i1, size_t i2){return median_subset[i1]<median_subset[i2];});
-    std::sort(median_subset.begin(),median_subset.end());
+
+    std::sort(root->triNumber.begin(),root->triNumber.end(),[medians,axes](size_t i1, size_t i2){return (*medians)[i1][axes]<(*medians)[i2][axes];});
+    //std::sort(median_subset.begin(),median_subset.end());
 
     root->leftbox = new AABB;
     root->rightbox = new AABB;

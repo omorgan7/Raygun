@@ -33,8 +33,9 @@ int main(int argc, char* argv[]) {
     
     unsigned char *image = new unsigned char[width*height*3];
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
-    std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
-    //std::string objectstring = "/Users/Owen/Dropbox/suzanne.obj";
+    //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
+    std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
+    //std::string objectstring = "/Users/Owen/Dropbox/halfcone_dense.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
@@ -66,10 +67,10 @@ int main(int argc, char* argv[]) {
     std::vector<float> eye_v;
     std::vector<float> eye_u;
     std::vector<float> c = { 0.0f,0.0f,0.0f };
-    std::vector<float> eye_origin = {0.0f,0.0f,-3.0f};
+    std::vector<float> eye_origin = {0.0f,0.0f,-2.5f};
     std::vector<float> L_vector = std::vector<float>(3);
     vec3f direction;
-    vec3f eyevec {0.0f,0.0f,-3.0f};
+    vec3f eyevec {0.0f,0.0f,-2.5f};
     float pixel_height, pixel_width;
     
     world::assembleCameraCoords(&eye_origin,&c,width, height, 90.0f,&eye_u,&eye_v,&L_vector,&pixel_width, &pixel_height);
