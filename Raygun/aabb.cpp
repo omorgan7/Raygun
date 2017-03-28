@@ -161,7 +161,7 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
         tmin = std::max(tmin, std::min(std::min(t1, t2), tmax));
         tmax = std::min(tmax, std::max(std::max(t1, t2), tmin));
     }
-    if((tmax > std::max(tmin, 0.0f))==0){
+    if(tmax <= std::max(tmin, 0.0f)){
         return 0;
     }
     bool leftret=0, rightret=0;

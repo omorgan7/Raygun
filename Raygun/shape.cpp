@@ -148,30 +148,31 @@ color triangle::AmbientRayInterSection(Ray * ray){
 }
 color triangle::DiffuseColorCalc(Ray * ray){
     vec3f interpNormal = Vec3Add(Vec3ScalarMultiply(normals[0], barycentrics.x),Vec3Add(Vec3ScalarMultiply(normals[1],barycentrics.y), Vec3ScalarMultiply(normals[2],barycentrics.z)));
-    normalDist = fabs(Vec3DotProduct(interpNormal,world::sunlightDirection));
+    normalDist = Vec3DotProduct(interpNormal,world::sunlightDirection);
     
-    //normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
-//    std::cout<<"barycentrics:\n";
-//    std::cout<<barycentrics.x<<" "<<barycentrics.y<<" "<<barycentrics.z<<"\n";
-//    std::cout<<"normals:\n";
-//    std::cout<<normals[0].x<<" "<<normals[0].y<<" "<<normals[0].z<<"\n";
-//    std::cout<<normals[1].x<<" "<<normals[1].y<<" "<<normals[1].z<<"\n";
-//    std::cout<<normals[2 ].x<<" "<<normals[2].y<<" "<<normals[2].z<<"\n";
-    return Color*diffuseCoeff*normalDist;
+    //normalDist = Vec3DotProduct(triangleNormal,world::sunlightDirection);
+    std::cout<<"barycentrics:\n";
+    std::cout<<barycentrics.x<<" "<<barycentrics.y<<" "<<barycentrics.z<<"\n";
+    std::cout<<"normals:\n";
+    std::cout<<normals[0].x<<" "<<normals[0].y<<" "<<normals[0].z<<"\n";
+    std::cout<<normals[1].x<<" "<<normals[1].y<<" "<<normals[1].z<<"\n";
+    std::cout<<normals[2 ].x<<" "<<normals[2].y<<" "<<normals[2].z<<"\n";
+    if(normalDist > 0){
+       return Color*diffuseCoeff*normalDist;
+    }
+    return Color*0.0f;
+    
 }
 color triangle::SpecularColorCalc(Ray * ray){
-    vec3f interpNormal = Vec3Add(Vec3ScalarMultiply(normals[0], barycentrics.x),
-                                 Vec3Add(Vec3ScalarMultiply(normals[1],barycentrics.y), Vec3ScalarMultiply(normals[2],barycentrics.z)));
-    normalDist = fabs(Vec3DotProduct(interpNormal,world::sunlightDirection));
-    //normalDist = fabs(Vec3DotProduct(triangleNormal,world::sunlightDirection));
-    reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNormal, 2.0f*Vec3DotProduct(interpNormal,world::sunlightDirection)), world::sunlightDirection);
-    //reflectionVector = Vec3Sub(Vec3ScalarMultiply(triangleNormal, 2.0f*Vec3DotProduct(triangleNormal,world::sunlightDirection)), world::sunlightDirection);
-    auto SpecRay = Vec3DotProduct(ray->GetDirection(),reflectionVector);
-    if(SpecRay<0){
+//    vec3f interpNormal = Vec3Add(Vec3ScalarMultiply(normals[0], barycentrics.x),
+//                                 Vec3Add(Vec3ScalarMultiply(normals[1],barycentrics.y), Vec3ScalarMultiply(normals[2],barycentrics.z)));
+//    reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNormal, 2.0f*Vec3DotProduct(interpNormal,world::sunlightDirection)), world::sunlightDirection);
+//    auto SpecRay = Vec3DotProduct(ray->GetDirection(),reflectionVector);
+//    if(SpecRay<0){
         return color(0,0,0);
-    }
-    //std::cout<<SpecRay<<"\n";
-    return Color*specularCoeff*powf(SpecRay,20);
+//    }
+//    //std::cout<<SpecRay<<"\n";
+//    return Color*specularCoeff*powf(SpecRay,20);
 
 }
 float triangle::calculateInterSectionProduct(Ray * ray, int * success){

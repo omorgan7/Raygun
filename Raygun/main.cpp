@@ -34,12 +34,12 @@ int main(int argc, char* argv[]) {
     unsigned char *image = new unsigned char[width*height*3];
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
-    std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
+    //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/halfcone_dense.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
-    //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
+    std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
     
     
     std::vector<std::vector<float> > vertices;
