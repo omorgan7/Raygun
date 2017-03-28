@@ -77,15 +77,14 @@ public:
     color SpecularColorCalc(Ray * ray);
     float calculateInterSectionProduct(Ray * ray, int * success);
     void inputIntersectionCoords(vec3f &coords);
+	void computeBarycentrics(Ray * ray);
     
 private:
     //std::vector<float> vertex_0, vertex_1, vertex_2;
     vec3f vertices[3];
     vec3f normals[3];
     vec3f triangleNormal,edgeA,edgeB, barycentrics,rayintersectioncoords;
-    void computeBarycentrics(Ray * ray);
     //float barycentricDivisor;
-
     void ComputeNormal(void);
     //void flipNormal(void);
     float normalDist;

@@ -11,6 +11,7 @@
 #include <float.h>
 #include <algorithm>
 #include <numeric>
+#include <random>
 //#include <unistd.h>
 
 #include "world.hpp"
@@ -37,9 +38,9 @@ int main(int argc, char* argv[]) {
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/halfcone_dense.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
-	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/donut.obj";
+	std::string objectstring = "H:/dos/C++/Raygun/Raygun/suzzane_dense.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
-    std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
+   // std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
     
     
     std::vector<std::vector<float> > vertices;
@@ -75,21 +76,29 @@ int main(int argc, char* argv[]) {
     
     world::assembleCameraCoords(&eye_origin,&c,width, height, 90.0f,&eye_u,&eye_v,&L_vector,&pixel_width, &pixel_height);
     std::vector<std::vector<float> > interSectionCoordinates;
-
+	std::random_device r;
+	std::default_random_engine e1(r());
+	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.01f);
+	//float jitter;
 
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/width;
+		//jitter = uniform_dist(e1);
         for (auto j =0; j<3; j++){
-            direction.coords[j] = L_vector[j] - eye_u[j]*image_x*(pixel_width/(float)width) + eye_v[j]*image_y*(pixel_height/(float)height);
+			direction.coords[j] = L_vector[j] - eye_u[j] * image_x*(pixel_width / (float)width) + eye_v[j] * image_y*(pixel_height / (float)height) +uniform_dist(e1);
         }
+		if (image_x == 918 && image_y == 534) {
+			std::cout << "";
+		}
 		direction = Vec3Sub(direction, eyevec);
         NormaliseVector(&direction);
         Ray R = Ray(eyevec,direction);
         color outColor;
+
         mesh.RayIntersection(&R,&outColor);
-        
+		
         image[i] = outColor.Red();
         image[i+1] = outColor.Green();
         image[i+2]= outColor.Blue();

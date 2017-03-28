@@ -174,9 +174,6 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
 //        }
         for(int i = 0; i<root->triNumber.size(); i++){
           (*intersectedVertices).push_back(root->triNumber[i]);
-            if(root->triNumber[i] > 5000){
-                std::cout<<"";
-            }
         }
 //        (*intersectedVertices) = root->triNumber;
 //        *intersectedVertices =root->vertex_indices;
