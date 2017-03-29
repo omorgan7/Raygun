@@ -35,10 +35,10 @@ int main(int argc, char* argv[]) {
     unsigned char *image = new unsigned char[width*height*3];
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
-    //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
-    //std::string objectstring = "/Users/Owen/Dropbox/halfcone_dense.obj";
+    std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
+    //std::string objectstring = "/Users/Owen/Dropbox/donut_smooth.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
-	std::string objectstring = "H:/dos/C++/Raygun/Raygun/suzzane_dense.obj";
+	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/suzzane_dense.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
    // std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
     
@@ -80,29 +80,34 @@ int main(int argc, char* argv[]) {
 	std::default_random_engine e1(r());
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.01f);
 	//float jitter;
-
+    int AAFactor = 16;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/width;
 		//jitter = uniform_dist(e1);
         for (auto j =0; j<3; j++){
-			direction.coords[j] = L_vector[j] - eye_u[j] * image_x*(pixel_width / (float)width) + eye_v[j] * image_y*(pixel_height / (float)height) +uniform_dist(e1);
+            direction.coords[j] = L_vector[j] - eye_u[j] * image_x*(pixel_width / (float)width) + eye_v[j] * image_y*(pixel_height / (float)height);// +
         }
-		if (image_x == 918 && image_y == 534) {
-			std::cout << "";
-		}
-		direction = Vec3Sub(direction, eyevec);
-        NormaliseVector(&direction);
-        Ray R = Ray(eyevec,direction);
+//		if (image_x == 918 && image_y == 534) {
+//			std::cout << "";
+//		}
+       // direction = Vec3Sub(direction, eyevec);
         color outColor;
+        for(int j = 0; j<AAFactor; j++){
+            vec3f noisevec {uniform_dist(e1),uniform_dist(e1),uniform_dist(e1)};
+            vec3f jitteredDirection = Vec3Add(noisevec, direction);
+            jitteredDirection = Vec3Sub(jitteredDirection,eyevec);
+            NormaliseVector(&jitteredDirection);
+            Ray R = Ray(eyevec,jitteredDirection);
 
-        mesh.RayIntersection(&R,&outColor);
-		
+            color tempColor;
+            mesh.RayIntersection(&R,&tempColor);
+            outColor += tempColor*(1.0f/((float)AAFactor));
+        }
         image[i] = outColor.Red();
         image[i+1] = outColor.Green();
         image[i+2]= outColor.Blue();
-
     }
 //    std::ofstream ofs("./raytrace.ppm", std::ios::out | std::ios::binary);
 //    ofs << "P6\n" << width << " " << height << "\n255\n";
