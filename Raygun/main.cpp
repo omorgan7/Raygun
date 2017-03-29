@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
    //std::string objectstring = "/Users/Owen/Dropbox/donut_smooth.obj";
-    std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
-	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/suzzane_dense.obj";
+    //std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
+	std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
    // std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
     
@@ -58,9 +58,9 @@ int main(int argc, char* argv[]) {
     world::sunlightPosition.y = (float)height/2;
     world::sunlightPosition.z = 0;
     
-    world::sunlightDirection.x = world::sunlightPosition.x;
-    world::sunlightDirection.y = world::sunlightPosition.y;
-    world::sunlightDirection.z = world::sunlightPosition.z -400.0f;
+	world::sunlightDirection.x = 0;// world::sunlightPosition.x;
+	world::sunlightDirection.y = 0;// world::sunlightPosition.y;
+    world::sunlightDirection.z = 1;
     
     NormaliseVector(&world::sunlightDirection);
     Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices);
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
     std::vector<float> eye_v;
     std::vector<float> eye_u;
     std::vector<float> c = { 0.0f,0.0f,0.0f };
-    std::vector<float> eye_origin = {0.0f,0.0f,-2.0f};
+    std::vector<float> eye_origin = {0.0f,0.0f,-2.5f};
     std::vector<float> L_vector = std::vector<float>(3);
     vec3f direction;
     vec3f eyevec {0.0f,0.0f,-2.5f};
@@ -80,8 +80,8 @@ int main(int argc, char* argv[]) {
 	std::default_random_engine e1(r());
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.01f);
 	//float jitter;
-    int AAFactor = 2;
-    int AA_status = 0;
+    int AAFactor = 4;
+    int AA_status = 1;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
@@ -90,13 +90,10 @@ int main(int argc, char* argv[]) {
         for (auto j =0; j<3; j++){
             direction.coords[j] = L_vector[j] - eye_u[j] * image_x*(pixel_width / (float)width) + eye_v[j] * image_y*(pixel_height / (float)height);// +
         }
-		if (image_x == 953 && image_y == 279) {
+       // direction = Vec3Sub(direction, eyevec);
+		if (image_x == 950 && image_y == 530) {
 			std::cout << "";
 		}
-        if (image_x == 978 && image_y == 279) {
-            std::cout << "";
-        }
-       // direction = Vec3Sub(direction, eyevec);
         color outColor;
         if(AA_status){
             for(int j = 0; j<AAFactor; j++){

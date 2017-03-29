@@ -144,47 +144,75 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
 
 bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its, int readonly){
     its++;
-
     vec3f InvDirection = R->GetInvDirection();
     vec3f origin = R->GetStartPos();
     
-    float t1 = (root->min.x - origin.x)*InvDirection.x;
-    float t2 = (root->max.x - origin.x)*InvDirection.x;
-    
-    float tmin = std::min(t1, t2);
-    float tmax = std::max(t1, t2);
-    
-    for (int i = 1; i < 3; i++) {
-        t1 = (root->min.coords[i] - origin.coords[i])*InvDirection.coords[i];
-        t2 = (root->max.coords[i] - origin.coords[i])*InvDirection.coords[i];
-        
-        tmin = std::max(tmin, std::min(std::min(t1, t2), tmax));
-        tmax = std::min(tmax, std::max(std::max(t1, t2), tmin));
-    }
-    if(tmax <= std::max(tmin, 0.0f)){
-        return 0;
-    }
+    //float t1 = (root->min.x - origin.x)*InvDirection.x;
+    //float t2 = (root->max.x - origin.x)*InvDirection.x;
+    //
+    //float tmin = std::min(t1, t2);
+    //float tmax = std::max(t1, t2);
+    //
+    //for (int i = 1; i < 3; i++) {
+    //    t1 = (root->min.coords[i] - origin.coords[i])*InvDirection.coords[i];
+    //    t2 = (root->max.coords[i] - origin.coords[i])*InvDirection.coords[i];
+    //    
+    //    tmin = std::max(tmin, std::min(std::min(t1, t2), tmax));
+    //    tmax = std::min(tmax, std::max(std::max(t1, t2), tmin));
+    //}
+    //if(tmax <= std::max(tmin,0.0f)){
+    //    return 0;
+    //}
+	float tmin, tmax, tymin, tymax, tzmin, tzmax;
+
+	tmin = (root->min.x - origin.x)*InvDirection.x;
+	tmax = (root->max.x - origin.x)*InvDirection.x;
+	if (tmin > tmax) {
+		swap(&tmin, &tmax);
+	}
+	tymin = (root->min.y - origin.y)*InvDirection.y;
+	tymax = (root->max.y - origin.y)*InvDirection.y;
+	if (tymin > tymax) {
+		swap(&tymin, &tymax);
+	}
+	if ((tmin > tymax) || (tymin > tmax)) {
+		return false;
+	}
+		
+	if (tymin > tmin)
+		tmin = tymin;
+	if (tymax < tmax)
+		tmax = tymax;
+
+	tzmin = (root->min.z - origin.z)*InvDirection.z;
+	tzmax = (root->max.z - origin.z)*InvDirection.z;
+	if (tzmin > tzmax) {
+		swap(&tzmin, &tzmax);
+	}
+	if ((tmin > tzmax) || (tzmin > tmax)) {
+		return false;
+	}
+		
+
     bool leftret=0, rightret=0;
     if(readonly == 1){
         return 1;
     }
-    if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
-//        for(int i = 0; i<root->vertex_indices.size(); i++){
-//          (*intersectedVertices).push_back(root->vertex_indices[i]);
-//        }
-        for(int i = 0; i<root->triNumber.size(); i++){
-          (*intersectedVertices).push_back(root->triNumber[i]);
-        }
-//        (*intersectedVertices) = root->triNumber;
-//        *intersectedVertices =root->vertex_indices;
-        return 1;
-    }
-    if(root->leftbox != nullptr){
-        leftret = AABBRayIntersection(root->leftbox,R,intersectedVertices,its,readonly);
-    }
-    if(root->rightbox != nullptr){
-        rightret = AABBRayIntersection(root->rightbox,R,intersectedVertices,its,readonly);
-    }
+	if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
+		for (int i = 0; i<root->triNumber.size(); i++) {
+			(*intersectedVertices).push_back(root->triNumber[i]);
+		}
+		//        (*intersectedVertices) = root->triNumber;
+		//        *intersectedVertices =root->vertex_indices;
+		return 1;
+	}
+	if (root->leftbox != nullptr) {
+		leftret = AABBRayIntersection(root->leftbox, R, intersectedVertices, its, readonly);
+	}
+	if (root->rightbox != nullptr) {
+		rightret = AABBRayIntersection(root->rightbox, R, intersectedVertices, its, readonly);
+	}
+    
     return leftret || rightret;
 }
 

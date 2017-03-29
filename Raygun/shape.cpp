@@ -141,19 +141,19 @@ color triangle::AmbientRayInterSection(Ray * ray){
     return Color*ambientCoeff;
 }
 color triangle::DiffuseColorCalc(Ray * ray){
-    normalDist = Vec3DotProduct(interpNormal,world::sunlightDirection);
-    
-    if(normalDist > 0){
-        return Color*diffuseCoeff*normalDist;
-    }
-    return Color*0.0f;
+    normalDist = fabs(Vec3DotProduct(interpNormal,world::sunlightDirection));
+    //
+    //if(normalDist > 0){
+    return Color*diffuseCoeff*normalDist;
+    //}
+    //return Color*0.0f;
     
 }
 color triangle::SpecularColorCalc(Ray * ray){
 
-    if(normalDist < 0){
-        return color(0,0,0);
-    }
+    //if(normalDist < 0){
+    //    return color(0,0,0);
+    //}
     reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNormal, 2.0f*Vec3DotProduct(interpNormal,world::sunlightDirection)), world::sunlightDirection);
     
     auto SpecRay = Vec3DotProduct(ray->GetDirection(),reflectionVector);
@@ -283,6 +283,7 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
     }
     size_t num_intersected_tris = intersectedTris.size();
     size_t objectIndex = 0;
+	size_t intersectedCoordsIndex = 0;
     float max_depth = INFINITY;
     std::vector<int> successState = std::vector<int>(num_intersected_tris);
 	int intersectionCount = -1;
@@ -295,6 +296,7 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
             if(interSectionCoordinates[intersectionCount].z < max_depth){
                 max_depth = interSectionCoordinates[intersectionCount].z;
                 objectIndex = j;
+				intersectedCoordsIndex = intersectionCount;
             }
         }
     }
@@ -304,15 +306,41 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
         outColor->changeBlue(0);
         return 0;
     }
-    //std::cout<<intersectedTris[objectIndex]<<"\n";
+	std::vector<unsigned int> intersectedShadowTris;
+	std::vector<vec3f> interSectionShadowCoordinates;
+	vec3f vectolight = Vec3ScalarMultiply(world::sunlightDirection, -1.0f);
+	NormaliseVector(&vectolight);
+    Ray shadowRay = Ray(interSectionCoordinates[intersectedCoordsIndex], vectolight);
+	bool shadowboxintersection = AABBRayIntersection(BVH, &shadowRay, &intersectedShadowTris, 0, 0);
+	int foundShadow = 0;
+
+	if(shadowboxintersection){
+		int shadowObjectIndex = 0;
+		int numShadowTris = intersectedShadowTris.size();
+		std::vector<int> successShadowState = std::vector<int>(numShadowTris);
+		int intersectionCount = -1;
+		for (int j = 0; j<numShadowTris; j++) {
+			successShadowState[j] = 1;
+			if (intersectedShadowTris[j] == intersectedTris[objectIndex]) {
+				continue;
+			}
+			auto shadow_t = tris[intersectedShadowTris[j]]->calculateInterSectionProduct(&shadowRay, &successShadowState[j]);
+			if (successShadowState[j] == 1) {
+				foundShadow = 1;
+				break;
+			}
+		}
+	}
+	if (foundShadow) {
+		*outColor = color(0, 0, 0);
+		return 1;
+	}
+
 	tris[intersectedTris[objectIndex]]->computeBarycentrics(ray);
     color ambientColor = tris[intersectedTris[objectIndex]]->AmbientRayInterSection(ray);
     color diffuseColor = tris[intersectedTris[objectIndex]]->DiffuseColorCalc(ray);
-    //color diffuseColor = color(0,0,0);
     color specColor = tris[intersectedTris[objectIndex]]->SpecularColorCalc(ray);
-//    outColor->changeRed(ambientColor.Red() + diffuseColor.Red() + specColor.Red());
-//    outColor->changeGreen(ambientColor.Green() + diffuseColor.Green() + specColor.Green());
-//    outColor->changeBlue(ambientColor.Blue() + diffuseColor.Blue() + specColor.Blue());
+
     *outColor = ambientColor + diffuseColor + specColor;
 
     return 1;
