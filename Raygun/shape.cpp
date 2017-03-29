@@ -285,15 +285,15 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
     size_t objectIndex = 0;
     float max_depth = INFINITY;
     std::vector<int> successState = std::vector<int>(num_intersected_tris);
+	int intersectionCount = -1;
     for(int j = 0; j<num_intersected_tris; j++){
-        int intersectionCount = -1;
         successState[j] = 1;
         auto t = tris[intersectedTris[j]]->calculateInterSectionProduct(ray,&successState[j]);
         if(successState[j] == 1){
             interSectionCoordinates.push_back(Vec3Add(ray->GetStartPos(),Vec3ScalarMultiply(ray->GetDirection(),t)));
             intersectionCount++;
-            if(interSectionCoordinates[intersectionCount].z*interSectionCoordinates[intersectionCount].z < max_depth){
-                max_depth = interSectionCoordinates[intersectionCount].z*interSectionCoordinates[intersectionCount].z;
+            if(interSectionCoordinates[intersectionCount].z < max_depth){
+                max_depth = interSectionCoordinates[intersectionCount].z;
                 objectIndex = j;
             }
         }

@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) {
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
-   std::string objectstring = "/Users/Owen/Dropbox/donut_smooth.obj";
-    //std::string objectstring = "C:/Dropbox/Dropbox/bender.obj";
+   //std::string objectstring = "/Users/Owen/Dropbox/donut_smooth.obj";
+    std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/suzzane_dense.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
    // std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.01f);
 	//float jitter;
     int AAFactor = 2;
-    int AA_status = 1;
+    int AA_status = 0;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
