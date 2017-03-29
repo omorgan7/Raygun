@@ -80,7 +80,8 @@ int main(int argc, char* argv[]) {
 	std::default_random_engine e1(r());
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.01f);
 	//float jitter;
-    int AAFactor = 16;
+    int AAFactor = 2;
+    int AA_status = 1;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
@@ -89,22 +90,31 @@ int main(int argc, char* argv[]) {
         for (auto j =0; j<3; j++){
             direction.coords[j] = L_vector[j] - eye_u[j] * image_x*(pixel_width / (float)width) + eye_v[j] * image_y*(pixel_height / (float)height);// +
         }
-//		if (image_x == 918 && image_y == 534) {
-//			std::cout << "";
-//		}
+		if (image_x == 934 && image_y == 732) {
+			std::cout << "";
+		}
        // direction = Vec3Sub(direction, eyevec);
         color outColor;
-        for(int j = 0; j<AAFactor; j++){
-            vec3f noisevec {uniform_dist(e1),uniform_dist(e1),uniform_dist(e1)};
-            vec3f jitteredDirection = Vec3Add(noisevec, direction);
-            jitteredDirection = Vec3Sub(jitteredDirection,eyevec);
-            NormaliseVector(&jitteredDirection);
-            Ray R = Ray(eyevec,jitteredDirection);
-
-            color tempColor;
-            mesh.RayIntersection(&R,&tempColor);
-            outColor += tempColor*(1.0f/((float)AAFactor));
+        if(AA_status){
+            for(int j = 0; j<AAFactor; j++){
+                vec3f noisevec {uniform_dist(e1),uniform_dist(e1),uniform_dist(e1)};
+                vec3f jitteredDirection = Vec3Add(noisevec, direction);
+                jitteredDirection = Vec3Sub(jitteredDirection,eyevec);
+                NormaliseVector(&jitteredDirection);
+                Ray R = Ray(eyevec,jitteredDirection);
+                
+                color tempColor;
+                mesh.RayIntersection(&R,&tempColor);
+                outColor += tempColor*(1.0f/((float)AAFactor));
+            }
         }
+        else{
+            direction = Vec3Sub(direction, eyevec);
+            NormaliseVector(&direction);
+            Ray R = Ray(eyevec,direction);
+            mesh.RayIntersection(&R,&outColor);
+        }
+
         image[i] = outColor.Red();
         image[i+1] = outColor.Green();
         image[i+2]= outColor.Blue();

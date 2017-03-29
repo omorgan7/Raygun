@@ -83,13 +83,14 @@ private:
     //std::vector<float> vertex_0, vertex_1, vertex_2;
     vec3f vertices[3];
     vec3f normals[3];
-    vec3f triangleNormal,edgeA,edgeB, barycentrics,rayintersectioncoords;
+    vec3f triangleNormal,interpNormal,edgeA,edgeB, barycentrics,rayintersectioncoords;
     //float barycentricDivisor;
     void ComputeNormal(void);
     //void flipNormal(void);
     float normalDist;
     vec3f reflectionVector;
     AABB tribox;
+    
     
 };
 
