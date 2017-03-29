@@ -102,6 +102,7 @@ class Mesh{
             std::vector<std::vector<float> > * v_norms, 
             std::vector<unsigned int> * v_norm_indices);
         ~Mesh();
+        void translateBy(vec3f translate);
         bool RayIntersection(Ray * ray, color * outColor);
     private:
         size_t num_tris;

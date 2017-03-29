@@ -40,7 +40,7 @@
 		5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bitmap.cpp; sourceTree = "<group>"; };
 		5A92340C1E82E1BE006FF027 /* raytrace.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = raytrace.bmp; path = "../../../../Library/Developer/Xcode/DerivedData/Raygun-hdpduejgbxvwwzhjaapakihvzbpx/Build/Products/Debug/raytrace.bmp"; sourceTree = "<group>"; };
 		5A9656C21E546F9E005A8D95 /* Raygun */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Raygun; sourceTree = BUILT_PRODUCTS_DIR; };
-		5A9656C51E546F9E005A8D95 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		5A9656C51E546F9E005A8D95 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = main.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		5A9DFB361E772D8300BA3B30 /* aabb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = aabb.hpp; sourceTree = "<group>"; };
 		5A9DFB371E772D8300BA3B30 /* aabb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aabb.cpp; sourceTree = "<group>"; };
 		5AAE57E31E5E071F00A562A8 /* raymath.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = raymath.hpp; sourceTree = "<group>"; };

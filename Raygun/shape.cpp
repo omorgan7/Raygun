@@ -208,7 +208,7 @@ void triangle::computeBarycentrics(Ray * ray){
     barycentrics.x = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(ray->GetDirection(), edgeB), Vec3Sub(ray->GetStartPos(),vertices[0]));
     barycentrics.y = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(Vec3Sub(ray->GetStartPos(),vertices[0]), edgeA), ray->GetDirection());
     barycentrics.z = 1.0f - barycentrics.x - barycentrics.y;
-    interpNormal = Vec3Add(Vec3ScalarMultiply(normals[0], barycentrics.x), Vec3Add(Vec3ScalarMultiply(normals[1], barycentrics.y), Vec3ScalarMultiply(normals[2], barycentrics.z)));
+    interpNormal = Vec3Add(Vec3ScalarMultiply(normals[1], barycentrics.x), Vec3Add(Vec3ScalarMultiply(normals[2], barycentrics.y), Vec3ScalarMultiply(normals[0], barycentrics.z)));
     NormaliseVector(&interpNormal);
 }
 
@@ -290,11 +290,11 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
         successState[j] = 1;
         auto t = tris[intersectedTris[j]]->calculateInterSectionProduct(ray,&successState[j]);
         if(successState[j] == 1){
-            interSectionCoordinates.push_back(Vec3ScalarMultiply(ray->GetDirection(),t));
+            interSectionCoordinates.push_back(Vec3Add(ray->GetStartPos(),Vec3ScalarMultiply(ray->GetDirection(),t)));
             intersectionCount++;
             if(interSectionCoordinates[intersectionCount].z*interSectionCoordinates[intersectionCount].z < max_depth){
                 max_depth = interSectionCoordinates[intersectionCount].z*interSectionCoordinates[intersectionCount].z;
-                objectIndex = intersectionCount;
+                objectIndex = j;
             }
         }
     }
