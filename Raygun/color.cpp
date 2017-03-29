@@ -19,13 +19,13 @@ color::color(unsigned char r, unsigned char g, unsigned char b){
     green = g;
     blue = b;
 }
-unsigned char color::Red(void){
+unsigned char color::Red(void) const {
     return red;
 }
-unsigned char color::Green(void){
+unsigned char color::Green(void) const {
     return green;
 }
-unsigned char color::Blue(void){
+unsigned char color::Blue(void) const {
     return blue;
 }
 
@@ -39,77 +39,103 @@ void color::changeBlue(unsigned char B){
     blue = B;
 }
 
-color color::operator+(color &c){
+color color::operator+(const color &c){
     unsigned char newRed, newGreen, newBlue;
-    if(((int) red + (int) c.Red())>255){
+    if(((int) this->Red() +  (int)c.Red()) > 255){
         newRed = 255;
     }
     else{
-        newRed = red + c.Red();
+        newRed = this->Red() + c.Red();
     }
-    if(((int) green + (int) c.Green())>255){
+    if(((int) this->Green() + (int) c.Green())>255){
         newGreen = 255;
     }
     else{
-        newGreen = green + c.Green();
+        newGreen = this->Green() + c.Green();
     }
-    if(((int) blue + (int) c.Blue())>255){
+    if(((int) this->Blue() + (int) c.Blue())>255){
         newBlue = 255;
     }
     else{
-        newBlue = blue + c.Blue();
+        newBlue = this->Blue() + c.Blue();
     }
     return color(newRed,newGreen,newBlue);
 }
-color color::operator=(color &c){
-    return color(c.Red(),c.Green(),c.Blue());
+color color::operator+=(const color &c){
+    if(((int) this->Red() + (int) c.Red())>255){
+        this->changeRed(255);
+    }
+    else{
+        this->changeRed(this->Red() + c.Red());
+    }
+    if(((int) this->Green() + (int) c.Green())>255){
+        this->changeGreen(255);
+    }
+    else{
+        this->changeGreen(this->Green() + c.Green());
+    }
+    if(((int) this->Blue() + (int) c.Blue())>255){
+        this->changeBlue(255);
+    }
+    else{
+        this->changeBlue(this->Blue() + c.Blue());
+    }
+    return *this;
 }
-color color::operator-(color &c){
+color& color::operator=(const color &c){
+    if(this != &c){
+        this->changeRed(c.Red());
+        this->changeGreen(c.Green());
+        this->changeBlue(c.Blue());
+    }
+    return *this;
+}
+color color::operator-(const color &c){
     unsigned char newRed, newGreen, newBlue;
-    if(((int) red - (int) c.Red())<0){
+    if(((int) this->Red() - (int) c.Red())<0){
         newRed = 0;
     }
     else{
-        newRed = red - c.Red();
+        newRed = this->Red() - c.Red();
     }
-    if(((int) green - (int) c.Green())<0){
+    if(((int) this->Green() - (int) c.Green())<0){
         newGreen = 0;
     }
     else{
-        newGreen = green - c.Green();
+        newGreen = this->Green() - c.Green();
     }
-    if(((int) blue - (int) c.Blue())<0){
+    if(((int) this->Blue() - (int) c.Blue())<0){
         newBlue = 0;
     }
     else{
-        newBlue = blue - c.Blue();
+        newBlue = this->Blue() - c.Blue();
     }
     return color(newRed,newGreen,newBlue);
 }
-color color::operator*(float f){
+color color::operator*(const float f){
     unsigned char newRed, newGreen, newBlue;
-    if((float) red*f > 255){
+    if((float) red*f > 255.0f){
         newRed = 255;
     }
-    else if((float) red*f < 0){
+    else if((float) red*f < 0.0f){
         newRed = 0;
     }
     else{
         newRed = (unsigned char) ((float) red)*f;
     }
-    if((float) green*f > 255){
+    if((float) green*f > 255.0f){
         newGreen = 255;
     }
-    else if((float) green*f < 0){
+    else if((float) green*f < 0.0f){
         newGreen = 0;
     }
     else{
         newGreen = (unsigned char) ((float) green)*f;
     }
-    if((float) blue*f > 255){
+    if((float) blue*f > 255.0f){
         newBlue = 255;
     }
-    else if((float) blue*f < 0){
+    else if((float) blue*f < 0.0f){
         newBlue = 0;
     }
     else{
@@ -117,9 +143,9 @@ color color::operator*(float f){
     }
     return color(newRed,newGreen,newBlue);
 }
-bool color::operator==(color& c){
+bool color::operator==(const color& c){
     return (c.Red() == red)&&(c.Green() == green)&&(c.Blue() == blue);
 }
-bool color::operator!=(color& c){
+bool color::operator!=(const color& c){
     return !((c.Red() == red)&&(c.Green() == green)&&(c.Blue() == blue));
 }

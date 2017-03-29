@@ -16,19 +16,20 @@ class color{
 public:
     color();
     color(unsigned char r, unsigned char g, unsigned char b);
-    unsigned char Red(void);
-    unsigned char Green(void);
-    unsigned char Blue(void);
+    unsigned char Red(void) const;
+    unsigned char Green(void) const;
+    unsigned char Blue(void) const;
     void changeRed(unsigned char R);
     void changeGreen(unsigned char G);
     void changeBlue(unsigned char B);
     //operators
-    color operator+(color& c);
-    color operator*(float f);
-    color operator-(color& c);
-    color operator=(color &c);
-    bool operator==(color& c);
-    bool operator!=(color& c);
+    color operator+(const color& c);
+    color operator+=(const color& c);
+    color operator*(const float f);
+    color operator-(const color& c);
+    color& operator=(const color &c);
+    bool operator==(const color& c);
+    bool operator!=(const color& c);
 private:
     unsigned char red;
     unsigned char green;
