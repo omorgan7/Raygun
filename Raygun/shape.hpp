@@ -78,6 +78,7 @@ public:
     float calculateInterSectionProduct(Ray * ray, int * success);
     void inputIntersectionCoords(vec3f &coords);
 	void computeBarycentrics(Ray * ray);
+    void translateTri(vec3f translate);
     
 private:
     //std::vector<float> vertex_0, vertex_1, vertex_2;
@@ -102,7 +103,7 @@ class Mesh{
             std::vector<std::vector<float> > * v_norms, 
             std::vector<unsigned int> * v_norm_indices);
         ~Mesh();
-        void translateBy(vec3f translate);
+        void translate(vec3f translate);
         bool RayIntersection(Ray * ray, color * outColor);
     private:
         size_t num_tris;

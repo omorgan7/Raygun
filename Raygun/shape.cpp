@@ -118,9 +118,9 @@ triangle::triangle(
     }
     edgeA = Vec3Sub(vertices[1],vertices[0]);
     edgeB = Vec3Sub(vertices[2],vertices[0]);
-    ambientCoeff=0.3;
-    diffuseCoeff = 0.6;
-    specularCoeff = 0.8;
+    ambientCoeff=0.1;
+    diffuseCoeff = 0.45;
+    specularCoeff = 0.45;
     Color.changeRed(255);
     Color.changeBlue(255);
     ComputeNormal();
@@ -136,6 +136,12 @@ triangle::triangle(
 //    SetVertexCoord(vertex,vertex_index);
 //    ComputeNormal();
 //}
+
+void triangle::translateTri(vec3f translate){
+    for(int i =0; i<3; i++){
+        vertices[i] = {vertices[i].x+translate.x,vertices[i].y+translate.y,vertices[i].z+translate.z};
+    }
+}
 
 color triangle::AmbientRayInterSection(Ray * ray){
     return Color*ambientCoeff;
@@ -315,16 +321,14 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
 	int foundShadow = 0;
 
 	if(shadowboxintersection){
-		int shadowObjectIndex = 0;
-		int numShadowTris = intersectedShadowTris.size();
+		size_t numShadowTris = intersectedShadowTris.size();
 		std::vector<int> successShadowState = std::vector<int>(numShadowTris);
-		int intersectionCount = -1;
 		for (int j = 0; j<numShadowTris; j++) {
 			successShadowState[j] = 1;
 			if (intersectedShadowTris[j] == intersectedTris[objectIndex]) {
 				continue;
 			}
-			auto shadow_t = tris[intersectedShadowTris[j]]->calculateInterSectionProduct(&shadowRay, &successShadowState[j]);
+			tris[intersectedShadowTris[j]]->calculateInterSectionProduct(&shadowRay, &successShadowState[j]);
 			if (successShadowState[j] == 1) {
 				foundShadow = 1;
 				break;
@@ -345,4 +349,10 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
 
     return 1;
 
+}
+
+void Mesh::translate(vec3f translate){
+    for(size_t i = 0; i<num_tris; i++){
+        tris[i]->translateTri(translate);
+    }
 };

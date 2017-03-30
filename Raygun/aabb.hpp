@@ -43,6 +43,8 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
 
 void cleanupAABBTree(AABB * root);
 
+void translateAABBcorners(AABB * root,vec3f * translate);
+
 void quicksort(int * A, int low, int high, int axis,std::vector<std::vector<float> > *vertices);
 
 template <typename Ta,typename Tb>
