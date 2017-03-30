@@ -237,37 +237,12 @@ Mesh::Mesh(
     num_tris = v_indices->size()/3;
     tris = new triangle* [num_tris];
     BVH = new AABB;
-    // vec3<unsigned int> v_i;
-    // vec3<unsigned int> v_n;
     for(size_t i = 0; i<num_tris; i++){
         unsigned int v_i[] = {(*v_indices)[3*i],(*v_indices)[3*i+1],(*v_indices)[3*i+2]};
         unsigned int v_n[] = {(*v_norm_indices)[3*i],(*v_norm_indices)[3*i+1],(*v_norm_indices)[3*i+2]};
         //unsigned int v_n[3] = {};
         tris[i] = new triangle(v,v_i,v_norms,v_n);
     }
-
-    BVH->vertex_indices = *v_indices;
-    Mesh_Stats xyz;
-    getminmaxmed(BVH,v, &xyz);
-    for(int i = 0; i<3; i++){
-        BVH->min.coords[i] = xyz.min.coords[i];
-        BVH->max.coords[i] = xyz.max.coords[i];
-    };
-    
-    BVH->triNumber = std::vector<unsigned int>(num_tris);
-    std::iota(BVH->triNumber.begin(),BVH->triNumber.end(),0);
-    std::vector<std::vector<float> > medians = std::vector<std::vector<float> >(num_tris);
-    for(int i =0; i<num_tris; i++){
-        medians[i] = std::vector<float>(3);
-        for(int j = 0; j<3; j++){
-            medians[i][j] = (*v)[(*v_indices)[3*i]][j] + (*v)[(*v_indices)[3*i+1]][j] + (*v)[(*v_indices)[3*i+2]][j];
-            medians[i][j] /= 3.0f;
-        }
-    }
-
-    int depth = buildAABBTree(BVH, v, v_indices, &medians,0);
-    std::cout<<"aabb tree depth = "<<depth<<"\n";
-
 
 }
 Mesh::~Mesh(){
@@ -277,19 +252,43 @@ Mesh::~Mesh(){
     delete[] tris;
     cleanupAABBTree(BVH);
 }
+
+void Mesh::computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices) {
+	BVH->vertex_indices = *v_indices;
+	Mesh_Stats xyz;
+	getminmaxmed(BVH, v, &xyz);
+	for (int i = 0; i<3; i++) {
+		BVH->min.coords[i] = xyz.min.coords[i];
+		BVH->max.coords[i] = xyz.max.coords[i];
+	};
+
+	BVH->triNumber = std::vector<unsigned int>(num_tris);
+	std::iota(BVH->triNumber.begin(), BVH->triNumber.end(), 0);
+	std::vector<std::vector<float> > medians = std::vector<std::vector<float> >(num_tris);
+	for (int i = 0; i<num_tris; i++) {
+		medians[i] = std::vector<float>(3);
+		for (int j = 0; j<3; j++) {
+			medians[i][j] = (*v)[(*v_indices)[3 * i]][j] + (*v)[(*v_indices)[3 * i + 1]][j] + (*v)[(*v_indices)[3 * i + 2]][j];
+			medians[i][j] /= 3.0f;
+		}
+	}
+
+	int depth = buildAABBTree(BVH, v, v_indices, &medians, 0);
+	std::cout << "aabb tree depth = " << depth << "\n";
+}
+
 bool Mesh::RayIntersection(Ray * ray, color * outColor){
     std::vector<unsigned int> intersectedTris;
     std::vector<vec3f> interSectionCoordinates;
     bool intersection = AABBRayIntersection(BVH, ray, &intersectedTris,0,0);
     if(intersection == 0){
-        outColor->changeRed(0);
-        outColor->changeGreen(0);
-        outColor->changeBlue(0);
+		*outColor = color(0, 0, 0);
         return 0;
     }
+	objectIndex = 0;
+	intersectedCoordsIndex = 0;
+
     size_t num_intersected_tris = intersectedTris.size();
-    size_t objectIndex = 0;
-	size_t intersectedCoordsIndex = 0;
     float max_depth = INFINITY;
     std::vector<int> successState = std::vector<int>(num_intersected_tris);
 	int intersectionCount = -1;
@@ -307,34 +306,33 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
         }
     }
     if(max_depth == INFINITY){//nothing intersected
-        outColor->changeRed(0);
-        outColor->changeGreen(0);
-        outColor->changeBlue(0);
+		*outColor = color(0, 0, 0);
         return 0;
     }
-	std::vector<unsigned int> intersectedShadowTris;
-	std::vector<vec3f> interSectionShadowCoordinates;
-	vec3f vectolight = Vec3ScalarMultiply(world::sunlightDirection, -1.0f);
-	NormaliseVector(&vectolight);
-    Ray shadowRay = Ray(interSectionCoordinates[intersectedCoordsIndex], vectolight);
-	bool shadowboxintersection = AABBRayIntersection(BVH, &shadowRay, &intersectedShadowTris, 0, 0);
-	int foundShadow = 0;
-
-	if(shadowboxintersection){
-		size_t numShadowTris = intersectedShadowTris.size();
-		std::vector<int> successShadowState = std::vector<int>(numShadowTris);
-		for (int j = 0; j<numShadowTris; j++) {
-			successShadowState[j] = 1;
-			if (intersectedShadowTris[j] == intersectedTris[objectIndex]) {
-				continue;
-			}
-			tris[intersectedShadowTris[j]]->calculateInterSectionProduct(&shadowRay, &successShadowState[j]);
-			if (successShadowState[j] == 1) {
-				foundShadow = 1;
-				break;
-			}
-		}
-	}
+	bool foundShadow = ShadowRayIntersection(&interSectionCoordinates, &intersectedTris);
+	//int foundShadow = 0;
+	//std::vector<unsigned int> intersectedShadowTris;
+	//std::vector<vec3f> interSectionShadowCoordinates;
+	//vec3f vectolight = Vec3ScalarMultiply(world::sunlightDirection, -1.0f);
+	//NormaliseVector(&vectolight);
+	//Ray shadowRay = Ray(interSectionCoordinates[intersectedCoordsIndex], vectolight);
+	//bool shadowboxintersection = AABBRayIntersection(BVH, &shadowRay, &intersectedShadowTris, 0, 0);
+	//if (shadowboxintersection == 0) {
+	//	return 0;
+	//}
+	//size_t numShadowTris = intersectedShadowTris.size();
+	//std::vector<int> successShadowState = std::vector<int>(numShadowTris);
+	//for (int j = 0; j<numShadowTris; j++) {
+	//	successShadowState[j] = 1;
+	//	if (intersectedShadowTris[j] == intersectedTris[objectIndex]) {
+	//		continue;
+	//	}
+	//	tris[intersectedShadowTris[j]]->calculateInterSectionProduct(&shadowRay, &successShadowState[j]);
+	//	if (successShadowState[j] == 1) {
+	//		foundShadow = 1;
+	//		break;
+	//	}
+	//}
 	if (foundShadow) {
 		*outColor = color(0, 0, 0);
 		return 1;
@@ -349,6 +347,31 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
 
     return 1;
 
+}
+
+bool Mesh::ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<size_t> * intersectedTris){
+	std::vector<unsigned int> intersectedShadowTris;
+	std::vector<vec3f> interSectionShadowCoordinates;
+	vec3f vectolight = Vec3ScalarMultiply(world::sunlightDirection, -1.0f);
+	NormaliseVector(&vectolight);
+	Ray shadowRay = Ray((*interSectionCoordinates)[intersectedCoordsIndex], vectolight);
+	bool shadowboxintersection = AABBRayIntersection(BVH, &shadowRay, &intersectedShadowTris, 0, 0);
+	if (shadowboxintersection == 0) {
+		return 0;
+	}
+	size_t numShadowTris = intersectedShadowTris.size();
+	std::vector<int> successShadowState = std::vector<int>(numShadowTris);
+	for (int j = 0; j<numShadowTris; j++) {
+		successShadowState[j] = 1;
+		if (intersectedShadowTris[j] == (*intersectedTris)[objectIndex]) {
+			continue;
+		}
+		tris[intersectedShadowTris[j]]->calculateInterSectionProduct(&shadowRay, &successShadowState[j]);
+		if (successShadowState[j] == 1) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 void Mesh::translate(vec3f translate){

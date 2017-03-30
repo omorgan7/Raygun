@@ -35,10 +35,10 @@ int main(int argc, char* argv[]) {
     unsigned char *image = new unsigned char[width*height*3];
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
-    std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
+    //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
    //std::string objectstring = "/Users/Owen/Dropbox/donut_smooth.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
-	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
+	std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
    // std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
     
@@ -64,6 +64,7 @@ int main(int argc, char* argv[]) {
     
     NormaliseVector(&world::sunlightDirection);
     Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices);
+	mesh.computeBVH(&vertices, &vertex_indices);
 
     std::vector<float> eye_v;
     std::vector<float> eye_u;

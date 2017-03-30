@@ -105,10 +105,14 @@ class Mesh{
         ~Mesh();
         void translate(vec3f translate);
         bool RayIntersection(Ray * ray, color * outColor);
+		void computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices);
     private:
+		bool ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<size_t> * intersectedTris);
         size_t num_tris;
         triangle ** tris;
         AABB * BVH;
+		size_t objectIndex = 0;
+		size_t intersectedCoordsIndex = 0;
 };
 
 #endif /* shape_hpp */
