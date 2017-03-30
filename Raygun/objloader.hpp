@@ -26,7 +26,7 @@ class ObjectLoader {
 		bool loadIndices(std::vector<unsigned int> & out_vertex_indices, std::vector<unsigned int> & out_norm_indices, std::vector<unsigned int> &out_texture_indices);
 		bool loadNormals(std::vector<std::vector<float> > & out_vertex_norms);
 		bool loadUVs(std::vector < std::vector <float> > &out_uv_textures);
-		bool loadTextureImage(const char* image_path, unsigned char ** out_image);
+		bool loadTextureImage(const char* image_path, unsigned char ** out_image, int* imwidth, int * imheight);
 	private:
 		FILE * file;
 		enum Mesh_Types{VERTEX_ONLY,NORMALS,UVs,UNKNOWN_FORMAT};

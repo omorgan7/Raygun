@@ -104,7 +104,10 @@ triangle::triangle(
         std::vector<std::vector<float> > * input_vertices, 
         unsigned int * indices, 
         std::vector<std::vector<float> > * input_norms, 
-        unsigned int * norm_indices){
+        unsigned int * norm_indices,
+		std::vector<std::vector<float> > * input_UVs,
+		unsigned int * UV_indices
+	){
 
     // vertex_0 = (*vertices)[v0];
     // vertex_1 = (*vertices)[v1];
@@ -112,7 +115,12 @@ triangle::triangle(
     for(int i=0; i<3; i++){
         for(int j=0; j<3; j++){
             vertices[i].coords[j] = (*input_vertices)[indices[i]][j];
-            normals[i].coords[j] = (*input_norms)[norm_indices[i]][j];
+			if (input_norms != nullptr) {
+				normals[i].coords[j] = (*input_norms)[norm_indices[i]][j];
+			}
+			if (input_UVs != nullptr && j!=2) {
+				UVs[i].coords[j] = (*input_UVs)[UV_indices[i]][j];
+			}
         }
         tribox.vertex_indices.push_back(indices[i]);
     }
@@ -232,18 +240,40 @@ Mesh::Mesh(
     std::vector<std::vector<float> > * v, 
     std::vector<unsigned int> * v_indices, 
     std::vector<std::vector<float> > * v_norms, 
-    std::vector<unsigned int> * v_norm_indices){
+    std::vector<unsigned int> * v_norm_indices,
+	std::vector<std::vector<float> > * uvs,
+	std::vector<unsigned int> * uv_indices,
+	unsigned char * textureImage){
     
     num_tris = v_indices->size()/3;
     tris = new triangle* [num_tris];
     BVH = new AABB;
     for(size_t i = 0; i<num_tris; i++){
         unsigned int v_i[] = {(*v_indices)[3*i],(*v_indices)[3*i+1],(*v_indices)[3*i+2]};
-        unsigned int v_n[] = {(*v_norm_indices)[3*i],(*v_norm_indices)[3*i+1],(*v_norm_indices)[3*i+2]};
-        //unsigned int v_n[3] = {};
-        tris[i] = new triangle(v,v_i,v_norms,v_n);
+		unsigned int v_n[3], v_uv[3];
+		if (v_norms != nullptr) {
+			for (int j = 0; j < 3; j++) {
+				v_n[j] = (*v_norm_indices)[3 * i+j];
+			}
+		}
+		if (uvs != nullptr) {
+			for (int j = 0; j < 3; j++) {
+				v_uv[j] = (*uv_indices)[3 * i + j];
+			}
+			
+		}
+		if (v_norms == nullptr || uvs == nullptr) {
+			if (v_norms != nullptr) {
+				tris[i] = new triangle(v, v_i, v_norms, v_n, nullptr, nullptr);
+			}
+			else {
+				tris[i] = new triangle(v, v_i, nullptr,nullptr, nullptr, nullptr);
+			}
+		}
+		else {
+			tris[i] = new triangle(v, &v_i[0], v_norms, &v_n[0], uvs, &v_uv[0]);
+		}
     }
-
 }
 Mesh::~Mesh(){
     for(size_t i = 0; i<num_tris; i++){
@@ -310,29 +340,6 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
         return 0;
     }
 	bool foundShadow = ShadowRayIntersection(&interSectionCoordinates, &intersectedTris);
-	//int foundShadow = 0;
-	//std::vector<unsigned int> intersectedShadowTris;
-	//std::vector<vec3f> interSectionShadowCoordinates;
-	//vec3f vectolight = Vec3ScalarMultiply(world::sunlightDirection, -1.0f);
-	//NormaliseVector(&vectolight);
-	//Ray shadowRay = Ray(interSectionCoordinates[intersectedCoordsIndex], vectolight);
-	//bool shadowboxintersection = AABBRayIntersection(BVH, &shadowRay, &intersectedShadowTris, 0, 0);
-	//if (shadowboxintersection == 0) {
-	//	return 0;
-	//}
-	//size_t numShadowTris = intersectedShadowTris.size();
-	//std::vector<int> successShadowState = std::vector<int>(numShadowTris);
-	//for (int j = 0; j<numShadowTris; j++) {
-	//	successShadowState[j] = 1;
-	//	if (intersectedShadowTris[j] == intersectedTris[objectIndex]) {
-	//		continue;
-	//	}
-	//	tris[intersectedShadowTris[j]]->calculateInterSectionProduct(&shadowRay, &successShadowState[j]);
-	//	if (successShadowState[j] == 1) {
-	//		foundShadow = 1;
-	//		break;
-	//	}
-	//}
 	if (foundShadow) {
 		*outColor = color(0, 0, 0);
 		return 1;

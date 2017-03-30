@@ -63,10 +63,12 @@ protected:
 class triangle : public object{
 public:
     triangle(
-        std::vector<std::vector<float> > * input_vertices, 
-        unsigned int * indices, 
-        std::vector<std::vector<float> > * input_norms, 
-        unsigned int * norm_indices);
+		std::vector<std::vector<float> > * input_vertices,
+		unsigned int * indices,
+		std::vector<std::vector<float> > * input_norms,
+		unsigned int * norm_indices,
+		std::vector<std::vector<float> > * input_UVs,
+		unsigned int * UV_indices);
 
     color GetColor(void);
     void SetColor(color C);
@@ -84,6 +86,7 @@ private:
     //std::vector<float> vertex_0, vertex_1, vertex_2;
     vec3f vertices[3];
     vec3f normals[3];
+	vec3f UVs[3];
     vec3f triangleNormal,interpNormal,edgeA,edgeB, barycentrics,rayintersectioncoords;
     //float barycentricDivisor;
     void ComputeNormal(void);
@@ -98,10 +101,13 @@ private:
 class Mesh{
     public:
         Mesh(
-            std::vector<std::vector<float> > * v, 
-            std::vector<unsigned int> * v_indices, 
-            std::vector<std::vector<float> > * v_norms, 
-            std::vector<unsigned int> * v_norm_indices);
+			std::vector<std::vector<float> > * v,
+			std::vector<unsigned int> * v_indices,
+			std::vector<std::vector<float> > * v_norms,
+			std::vector<unsigned int> * v_norm_indices,
+			std::vector<std::vector<float> > * uvs,
+			std::vector<unsigned int> * uv_indices,
+			unsigned char * textureImage);
         ~Mesh();
         void translate(vec3f translate);
         bool RayIntersection(Ray * ray, color * outColor);

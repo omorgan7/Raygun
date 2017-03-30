@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
    //std::string objectstring = "/Users/Owen/Dropbox/donut_smooth.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
-	std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
+	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
+	std::string objectstring = "H:/dos/C++/Raygun/Raygun/cube.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
    // std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
     
@@ -47,11 +48,22 @@ int main(int argc, char* argv[]) {
     std::vector<unsigned int> vertex_indices;
     std::vector<std::vector<float> > normals;
     std::vector<unsigned int> normal_indices;
-    int retval = loadSimpleOBJ(
+	std::vector<std::vector<float> > UVs;
+	std::vector<unsigned int> uv_indices;
+	ObjectLoader objl(objectstring.c_str());
+	objl.loadVertices(vertices);
+	objl.loadNormals(normals);
+	objl.loadUVs(UVs);
+	objl.loadIndices(vertex_indices, normal_indices, uv_indices);
+	unsigned char * textureImage = nullptr;
+	int textureWidth, textureHeight;
+	objl.loadTextureImage("texture.bmp", &textureImage,&textureWidth,&textureHeight);
+
+    /*int retval = loadSimpleOBJ(
                                 objectstring.c_str(),
                                 vertices,vertex_indices,
                                 normals,
-                                normal_indices);
+                                normal_indices);*/
     
 
     world::sunlightPosition.x = (float)width/2;
@@ -63,7 +75,7 @@ int main(int argc, char* argv[]) {
     world::sunlightDirection.z = 1;
     
     NormaliseVector(&world::sunlightDirection);
-    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices);
+    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices, &UVs,&uv_indices,textureImage);
 	mesh.computeBVH(&vertices, &vertex_indices);
 
     std::vector<float> eye_v;
@@ -141,5 +153,6 @@ int main(int argc, char* argv[]) {
     
     ofs.close();
     delete[] image;
+	delete[] textureImage;
     return 1;
 }

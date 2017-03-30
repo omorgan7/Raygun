@@ -298,7 +298,7 @@ bool ObjectLoader::loadIndices(std::vector<unsigned int> & out_vertex_indices, s
 	return 1;
 }
 
-bool ObjectLoader::loadTextureImage(const char* image_path, unsigned char ** out_image) {
+bool ObjectLoader::loadTextureImage(const char* image_path, unsigned char ** out_image, int* imwidth, int * imheight) {
 	if (meshretval == 0) {
 		return 0;
 	}
@@ -337,7 +337,8 @@ bool ObjectLoader::loadTextureImage(const char* image_path, unsigned char ** out
 			}
 		}
 	}
-
+	*imwidth = width;
+	*imheight = height;
 	delete[] data;
 	//*out_image = data;
 	
