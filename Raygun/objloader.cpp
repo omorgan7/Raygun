@@ -1,10 +1,3 @@
-#include <vector>
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include <cstring>
-
-
 #include "objloader.hpp"
 
 // Very, VERY simple OBJ loader.
@@ -234,6 +227,21 @@ bool ObjectLoader::loadUVs(std::vector < std::vector <float> > &out_uv_textures)
 		if (strcmp(lineHeader, "vt") == 0) {
 			std::vector<float> vertex(2);
 			fscanf(file, "%f %f \n", &vertex[0], &vertex[1]);
+            
+            //truncate the non-decimal part. This is to get tiling behaviour
+            //converts ±X.XXXXf -> ±0.XXXX
+            float tempInt;
+            float uFraction = std::modf(vertex[0],&tempInt);
+            float vFraction = std::modf(vertex[1],&tempInt);
+            if(uFraction < 0){
+                uFraction = 1+uFraction;
+            }
+            if(vFraction<0){
+                vFraction = 1+vFraction;
+            }
+            vertex[0] = uFraction;
+            //flip the v vexture part. this is due to image coordinates starting in top left where uv coordinates start bottom left.
+            vertex[1] = 1-vFraction;
 			out_uv_textures.push_back(vertex);
 		}
 		else {
@@ -261,24 +269,26 @@ bool ObjectLoader::loadIndices(std::vector<unsigned int> & out_vertex_indices, s
 		// else : parse lineHeader
 
 		if (strcmp(lineHeader, "f") == 0) {
-			unsigned int vertexIndex[3], normalIndex[3], textureIndex[3];
+            unsigned int vertexIndex[3];
 			switch (mt) {
 			case VERTEX_ONLY:
 				fscanf(file, "%d %d %d\n", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2]);
 				break;
 			case NORMALS:
+                unsigned int normalIndex[3];
 				fscanf(file, "%d//%d %d//%d %d//%d\n", &vertexIndex[0], &normalIndex[0], &vertexIndex[1], &normalIndex[1], &vertexIndex[2], &normalIndex[2]);
 				out_norm_indices.push_back(normalIndex[0] - 1);
 				out_norm_indices.push_back(normalIndex[1] - 1);
 				out_norm_indices.push_back(normalIndex[2] - 1);
 				break;
 			case UVs:
-				fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &textureIndex[0], &normalIndex[0],
-															&vertexIndex[1], &textureIndex[1], &normalIndex[1],
-															&vertexIndex[2], &textureIndex[2], &normalIndex[2]);
-				out_norm_indices.push_back(normalIndex[0] - 1);
-				out_norm_indices.push_back(normalIndex[1] - 1);
-				out_norm_indices.push_back(normalIndex[2] - 1);
+                unsigned int nIndex[3], textureIndex[3];
+				fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n",&vertexIndex[0], &textureIndex[0], &nIndex[0],
+															&vertexIndex[1], &textureIndex[1], &nIndex[1],
+															&vertexIndex[2], &textureIndex[2], &nIndex[2]);
+				out_norm_indices.push_back(nIndex[0] - 1);
+				out_norm_indices.push_back(nIndex[1] - 1);
+				out_norm_indices.push_back(nIndex[2] - 1);
 				out_texture_indices.push_back(textureIndex[0] - 1);
 				out_texture_indices.push_back(textureIndex[1] - 1);
 				out_texture_indices.push_back(textureIndex[2] - 1);
@@ -318,31 +328,47 @@ bool ObjectLoader::loadTextureImage(const char* image_path, unsigned char ** out
 	}
 
 	unsigned char bitmap_header[54];
-	fread(bitmap_header, sizeof(unsigned char), 54, image_fp);
+	int headerbytesread = fread(bitmap_header, sizeof(unsigned char), 54, image_fp);
+    if(headerbytesread != 54){
+        std::cerr<<"Warning! texture file header not read correctly, data corruption may occur.\n";
+    }
 	// extract image height and width from header
 	int width = *(int*)&bitmap_header[18];
 	int height = *(int*)&bitmap_header[22];
-	int size = 3 * width * height;
+    int heightSign = 1;
+    if(height < 0){
+        heightSign = -1;
+    }
+	int size = 3 * width * abs(height);
 	unsigned char* data = new unsigned char[size]; // allocate 3 bytes per pixel
 	size_t bytesread = fread(data, sizeof(unsigned char), size, image_fp); // read the rest of the data at once
 	if (bytesread != size) {
 			std::cerr << errno;
 	}
 	fclose(image_fp);
-	(*out_image) = new unsigned char[size];
-	for (auto i = 0; i <height; i++) {
-		for (auto j = 0; j < width; j++) {
-			for (auto k = 0; k < 3; k++) {
-				(*out_image)[i*width * 3 + k + j * 3] = data[2-k + j*3 - i*width*3 + width*(height-1)*3];
-			}
-		}
-	}
-	*imwidth = width;
-	*imheight = height;
-	delete[] data;
-	//*out_image = data;
-	
-	return 0;
+    *imwidth = width;
+    *imheight = abs(height);
+    
+    if(heightSign == 1){
+        (*out_image) = new unsigned char[size];
+        for (auto i = 0; i <height; i++) {
+            for (auto j = 0; j < width; j++) {
+                for (auto k = 0; k < 3; k++) {
+                    (*out_image)[i*width * 3 + k + j * 3] = data[2-k + j*3 - i*width*3 + width*(height-1)*3];
+                }
+            }
+        }
+        delete[] data;
+        return 1;
+    }
+    for(int i =0; i<size; i+=3){
+        unsigned char temp = data[i];
+        data[i] = data[i+2];
+        data[i+2] = temp;
+    }
+
+    *out_image = data;
+	return 1;
 }
 
 

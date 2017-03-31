@@ -2,6 +2,12 @@
 #define OBJLOADER_H
 
 #include <string>
+#include <vector>
+#include <stdio.h>
+#include <iostream>
+#include <string>
+#include <cmath>
+#include <cstring>
 
 class ObjectLoader {
 	public:
