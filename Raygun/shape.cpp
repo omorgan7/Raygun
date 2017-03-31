@@ -173,6 +173,8 @@ color triangle::GetColor(void){
     
     //pixel neighbourhood index calculation and sanitisation.
     int pixNBH[4];
+    
+    ///////////// THIS CODE IS BUGGY ///////////////
     pixNBH[0] = pixelU*texture->width * 3 + pixelV*3;
     if(pixNBH[0] == texture->width*texture->height*3 - 1){//at the bottom right corner.
         pixNBH[1] = 0;
@@ -199,7 +201,7 @@ color triangle::GetColor(void){
         horizColor2.coords[i] = (float) pixColors[2].coords[i] * fracPixelU + (float) pixColors[3].coords[i] * (1.0f-fracPixelU);
         finalColor.coords[i] = horizColor1.coords[i]*fracPixelV + horizColor2.coords[i]*(1-fracPixelV);
     }
-    
+    /////////////////////////////////////////////////
     return color(finalColor.x,finalColor.y,finalColor.z);
     
 
