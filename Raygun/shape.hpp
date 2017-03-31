@@ -18,7 +18,11 @@
 #ifndef shape_hpp
 #define shape_hpp
 
-
+struct textureImage{
+    unsigned char * imageData = nullptr;
+    int width;
+    int height;
+};
 
 class object{
 public:
@@ -30,7 +34,7 @@ public:
     virtual float calculateInterSectionProduct(Ray * ray, int * success) =0;
     //virtual void inputIntersectionCoords(std::vector<float> &coords)= 0;
 protected:
-    color Color = color(0,0,0);
+    color Color = color();
     float ambientCoeff, diffuseCoeff, specularCoeff, reflectCoeff;
 };
 
@@ -81,6 +85,9 @@ public:
     void inputIntersectionCoords(vec3f &coords);
 	void computeBarycentrics(Ray * ray);
     void translateTri(vec3f translate);
+    inline void setImageTexture(textureImage * imTexture ){
+        texture = imTexture;
+    }
     
 private:
     //std::vector<float> vertex_0, vertex_1, vertex_2;
@@ -94,6 +101,7 @@ private:
     float normalDist;
     vec3f reflectionVector;
     AABB tribox;
+    textureImage * texture = nullptr;
     
     
 };
@@ -107,13 +115,13 @@ class Mesh{
 			std::vector<unsigned int> * v_norm_indices,
 			std::vector<std::vector<float> > * uvs,
 			std::vector<unsigned int> * uv_indices,
-			unsigned char * textureImage);
+			textureImage * texture);
         ~Mesh();
         void translate(vec3f translate);
         bool RayIntersection(Ray * ray, color * outColor);
 		void computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices);
     private:
-		bool ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<size_t> * intersectedTris);
+		bool ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<unsigned int> * intersectedTris);
         size_t num_tris;
         triangle ** tris;
         AABB * BVH;

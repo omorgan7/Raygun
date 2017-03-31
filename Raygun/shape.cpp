@@ -118,8 +118,13 @@ triangle::triangle(
 			if (input_norms != nullptr) {
 				normals[i].coords[j] = (*input_norms)[norm_indices[i]][j];
 			}
-			if (input_UVs != nullptr && j!=2) {
-				UVs[i].coords[j] = (*input_UVs)[UV_indices[i]][j];
+			if (input_UVs != nullptr) {
+                if(j==2){
+                    UVs[i].coords[j] = 0.0f;
+                }
+                else{
+                    UVs[i].coords[j] = (*input_UVs)[UV_indices[i]][j];
+                }
 			}
         }
         tribox.vertex_indices.push_back(indices[i]);
@@ -127,8 +132,8 @@ triangle::triangle(
     edgeA = Vec3Sub(vertices[1],vertices[0]);
     edgeB = Vec3Sub(vertices[2],vertices[0]);
     ambientCoeff=0.1;
-    diffuseCoeff = 0.45;
-    specularCoeff = 0.45;
+    diffuseCoeff = 0.8;
+    specularCoeff = 0.8;
     Color.changeRed(255);
     Color.changeBlue(255);
     ComputeNormal();
@@ -151,16 +156,67 @@ void triangle::translateTri(vec3f translate){
     }
 }
 
+color triangle::GetColor(void){
+    if(texture == nullptr){
+       return Color;
+    }
+    // assumption: barycentrics computed before this funciton is called.
+    vec3<unsigned char> pixColors[4];
+    vec3f interpUV = Vec3Add(Vec3ScalarMultiply(UVs[1], barycentrics.x), Vec3Add(Vec3ScalarMultiply(UVs[2], barycentrics.y), Vec3ScalarMultiply(UVs[0], barycentrics.z)));
+    interpUV = {interpUV.x * texture->width, interpUV.y * texture->height,0};
+    
+    float wholePixelU,fracPixelU,wholePixelV,fracPixelV;
+    fracPixelU = std::modf(interpUV.y,&wholePixelU);
+    fracPixelV = std::modf(interpUV.x,&wholePixelV);
+    int pixelU = (int) wholePixelU;
+    int pixelV = (int) wholePixelV; // SHOULD be safe: pixel values are unlikely to exceed INT_MAX (the image would be millions of gigabytes in size and i'd have other problems)
+    
+    //pixel neighbourhood index calculation and sanitisation.
+    int pixNBH[4];
+    pixNBH[0] = pixelU*texture->width * 3 + pixelV*3;
+    if(pixNBH[0] == texture->width*texture->height*3 - 1){//at the bottom right corner.
+        pixNBH[1] = 0;
+        pixNBH[2] = texture->width * 3;
+        pixNBH[3] = texture->width * 3 + 1;
+        
+    }else{
+        pixNBH[2] = pixNBH[0] + texture->width * 3;
+        if(pixNBH[0] + 4 % texture->width * 3 == 0){ // we were at an edge at pixelU
+            pixNBH[1] = pixelU*texture->width*3;
+            pixNBH[3] = (pixelU+1)*texture->width*3;
+        }
+        else{
+            pixNBH[1] = pixNBH[0];
+            pixNBH[3] = pixNBH[2];
+        }
+    }
+    for(int i =0; i<4; i++){
+        pixColors[i] = {texture->imageData[pixNBH[i]],texture->imageData[pixNBH[i]+1],texture->imageData[pixNBH[i]+2]};
+    }
+    vec3f horizColor1,horizColor2,finalColor;
+    for(int i= 0; i<3; i++){
+        horizColor1.coords[i] = (float) pixColors[0].coords[i] * fracPixelU + (float) pixColors[1].coords[i] * (1.0f-fracPixelU);
+        horizColor2.coords[i] = (float) pixColors[2].coords[i] * fracPixelU + (float) pixColors[3].coords[i] * (1.0f-fracPixelU);
+        finalColor.coords[i] = horizColor1.coords[i]*fracPixelV + horizColor2.coords[i]*(1-fracPixelV);
+    }
+    
+    return color(finalColor.x,finalColor.y,finalColor.z);
+    
+
+    
+    
+}
+
 color triangle::AmbientRayInterSection(Ray * ray){
-    return Color*ambientCoeff;
+    return GetColor()*ambientCoeff;
 }
 color triangle::DiffuseColorCalc(Ray * ray){
     normalDist = fabs(Vec3DotProduct(interpNormal,world::sunlightDirection));
     //
-    //if(normalDist > 0){
-    return Color*diffuseCoeff*normalDist;
-    //}
-    //return Color*0.0f;
+//    if(normalDist >= 0){
+    return GetColor()*diffuseCoeff*normalDist;
+//    }
+//    return color(0,0,0);
     
 }
 color triangle::SpecularColorCalc(Ray * ray){
@@ -172,10 +228,10 @@ color triangle::SpecularColorCalc(Ray * ray){
     
     auto SpecRay = Vec3DotProduct(ray->GetDirection(),reflectionVector);
     if(SpecRay<0){
-        return color(0,0,0);
+        return color();
     }
 //    //std::cout<<SpecRay<<"\n";
-    return Color*specularCoeff*powf(SpecRay,20);
+    return GetColor()*specularCoeff*powf(SpecRay,200);
 
 }
 float triangle::calculateInterSectionProduct(Ray * ray, int * success){
@@ -243,7 +299,7 @@ Mesh::Mesh(
     std::vector<unsigned int> * v_norm_indices,
 	std::vector<std::vector<float> > * uvs,
 	std::vector<unsigned int> * uv_indices,
-	unsigned char * textureImage){
+	textureImage * texture){
     
     num_tris = v_indices->size()/3;
     tris = new triangle* [num_tris];
@@ -273,6 +329,10 @@ Mesh::Mesh(
 		else {
 			tris[i] = new triangle(v, &v_i[0], v_norms, &v_n[0], uvs, &v_uv[0]);
 		}
+        if(texture != nullptr && texture->imageData != nullptr){
+            tris[i]->setImageTexture(texture);
+        }
+        
     }
 }
 Mesh::~Mesh(){
@@ -312,7 +372,7 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
     std::vector<vec3f> interSectionCoordinates;
     bool intersection = AABBRayIntersection(BVH, ray, &intersectedTris,0,0);
     if(intersection == 0){
-		*outColor = color(0, 0, 0);
+		*outColor = color();
         return 0;
     }
 	objectIndex = 0;
@@ -336,12 +396,12 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
         }
     }
     if(max_depth == INFINITY){//nothing intersected
-		*outColor = color(0, 0, 0);
+		*outColor = color();
         return 0;
     }
 	bool foundShadow = ShadowRayIntersection(&interSectionCoordinates, &intersectedTris);
 	if (foundShadow) {
-		*outColor = color(0, 0, 0);
+		*outColor = color();
 		return 1;
 	}
 
@@ -356,7 +416,7 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
 
 }
 
-bool Mesh::ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<size_t> * intersectedTris){
+bool Mesh::ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<unsigned int> * intersectedTris){
 	std::vector<unsigned int> intersectedShadowTris;
 	std::vector<vec3f> interSectionShadowCoordinates;
 	vec3f vectolight = Vec3ScalarMultiply(world::sunlightDirection, -1.0f);

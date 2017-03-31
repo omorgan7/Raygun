@@ -24,6 +24,7 @@
 
 
 
+
 int main(int argc, char* argv[]) {
     auto width = 180;
     auto height = 80;
@@ -36,13 +37,13 @@ int main(int argc, char* argv[]) {
     //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
-   //std::string objectstring = "/Users/Owen/Dropbox/donut_smooth.obj";
+   std::string objectstring = "/Users/Owen/Dropbox/donut_uv.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
-	std::string objectstring = "H:/dos/C++/Raygun/Raygun/cube.obj";
+	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/cube.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
-   // std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
-    
+   //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
+    std::string texturestring = "/Users/Owen/Dropbox/donut_texture.bmp";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -55,15 +56,14 @@ int main(int argc, char* argv[]) {
 	objl.loadNormals(normals);
 	objl.loadUVs(UVs);
 	objl.loadIndices(vertex_indices, normal_indices, uv_indices);
-	unsigned char * textureImage = nullptr;
-	int textureWidth, textureHeight;
-	objl.loadTextureImage("texture.bmp", &textureImage,&textureWidth,&textureHeight);
+    textureImage texture;
+	objl.loadTextureImage(texturestring.c_str(), &(texture.imageData),&(texture.width),&(texture.height));
 
-    /*int retval = loadSimpleOBJ(
-                                objectstring.c_str(),
-                                vertices,vertex_indices,
-                                normals,
-                                normal_indices);*/
+//    int retval = loadSimpleOBJ(
+//                                objectstring.c_str(),
+//                                vertices,vertex_indices,
+//                                normals,
+//                                normal_indices);
     
 
     world::sunlightPosition.x = (float)width/2;
@@ -71,20 +71,23 @@ int main(int argc, char* argv[]) {
     world::sunlightPosition.z = 0;
     
 	world::sunlightDirection.x = 0;// world::sunlightPosition.x;
-	world::sunlightDirection.y = 0;// world::sunlightPosition.y;
+	world::sunlightDirection.y = 0.5f;// world::sunlightPosition.y;
     world::sunlightDirection.z = 1;
     
     NormaliseVector(&world::sunlightDirection);
-    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices, &UVs,&uv_indices,textureImage);
+    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices, &UVs,&uv_indices, &texture);
 	mesh.computeBVH(&vertices, &vertex_indices);
 
     std::vector<float> eye_v;
     std::vector<float> eye_u;
     std::vector<float> c = { 0.0f,0.0f,0.0f };
-    std::vector<float> eye_origin = {0.0f,0.0f,-2.5f};
+    std::vector<float> eye_origin = {0.0f,0.0f,-1.8f};
     std::vector<float> L_vector = std::vector<float>(3);
     vec3f direction;
-    vec3f eyevec {0.0f,0.0f,-2.5f};
+    vec3f eyevec;
+    for(int i =0;i<3;i++){
+        eyevec.coords[i] = eye_origin[i];
+    }
     float pixel_height, pixel_width;
     
     world::assembleCameraCoords(&eye_origin,&c,width, height, 90.0f,&eye_u,&eye_v,&L_vector,&pixel_width, &pixel_height);
@@ -94,7 +97,7 @@ int main(int argc, char* argv[]) {
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.01f);
 	//float jitter;
     int AAFactor = 4;
-    int AA_status = 1;
+    int AA_status =0;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
@@ -104,7 +107,7 @@ int main(int argc, char* argv[]) {
             direction.coords[j] = L_vector[j] - eye_u[j] * image_x*(pixel_width / (float)width) + eye_v[j] * image_y*(pixel_height / (float)height);// +
         }
        // direction = Vec3Sub(direction, eyevec);
-		if (image_x == 950 && image_y == 530) {
+		if (image_x == 1071 && image_y == 515) {
 			std::cout << "";
 		}
         color outColor;
@@ -153,6 +156,9 @@ int main(int argc, char* argv[]) {
     
     ofs.close();
     delete[] image;
-	delete[] textureImage;
+    if(texture.imageData != nullptr){
+        delete[] texture.imageData;
+    }
+	
     return 1;
 }
