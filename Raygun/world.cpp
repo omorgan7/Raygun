@@ -8,7 +8,7 @@
 
 #include "world.hpp"
 
-color world::background_color = color(5,5,5);
+color world::background_color = color(5.0f,5.0f,5.0f);
 vec3f world::sunlightPosition;
 vec3f world::sunlightDirection;
 

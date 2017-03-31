@@ -19,6 +19,12 @@ color::color(unsigned char r, unsigned char g, unsigned char b){
     green = g;
     blue = b;
 }
+color::color(float r, float g, float b){
+    //clamp
+    red = (unsigned char) std::min(std::max(0.0f,r),255.0f);
+    green = (unsigned char) std::min(std::max(0.0f,g),255.0f);
+    blue = (unsigned char) std::min(std::max(0.0f,b),255.0f);
+}
 unsigned char color::Red(void) const {
     return red;
 }

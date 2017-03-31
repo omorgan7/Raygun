@@ -93,8 +93,8 @@
 			children = (
 				5AAE57E51E5E071F00A562A8 /* raymath.cpp */,
 				5A41A8CA1E72C457002D2E72 /* objloader.cpp */,
-				5AAE57E61E5E071F00A562A8 /* shape.cpp */,
 				5A9656C51E546F9E005A8D95 /* main.cpp */,
+				5AAE57E61E5E071F00A562A8 /* shape.cpp */,
 				5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */,
 				5A9DFB371E772D8300BA3B30 /* aabb.cpp */,
 				5A2AF25E1E56376C00910E82 /* color.cpp */,

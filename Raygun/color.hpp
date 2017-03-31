@@ -16,6 +16,7 @@ class color{
 public:
     color();
     color(unsigned char r, unsigned char g, unsigned char b);
+    color(float r, float g, float b);
     unsigned char Red(void) const;
     unsigned char Green(void) const;
     unsigned char Blue(void) const;
