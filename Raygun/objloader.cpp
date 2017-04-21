@@ -228,20 +228,12 @@ bool ObjectLoader::loadUVs(std::vector < std::vector <float> > &out_uv_textures)
 			std::vector<float> vertex(2);
 			fscanf(file, "%f %f \n", &vertex[0], &vertex[1]);
             
-            //truncate the non-decimal part. This is to get tiling behaviour
+            //truncate the non-decimal part.
             //converts ±X.XXXXf -> ±0.XXXX
-            float tempInt;
-            float uFraction = std::modf(vertex[0],&tempInt);
-            float vFraction = std::modf(vertex[1],&tempInt);
-            if(uFraction < 0){
-                uFraction = 1+uFraction;
-            }
-            if(vFraction<0){
-                vFraction = 1+vFraction;
-            }
-            vertex[0] = uFraction;
+            float vDecimal;
+            float vFraction = std::modf(vertex[1],&vDecimal);
             //flip the v vexture part. this is due to image coordinates starting in top left where uv coordinates start bottom left.
-            vertex[1] = 1-vFraction;
+            vertex[1] = 1-vFraction + vDecimal;
 			out_uv_textures.push_back(vertex);
 		}
 		else {

@@ -10,6 +10,7 @@
 #define color_hpp
 
 //#include <assert.h>
+#include <algorithm>
 #include <iostream>
 
 class color{

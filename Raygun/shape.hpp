@@ -87,6 +87,7 @@ public:
     void translateTri(vec3f translate);
     inline void setImageTexture(textureImage * imTexture ){
         texture = imTexture;
+		textureSize = imTexture->height*imTexture->width * 3;
     }
     
 private:
@@ -102,6 +103,7 @@ private:
     vec3f reflectionVector;
     AABB tribox;
     textureImage * texture = nullptr;
+	long long unsigned int textureSize;
     
     
 };

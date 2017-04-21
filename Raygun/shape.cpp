@@ -163,7 +163,16 @@ color triangle::GetColor(void){
     // assumption: barycentrics computed before this funciton is called.
     vec3<unsigned char> pixColors[4];
     vec3f interpUV = Vec3Add(Vec3ScalarMultiply(UVs[1], barycentrics.x), Vec3Add(Vec3ScalarMultiply(UVs[2], barycentrics.y), Vec3ScalarMultiply(UVs[0], barycentrics.z)));
-    interpUV = {interpUV.x * texture->width, interpUV.y * texture->height,0};
+
+	vec3f wholeUV, fracUV;
+
+	fracUV.x = std::modf(interpUV.x, &(wholeUV.x));
+	fracUV.y = std::modf(interpUV.y, &(wholeUV.y));
+
+	fracUV.x += 1.0f*(fracUV.x < 0);
+	fracUV.y += 1.0f*(fracUV.y < 0);
+
+    interpUV = {fracUV.x * texture->width, fracUV.y * texture->height,0};
     
     float wholePixelU,fracPixelU,wholePixelV,fracPixelV;
     fracPixelU = std::modf(interpUV.y,&wholePixelU);
@@ -176,23 +185,45 @@ color triangle::GetColor(void){
     
     ///////////// THIS CODE IS BUGGY ///////////////
     pixNBH[0] = pixelU*texture->width * 3 + pixelV*3;
-    if(pixNBH[0] == texture->width*texture->height*3 - 1){//at the bottom right corner.
-        pixNBH[1] = 0;
-        pixNBH[2] = texture->width * 3;
-        pixNBH[3] = texture->width * 3 + 1;
-        
-    }else{
-        pixNBH[2] = pixNBH[0] + texture->width * 3;
-        if(pixNBH[0] + 4 % texture->width * 3 == 0){ // we were at an edge at pixelU
-            pixNBH[1] = pixelU*texture->width*3;
-            pixNBH[3] = (pixelU+1)*texture->width*3;
-        }
-        else{
-            pixNBH[1] = pixNBH[0];
-            pixNBH[3] = pixNBH[2];
-        }
-    }
+ //   if(pixNBH[0] == textureSize - 3){//at the bottom right corner.
+ //       pixNBH[1] = 0;
+ //       pixNBH[2] = texture->width * 3;
+ //       pixNBH[3] = texture->width * 3 + 3;
+ //       
+	//}
+	//else if(pixNBH[0] > textureSize - 1 - texture->height * 3) { //on the bottom row
+	//	
+	//}
+	//else{
+ //       pixNBH[2] = pixNBH[0] + texture->width * 3;
+ //       if(pixNBH[0] + 4 % texture->width * 3 == 0){ // we were at an edge at pixelU
+ //           pixNBH[1] = pixelU*texture->width*3;
+ //           pixNBH[3] = (pixelU+1)*texture->width*3;
+ //       }
+ //       else{
+ //           pixNBH[1] = pixNBH[0];
+ //           pixNBH[3] = pixNBH[2];
+ //       }
+ //   }
+	if (pixNBH[0] > textureSize - 1 - texture->width * 3) {//on the bottom row
+		if (pixNBH[0] == textureSize - 3) {//in the bottom right corner
+			pixNBH[1] = 0;
+			pixNBH[2] = texture->width * 3;
+		}
+		else {
+			pixNBH[1] = pixNBH[0] + 3;
+			pixNBH[2] = pixelV * 3;
+		}
+		pixNBH[3] = pixNBH[2] + 3;
+	}
+	else {
+		pixNBH[1] = pixNBH[0] + 3;
+		pixNBH[2] = pixNBH[0] + texture->width * 3;
+		pixNBH[3] = pixNBH[2] + 3;
+	}
+
     for(int i =0; i<4; i++){
+		assert(pixNBH[i] < textureSize);
         pixColors[i] = {texture->imageData[pixNBH[i]],texture->imageData[pixNBH[i]+1],texture->imageData[pixNBH[i]+2]};
     }
     vec3f horizColor1,horizColor2,finalColor;
