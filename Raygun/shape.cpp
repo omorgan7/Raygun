@@ -185,28 +185,8 @@ color triangle::GetColor(void){
     
     ///////////// THIS CODE IS BUGGY ///////////////
     pixNBH[0] = pixelU*texture->width * 3 + pixelV*3;
- //   if(pixNBH[0] == textureSize - 3){//at the bottom right corner.
- //       pixNBH[1] = 0;
- //       pixNBH[2] = texture->width * 3;
- //       pixNBH[3] = texture->width * 3 + 3;
- //       
-	//}
-	//else if(pixNBH[0] > textureSize - 1 - texture->height * 3) { //on the bottom row
-	//	
-	//}
-	//else{
- //       pixNBH[2] = pixNBH[0] + texture->width * 3;
- //       if(pixNBH[0] + 4 % texture->width * 3 == 0){ // we were at an edge at pixelU
- //           pixNBH[1] = pixelU*texture->width*3;
- //           pixNBH[3] = (pixelU+1)*texture->width*3;
- //       }
- //       else{
- //           pixNBH[1] = pixNBH[0];
- //           pixNBH[3] = pixNBH[2];
- //       }
- //   }
 	if (pixNBH[0] > textureSize - 1 - texture->width * 3) {//on the bottom row
-		if (pixNBH[0] == textureSize - 3) {//in the bottom right corner
+		if (pixNBH[0] == textureSize -3) {//in the bottom right corner
 			pixNBH[1] = 0;
 			pixNBH[2] = texture->width * 3;
 		}
@@ -432,11 +412,11 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
 		*outColor = color();
         return 0;
     }
-	bool foundShadow = ShadowRayIntersection(&interSectionCoordinates, &intersectedTris);
-	if (foundShadow) {
-		*outColor = color();
-		return 1;
-	}
+	//bool foundShadow = ShadowRayIntersection(&interSectionCoordinates, &intersectedTris);
+	//if (foundShadow) {
+	//	*outColor = color();
+	//	return 1;
+	//}
 
 	tris[intersectedTris[objectIndex]]->computeBarycentrics(ray);
     color ambientColor = tris[intersectedTris[objectIndex]]->AmbientRayInterSection(ray);

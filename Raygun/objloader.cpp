@@ -230,10 +230,10 @@ bool ObjectLoader::loadUVs(std::vector < std::vector <float> > &out_uv_textures)
             
             //truncate the non-decimal part.
             //converts ±X.XXXXf -> ±0.XXXX
-            float vDecimal;
-            float vFraction = std::modf(vertex[1],&vDecimal);
+            //float vDecimal;
+            //float vFraction = std::modf(vertex[1],&vDecimal);
             //flip the v vexture part. this is due to image coordinates starting in top left where uv coordinates start bottom left.
-            vertex[1] = 1-vFraction + vDecimal;
+            //vertex[1] = 1-vFraction + vDecimal;
 			out_uv_textures.push_back(vertex);
 		}
 		else {

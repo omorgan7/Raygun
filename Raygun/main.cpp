@@ -38,14 +38,15 @@ int main(int argc, char* argv[]) {
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
    //std::string objectstring = "/Users/Owen/Dropbox/donut_uv.obj";
-	std::string objectstring = "C:/Users/om371/Dropbox/testslab.obj";
+	std::string objectstring = "C:/Users/om371/Dropbox/halo.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/cube.obj";
     //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
    //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
    // std::string texturestring = "/Users/Owen/Dropbox/donut_texture.bmp";
-   std::string texturestring = "C:/Users/om371/Dropbox/cube_texture.bmp";
+   //std::string texturestring = "C:/Users/om371/Dropbox/cube_texture.bmp";
+   std::string texturestring = "C:/Users/om371/Dropbox/halo.bmp";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -82,8 +83,8 @@ int main(int argc, char* argv[]) {
 
     std::vector<float> eye_v;
     std::vector<float> eye_u;
-    std::vector<float> c = { 0.0f,0.0f,0.0f };
-    std::vector<float> eye_origin = {0.0f,0.0f,-1.8f};
+    std::vector<float> c = { 0.0f,0.0f,0.5f };
+    std::vector<float> eye_origin = {0.0f,0.0f,-0.5f};
     std::vector<float> L_vector = std::vector<float>(3);
     vec3f direction;
     vec3f eyevec;
@@ -96,14 +97,17 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<float> > interSectionCoordinates;
 	std::random_device r;
 	std::default_random_engine e1(r());
-	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.01f);
+	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.005f);
 	//float jitter;
-    int AAFactor = 4;
+    int AAFactor = 16;
     int AA_status =0;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
         auto image_y = (i/3)/width;
+		if (image_x == 843 && image_y == 156) {
+			std::cout << "";
+		}
 		//jitter = uniform_dist(e1);
         for (auto j =0; j<3; j++){
             direction.coords[j] = L_vector[j] - eye_u[j] * image_x*(pixel_width / (float)width) + eye_v[j] * image_y*(pixel_height / (float)height);// +
