@@ -155,6 +155,7 @@ bool ObjectLoader::GetMeshFileType(void) {
 }
 
 bool ObjectLoader::loadVertices(std::vector<std::vector<float> > & out_vertices) {
+	out_vertices.erase(out_vertices.begin(), out_vertices.end());
 	if (meshretval == 0) {
 		return 0;
 	}
@@ -183,6 +184,7 @@ bool ObjectLoader::loadVertices(std::vector<std::vector<float> > & out_vertices)
 	return 1;
 }
 bool ObjectLoader::loadNormals(std::vector<std::vector<float> > & out_vertex_norms) {
+	out_vertex_norms.erase(out_vertex_norms.begin(), out_vertex_norms.end());
 	if (meshretval == 0) {
 		return 0;
 	}
@@ -214,6 +216,7 @@ bool ObjectLoader::loadUVs(std::vector < std::vector <float> > &out_uv_textures)
 	if (meshretval == 0) {
 		return 0;
 	}
+	out_uv_textures.erase(out_uv_textures.begin(), out_uv_textures.end());
 	while (1) {
 
 		char lineHeader[128];
@@ -250,6 +253,7 @@ bool ObjectLoader::loadIndices(std::vector<unsigned int> & out_vertex_indices, s
 	if (meshretval == 0) {
 		return 0;
 	}
+	out_vertex_indices.erase(out_vertex_indices.begin(),out_vertex_indices.end());
 	while (1) {
 
 		char lineHeader[128];

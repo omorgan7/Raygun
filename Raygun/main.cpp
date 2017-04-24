@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
    //std::string objectstring = "/Users/Owen/Dropbox/donut_uv.obj";
-	std::string objectstring = "C:/Users/om371/Dropbox/halo.obj";
+	std::string objectstring = "C:/Users/om371/Dropbox/lightscene.obj";
+    std::string lightobjectstring = "C:/Users/om371/Dropbox/lightsurface.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/cube.obj";
@@ -54,37 +55,40 @@ int main(int argc, char* argv[]) {
     std::vector<unsigned int> normal_indices;
 	std::vector<std::vector<float> > UVs;
 	std::vector<unsigned int> uv_indices;
-	ObjectLoader objl(objectstring.c_str());
-	objl.loadVertices(vertices);
-	objl.loadNormals(normals);
-	objl.loadUVs(UVs);
-	objl.loadIndices(vertex_indices, normal_indices, uv_indices);
+
+    //Load scene
+	ObjectLoader sceneLoader(objectstring.c_str());
+	sceneLoader.loadVertices(vertices);
+	sceneLoader.loadNormals(normals);
+	sceneLoader.loadUVs(UVs);
+	sceneLoader.loadIndices(vertex_indices, normal_indices, uv_indices);
     textureImage texture;
-	objl.loadTextureImage(texturestring.c_str(), &(texture.imageData),&(texture.width),&(texture.height));
-
-//    int retval = loadSimpleOBJ(
-//                                objectstring.c_str(),
-//                                vertices,vertex_indices,
-//                                normals,
-//                                normal_indices);
-    
-
-    world::sunlightPosition.x = (float)width/2;
-    world::sunlightPosition.y = (float)height/2;
-    world::sunlightPosition.z = 0;
-    
-	world::sunlightDirection.x = 0;// world::sunlightPosition.x;
-	world::sunlightDirection.y = 0.5f;// world::sunlightPosition.y;
-    world::sunlightDirection.z = 1;
-    
-    NormaliseVector(&world::sunlightDirection);
-    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices, &UVs,&uv_indices, &texture);
+	sceneLoader.loadTextureImage(texturestring.c_str(), &(texture.imageData),&(texture.width),&(texture.height));
+    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices, nullptr,nullptr, nullptr);
 	mesh.computeBVH(&vertices, &vertex_indices);
+
+    //Load light surfaces
+    ObjectLoader lightLoader(lightobjectstring.c_str());
+    lightLoader.loadVertices(vertices);
+	lightLoader.loadNormals(normals);
+	lightLoader.loadUVs(UVs);
+	lightLoader.loadIndices(vertex_indices, normal_indices, uv_indices);
+	LightSurface light = LightSurface(&vertices, &vertex_indices, &normals, &normal_indices, nullptr, nullptr, nullptr);
+	light.computeBVH(&vertices, &vertex_indices);
+
+
+	world::sunlightPosition.x = 0.0f;
+	world::sunlightPosition.y = 1.0f;
+	world::sunlightPosition.z = 0.0f;
+
+	world::sunlightDirection.x = 0.0f;// world::sunlightPosition.x;
+	world::sunlightDirection.y = -3.0f;// world::sunlightPosition.y;
+	world::sunlightDirection.z = 0.f;
 
     std::vector<float> eye_v;
     std::vector<float> eye_u;
-    std::vector<float> c = { 0.0f,0.0f,0.5f };
-    std::vector<float> eye_origin = {0.0f,0.0f,-0.5f};
+    std::vector<float> c = { 0.0f,0.0f,-1.0f };
+    std::vector<float> eye_origin = {0.0f,0.0f,-3.0f};
     std::vector<float> L_vector = std::vector<float>(3);
     vec3f direction;
     vec3f eyevec;
@@ -99,8 +103,8 @@ int main(int argc, char* argv[]) {
 	std::default_random_engine e1(r());
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.005f);
 	//float jitter;
-    int AAFactor = 16;
-    int AA_status =0;
+    int AAFactor = 2;
+    int AA_status =1;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
@@ -126,7 +130,7 @@ int main(int argc, char* argv[]) {
                 Ray R = Ray(eyevec,jitteredDirection);
                 
                 color tempColor;
-                mesh.RayIntersection(&R,&tempColor);
+                mesh.RayIntersection(&R,&tempColor,&light);
                 outColor += tempColor*(1.0f/((float)AAFactor));
             }
         }
@@ -134,7 +138,7 @@ int main(int argc, char* argv[]) {
             direction = Vec3Sub(direction, eyevec);
             NormaliseVector(&direction);
             Ray R = Ray(eyevec,direction);
-            mesh.RayIntersection(&R,&outColor);
+            mesh.RayIntersection(&R,&outColor, &light);
         }
 
         image[i] = outColor.Red();

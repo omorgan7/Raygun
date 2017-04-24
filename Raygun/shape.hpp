@@ -85,6 +85,7 @@ public:
     void inputIntersectionCoords(vec3f &coords);
 	void computeBarycentrics(Ray * ray);
     void translateTri(vec3f translate);
+	float getArea(void);
     inline void setImageTexture(textureImage * imTexture ){
         texture = imTexture;
 		textureSize = imTexture->height*imTexture->width * 3;
@@ -95,7 +96,7 @@ private:
     vec3f vertices[3];
     vec3f normals[3];
 	vec3f UVs[3];
-    vec3f triangleNormal,interpNormal,edgeA,edgeB, barycentrics,rayintersectioncoords;
+    vec3f triangleNormal,interpNormal,edgeA,edgeB, barycentrics,rayintersectioncoords,lightvec;
     //float barycentricDivisor;
     void ComputeNormal(void);
     //void flipNormal(void);
@@ -120,9 +121,9 @@ class Mesh{
 			textureImage * texture);
         ~Mesh();
         void translate(vec3f translate);
-        bool RayIntersection(Ray * ray, color * outColor);
+        bool RayIntersection(Ray * ray, color * outColor, LightSurface * light);
 		void computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices);
-    private:
+    protected:
 		bool ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<unsigned int> * intersectedTris);
         size_t num_tris;
         triangle ** tris;
@@ -131,4 +132,23 @@ class Mesh{
 		size_t intersectedCoordsIndex = 0;
 };
 
+class LightSurface : public Mesh{
+	public:
+		vec3f returnSurfaceSamplePoint(void);
+		LightSurface(
+			std::vector<std::vector<float> > * v,
+			std::vector<unsigned int> * v_indices,
+			std::vector<std::vector<float> > * v_norms,
+			std::vector<unsigned int> * v_norm_indices,
+			std::vector<std::vector<float> > * uvs,
+			std::vector<unsigned int> * uv_indices,
+			textureImage * texture) : Mesh(v, v_indices, v_norms, v_norm_indices, uvs, uv_indices, texture) {};
+		void CalculateArea(void);
+		float returnArea(void);
+		float returnStrength(void);
+	private:
+		color Colour = color();
+		float Area;
+		float strength = 10.0f;
+};
 #endif /* shape_hpp */
