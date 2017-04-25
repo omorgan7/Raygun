@@ -123,11 +123,11 @@ class Mesh{
         void translate(vec3f translate);
         bool RayIntersection(Ray * ray, color * outColor, LightSurface * light);
 		void computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices);
+		triangle ** tris;
+		AABB * BVH;
     protected:
 		bool ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<unsigned int> * intersectedTris);
         size_t num_tris;
-        triangle ** tris;
-        AABB * BVH;
 		size_t objectIndex = 0;
 		size_t intersectedCoordsIndex = 0;
 };

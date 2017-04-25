@@ -369,7 +369,7 @@ void Mesh::computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned
 bool Mesh::RayIntersection(Ray * ray, color * outColor, LightSurface * light){
     std::vector<unsigned int> intersectedTris;
     std::vector<vec3f> interSectionCoordinates;
-    bool intersection = AABBRayIntersection(BVH, ray, &intersectedTris,0,0);
+    bool intersection = AABBRayIntersection(this->BVH, ray, &intersectedTris,0,0);
     if(intersection == 0){
 		*outColor = color();
         return 0;
