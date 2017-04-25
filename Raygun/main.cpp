@@ -112,14 +112,12 @@ int main(int argc, char* argv[]) {
 		if (image_x == 843 && image_y == 156) {
 			std::cout << "";
 		}
-		//jitter = uniform_dist(e1);
         for (auto j =0; j<3; j++){
             direction.coords[j] = L_vector[j] - eye_u[j] * image_x*(pixel_width / (float)width) + eye_v[j] * image_y*(pixel_height / (float)height);// +
         }
-       // direction = Vec3Sub(direction, eyevec);
-		if (image_x == 1071 && image_y == 515) {
-			std::cout << "";
-		}
+		//if (image_x == 1071 && image_y == 515) {
+		//	std::cout << "";
+		//}
         color outColor;
         if(AA_status){
             for(int j = 0; j<AAFactor; j++){

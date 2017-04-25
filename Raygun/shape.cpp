@@ -217,6 +217,17 @@ color triangle::GetColor(void){
     
 }
 
+vec3<vec3f> triangle::returnCoords(void){
+	return { vertices[0],vertices[1],vertices[2] };
+}
+
+vec3<vec3f> triangle::returnNormalCoords(void){
+	return { normals[0],normals[1],normals[2] };
+}
+vec3<vec3f> triangle::returnUVCoords(void) {
+	return { UVs[0],UVs[1],UVs[2] };
+}
+
 color triangle::AmbientRayInterSection(Ray * ray){
     return GetColor()*ambientCoeff;
 }
@@ -284,6 +295,10 @@ void triangle::computeBarycentrics(Ray * ray){
 	 //lightvec = Vec3Sub(world::sunlightDirection, rayintersectioncoords);
 	 //lightvec = world::sunlightDirection;
 	 NormaliseVector(&lightvec);
+ }
+
+ void triangle::inputBarycentrics(vec3f &vector) {
+	 barycentrics = vector;
  }
 
  float triangle::getArea(void) {
@@ -450,20 +465,54 @@ void Mesh::translate(vec3f translate){
     }
 }
 
-vec3f LightSurface::returnSurfaceSamplePoint(void){
-	vec3f v = { 0.0f, 0.0f, 0.0f };
-	return v;
+vec3f LightSurface::returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri){
+	//pick a triangle, weighted by area.
+	std::piecewise_constant_distribution<> const_dist(BVH->triNumber.begin(), BVH->triNumber.end(), weightedArea);
+	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
+	std::random_device r;
+	std::default_random_engine e1(r());
+	size_t randomTri = static_cast<size_t>(const_dist(e1));
+	assert(randomTri < num_tris && randomTri >= 0);
+	vec3<vec3f> TriangleCoords = tris[randomTri]->returnCoords;
+	vec3f randBarycentric;
+	do{
+		randBarycentric.x = uniform_dist(e1);
+		randBarycentric.y = uniform_dist(e1);
+	} while (randBarycentric.x + randBarycentric.y > 1);
+	randBarycentric.z = 1 - randBarycentric.x - randBarycentric.y;	
+	*outBarycentrics = randBarycentric;//this is ok, it's a struct! yay!
+	*outTri = randomTri;
+	return Vec3Add(Vec3Add(Vec3ScalarMultiply(TriangleCoords.coords[1], randBarycentric.x), Vec3ScalarMultiply(TriangleCoords.coords[2], randBarycentric.y)), Vec3ScalarMultiply(TriangleCoords.coords[0], randBarycentric.z));
 }
 void LightSurface::CalculateArea(void) {
-	Area = 0.0f;
+	if (weightedArea == nullptr) {
+		weightedArea = new float[num_tris];
+	}
+	TotalArea = 0.0f;
 	for (size_t i = 0; i < num_tris; i++) {
-		Area += tris[i]->getArea();
+		weightedArea[i] = tris[i]->getArea();
+		TotalArea += weightedArea[i];
+	}
+	for (size_t i = 0; i < num_tris; i++) {
+		weightedArea[i] /= TotalArea;
 	}
 }
 float LightSurface::returnArea(void) {
-	return Area;
+	return TotalArea;
 }
 float LightSurface::returnStrength(void) {
 	return strength;
+}
+
+LightSurface::~LightSurface() {
+	for (size_t i = 0; i<num_tris; i++) {
+		delete tris[i];
+	}
+	delete[] tris;
+	cleanupAABBTree(BVH);
+	if (weightedArea != nullptr) {
+		delete[] weightedArea;
+		weightedArea = nullptr;
+	}
 }
 ;

@@ -4,6 +4,7 @@
 #include <random>
 #include "raymath.hpp"
 #include "shape.hpp"
+#include "trace.hpp"
 
 struct Photon {
 	vec3f pos;
@@ -15,6 +16,7 @@ struct Photon {
 class Photonmap {
 	public: 
 		Photonmap(Mesh * scene, LightSurface * light);
+		KDTree * BuildPhotonmap();
 	private:
 		std::random_device random_dev;
 		std::default_random_engine e1;
@@ -27,7 +29,7 @@ class Photonmap {
 struct KDTree {
 	KDTree * left = nullptr;
 	KDTree * right = nullptr;
-	Photon photonVal;
+	Photon photon;
 	enum axes{x,y,z};
 	float axValue;
 };

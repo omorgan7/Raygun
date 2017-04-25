@@ -9,6 +9,7 @@
 #include <vector>
 //#include <assert.h>
 #include <cmath>
+#include <random>
 
 #include "color.hpp"
 #include "raymath.hpp"
@@ -78,12 +79,16 @@ public:
     void SetColor(color C);
     void SetVertexCoord(std::vector<float> vertex, int vertex_index);   
     void ChangeVertexCoord(std::vector<float> vertex, int vertex_index);
+	vec3<vec3f> returnCoords(void);
+	vec3<vec3f> returnNormalCoords(void);
+	vec3<vec3f> returnUVCoords(void);
     color AmbientRayInterSection(Ray * ray);
     color DiffuseColorCalc(Ray * ray);
     color SpecularColorCalc(Ray * ray);
     float calculateInterSectionProduct(Ray * ray, int * success);
     void inputIntersectionCoords(vec3f &coords);
 	void computeBarycentrics(Ray * ray);
+	void inputBarycentrics(vec3f &vector);
     void translateTri(vec3f translate);
 	float getArea(void);
     inline void setImageTexture(textureImage * imTexture ){
@@ -134,7 +139,7 @@ class Mesh{
 
 class LightSurface : public Mesh{
 	public:
-		vec3f returnSurfaceSamplePoint(void);
+		vec3f returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri);
 		LightSurface(
 			std::vector<std::vector<float> > * v,
 			std::vector<unsigned int> * v_indices,
@@ -148,7 +153,8 @@ class LightSurface : public Mesh{
 		float returnStrength(void);
 	private:
 		color Colour = color();
-		float Area;
+		float TotalArea;
+		float * weightedArea = nullptr;
 		float strength = 10.0f;
 };
 #endif /* shape_hpp */
