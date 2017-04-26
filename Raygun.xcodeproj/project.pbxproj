@@ -10,6 +10,8 @@
 		5A2AF25D1E56371E00910E82 /* world.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A2AF25B1E56371E00910E82 /* world.cpp */; };
 		5A2AF2601E56376C00910E82 /* color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A2AF25E1E56376C00910E82 /* color.cpp */; };
 		5A41A8CB1E72C457002D2E72 /* objloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A41A8CA1E72C457002D2E72 /* objloader.cpp */; };
+		5A50E6561EB106BF00F834E6 /* photonmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A50E6511EB106BF00F834E6 /* photonmap.cpp */; };
+		5A50E6571EB106BF00F834E6 /* trace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A50E6531EB106BF00F834E6 /* trace.cpp */; };
 		5A7FCFD71E575C8E002BBC75 /* bitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */; };
 		5A9656C61E546F9E005A8D95 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A9656C51E546F9E005A8D95 /* main.cpp */; };
 		5A9DFB381E772D8300BA3B30 /* aabb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DFB371E772D8300BA3B30 /* aabb.cpp */; };
@@ -36,6 +38,12 @@
 		5A2AF25F1E56376C00910E82 /* color.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = color.hpp; sourceTree = "<group>"; };
 		5A41A8C91E72C457002D2E72 /* objloader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = objloader.hpp; sourceTree = "<group>"; };
 		5A41A8CA1E72C457002D2E72 /* objloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objloader.cpp; sourceTree = "<group>"; };
+		5A50E6501EB106BF00F834E6 /* photon.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = photon.hpp; sourceTree = "<group>"; };
+		5A50E6511EB106BF00F834E6 /* photonmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = photonmap.cpp; sourceTree = "<group>"; };
+		5A50E6521EB106BF00F834E6 /* photonmap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = photonmap.hpp; sourceTree = "<group>"; };
+		5A50E6531EB106BF00F834E6 /* trace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trace.cpp; sourceTree = "<group>"; };
+		5A50E6541EB106BF00F834E6 /* trace.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = trace.hpp; sourceTree = "<group>"; };
+		5A50E6551EB106BF00F834E6 /* vec3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vec3.hpp; sourceTree = "<group>"; };
 		5A7FCFD51E572F9D002BBC75 /* bitmap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bitmap.hpp; sourceTree = "<group>"; };
 		5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bitmap.cpp; sourceTree = "<group>"; };
 		5A92340C1E82E1BE006FF027 /* raytrace.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = raytrace.bmp; path = "../../../../Library/Developer/Xcode/DerivedData/Raygun-hdpduejgbxvwwzhjaapakihvzbpx/Build/Products/Debug/raytrace.bmp"; sourceTree = "<group>"; };
@@ -95,6 +103,8 @@
 				5A41A8CA1E72C457002D2E72 /* objloader.cpp */,
 				5A9656C51E546F9E005A8D95 /* main.cpp */,
 				5AAE57E61E5E071F00A562A8 /* shape.cpp */,
+				5A50E6511EB106BF00F834E6 /* photonmap.cpp */,
+				5A50E6531EB106BF00F834E6 /* trace.cpp */,
 				5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */,
 				5A9DFB371E772D8300BA3B30 /* aabb.cpp */,
 				5A2AF25E1E56376C00910E82 /* color.cpp */,
@@ -112,6 +122,10 @@
 				5A7FCFD51E572F9D002BBC75 /* bitmap.hpp */,
 				5A2AF25F1E56376C00910E82 /* color.hpp */,
 				5A2AF25C1E56371E00910E82 /* world.hpp */,
+				5A50E6551EB106BF00F834E6 /* vec3.hpp */,
+				5A50E6501EB106BF00F834E6 /* photon.hpp */,
+				5A50E6541EB106BF00F834E6 /* trace.hpp */,
+				5A50E6521EB106BF00F834E6 /* photonmap.hpp */,
 				5A9DFB361E772D8300BA3B30 /* aabb.hpp */,
 			);
 			name = Headers;
@@ -178,8 +192,10 @@
 				5AAE57E81E5E071F00A562A8 /* shape.cpp in Sources */,
 				5A2AF2601E56376C00910E82 /* color.cpp in Sources */,
 				5AAE57E71E5E071F00A562A8 /* raymath.cpp in Sources */,
+				5A50E6561EB106BF00F834E6 /* photonmap.cpp in Sources */,
 				5A41A8CB1E72C457002D2E72 /* objloader.cpp in Sources */,
 				5A2AF25D1E56371E00910E82 /* world.cpp in Sources */,
+				5A50E6571EB106BF00F834E6 /* trace.cpp in Sources */,
 				5A9656C61E546F9E005A8D95 /* main.cpp in Sources */,
 				5A9DFB381E772D8300BA3B30 /* aabb.cpp in Sources */,
 			);

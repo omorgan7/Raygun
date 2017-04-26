@@ -105,6 +105,7 @@ bool ObjectLoader::GetMeshFileType(void) {
 				else {
 					char stupidBuffer[1000];
 					fgets(stupidBuffer, 1000, file);
+                    rewind(file);
 					vertex_test = 1;
 					continue;
 				}
@@ -119,6 +120,7 @@ bool ObjectLoader::GetMeshFileType(void) {
 				else {
 					char stupidBuffer[1000];
 					fgets(stupidBuffer, 1000, file);
+                    rewind(file);
 					normal_test = 1;
 					continue;
 				}
@@ -136,6 +138,7 @@ bool ObjectLoader::GetMeshFileType(void) {
 				else {
 					char stupidBuffer[1000];
 					fgets(stupidBuffer, 1000, file);
+                    rewind(file);
 					mt = UNKNOWN_FORMAT;
 					break;
 				}
