@@ -501,7 +501,7 @@ vec3f Mesh::returnRandomDirection(vec3f * position, size_t triNumber){
 	do {
 		randDir = { uniform_dist(e1),uniform_dist(e1), uniform_dist(e1) };
 	} while (fabs(randDir.x - interpNormal.x) < 1e-4 && fabs(randDir.y - interpNormal.y) < 1e-4 && fabs(randDir.z - interpNormal.z) < 1e-4);
-	randDir = Vec3Sub(randDir, interpNormal);
+	randDir = Vec3Add(randDir, interpNormal);
 	NormaliseVector(&randDir);
 	return randDir;
 }

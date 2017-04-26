@@ -28,7 +28,7 @@ KDTree * Photonmap::BuildPhotonmap(void){
 	light->CalculateArea();
 	vec3f randBCs;
 	size_t randTri;
-	size_t NumPhotons = 1e6;
+	size_t NumPhotons = 1e5;
 	;
 
 	for (size_t i = 0; i < NumPhotons; i++) {
@@ -44,10 +44,10 @@ KDTree * Photonmap::BuildPhotonmap(void){
 	}
 	// build kd tree
 	if (PhotonList.size() > 0) {
-		PhotonNumbers = std::vector<size_t>(PhotonList.size());
+		//PhotonNumbers = std::vector<size_t>(PhotonList.size());
 		KDTree * root = new KDTree;
-		std::iota(PhotonNumbers.begin(), PhotonNumbers.end(), 0);
-		root->PhotonNumbers = this->PhotonNumbers;
+        root->PhotonNumbers = std::vector<size_t>(PhotonList.size());
+		std::iota(root->PhotonNumbers.begin(), root->PhotonNumbers.end(), 0);
 		BuildKDTree(root);
 		return root;
 	}
@@ -65,7 +65,7 @@ void Photonmap::BuildKDTree(KDTree * root) {
 	vec3f max = { -INFINITY,-INFINITY, -INFINITY };
 	vec3f min = { INFINITY,INFINITY, INFINITY };
 
-	for (size_t i = 0; i < PhotonList.size(); i++) {
+	for (size_t i = 0; i < root->PhotonNumbers.size(); i++) {
 		for (int j = 0; j < 3; j++) {
 			if (min.coords[j] >= PhotonList[root->PhotonNumbers[i]]->pos.coords[j]) {
 				min.coords[j] = PhotonList[root->PhotonNumbers[i]]->pos.coords[j];
@@ -87,12 +87,9 @@ void Photonmap::BuildKDTree(KDTree * root) {
 	}
 	root->axes = axes;
 	//build a list
-	std::vector<float> sortedPositions = std::vector<float>(root->PhotonNumbers.size());
-	for (size_t i = 0; i <root->PhotonNumbers.size(); i++) {
-		sortedPositions[i] = PhotonList[root->PhotonNumbers[i]]->pos.coords[axes];
-	}
-	std::sort(root->PhotonNumbers.begin(), root->PhotonNumbers.end(), [sortedPositions](size_t i1, size_t i2) {return sortedPositions[i1]<sortedPositions[i2]; }); //sort the photon indices wrt to their positions.
-	root->axValue = sortedPositions[root->PhotonNumbers[root->PhotonNumbers.size() / 2]];
+    
+    std::sort(root->PhotonNumbers.begin(), root->PhotonNumbers.end(), [this,axes](size_t i1, size_t i2) {return PhotonList[i1]->pos.coords[axes]>PhotonList[i2]->pos.coords[axes]; }); //sort the photon indices wrt to their positions.
+	root->axValue = PhotonList[root->PhotonNumbers[root->PhotonNumbers.size() / 2]]->pos.coords[axes];
 
 	root->left = new KDTree;
 	root->right = new KDTree;
