@@ -30,7 +30,6 @@ int buildAABBTree(AABB * root,
 //    for(int i= 0;i<root->triNumber.size(); i++){
 //        median_subset[i] = (*medians)[root->triNumber[i]][axes];
 //    }
-    std::cout<<"";
 
     std::sort(root->triNumber.begin(),root->triNumber.end(),[medians,axes](size_t i1, size_t i2){return (*medians)[i1][axes]<(*medians)[i2][axes];});
     //std::sort(median_subset.begin(),median_subset.end());

@@ -33,6 +33,15 @@ public:
     virtual color DiffuseColorCalc(Ray * ray) = 0;
     virtual color SpecularColorCalc(Ray * ray) = 0;
     virtual float calculateInterSectionProduct(Ray * ray, int * success) =0;
+	virtual inline float returnAmbient(void) {
+		return ambientCoeff;
+	}
+	virtual inline float returnDiffuse(void) {
+		return diffuseCoeff;
+	}
+	virtual inline float returnSpecular(void) {
+		return specularCoeff;
+	}
     //virtual void inputIntersectionCoords(std::vector<float> &coords)= 0;
 protected:
     color Color = color();
@@ -88,6 +97,8 @@ public:
     float calculateInterSectionProduct(Ray * ray, int * success);
     void inputIntersectionCoords(vec3f &coords);
 	void computeBarycentrics(Ray * ray);
+	void interpolateNormal(void);
+	vec3f returnInterpNormal(void);
 	void inputBarycentrics(vec3f &vector);
     void translateTri(vec3f translate);
 	float getArea(void);
@@ -128,6 +139,8 @@ class Mesh{
         void translate(vec3f translate);
         bool RayIntersection(Ray * ray, color * outColor, LightSurface * light);
 		void computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices);
+		vec3f returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri);
+		vec3f returnRandomDirection(vec3f * position, size_t triNumber);
 		triangle ** tris;
 		AABB * BVH;
     protected:
@@ -135,11 +148,12 @@ class Mesh{
         size_t num_tris;
 		size_t objectIndex = 0;
 		size_t intersectedCoordsIndex = 0;
+		float TotalArea;
+		float * weightedArea = nullptr;
 };
 
 class LightSurface : public Mesh{
 	public:
-		vec3f returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri);
 		LightSurface(
 			std::vector<std::vector<float> > * v,
 			std::vector<unsigned int> * v_indices,
@@ -153,8 +167,6 @@ class LightSurface : public Mesh{
 		float returnStrength(void);
 	private:
 		color Colour = color();
-		float TotalArea;
-		float * weightedArea = nullptr;
 		float strength = 10.0f;
 };
 #endif /* shape_hpp */

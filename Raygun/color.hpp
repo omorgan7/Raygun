@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "raymath.hpp"
+
 class color{
 public:
     color();
@@ -24,6 +26,7 @@ public:
     void changeRed(unsigned char R);
     void changeGreen(unsigned char G);
     void changeBlue(unsigned char B);
+	vec3f floatingPointRep(void);
     //operators
     color operator+(const color& c);
     color operator+=(const color& c);

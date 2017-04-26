@@ -36,8 +36,10 @@ vec3<bool> Ray::GetInvDirectionSign(void) {
 	return InvDirSign;
 }
 void Ray::SetDirection(vec3f direction){
-    RayDirection.x = direction.x;
-    RayDirection.y = direction.y;
-    RayDirection.z = direction.z;
+	for (int i = 0; i<3; i++) {
+		RayDirection.coords[i] = direction.coords[i];
+		InvDirection.coords[i] = 1.0f / RayDirection.coords[i];
+		InvDirSign.coords[i] = InvDirection.coords[i] < 0;
+	}
 };
 

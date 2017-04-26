@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <cmath>
+#include "color.hpp"
 //#include <assert.h>
 
 #ifndef raymath_hpp
@@ -34,9 +35,18 @@ public:
     void SetDirection(vec3f direction);
     vec3f GetInvDirection(void);
 	vec3<bool> GetInvDirectionSign(void);
+	inline void SetColor(color c) {
+		RayColor = c;
+	}
+	inline color GetColor(void) {
+		return RayColor;
+	}
+	
+
 
 private:
     vec3f RayOrigin, RayDirection, InvDirection;
+	color RayColor = color((unsigned char)255, (unsigned char)255, (unsigned char)255);
     vec3<bool> InvDirSign;
 };
 

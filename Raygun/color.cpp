@@ -45,6 +45,10 @@ void color::changeBlue(unsigned char B){
     blue = B;
 }
 
+vec3f color::floatingPointRep(void){
+	return { (float)red / 255.0f , (float)green / 255.0f, (float)blue / 255.0f };
+}
+
 color color::operator+(const color &c){
     unsigned char newRed, newGreen, newBlue;
     if(((int) this->Red() +  (int)c.Red()) > 255){

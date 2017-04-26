@@ -10,7 +10,7 @@
 
 bool ShadowRayIntersection(Mesh * mesh, Ray * shadowRay);
 vec3f ForwardRayIntersection(Mesh * mesh, Ray * ray, size_t * out_tri_number);
-Photon PhotonIntersection(Mesh * mesh, Ray * ray);
+Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth);
 
 #endif // !trace_hpp
 

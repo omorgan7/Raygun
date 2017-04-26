@@ -286,8 +286,16 @@ void triangle::computeBarycentrics(Ray * ray){
     barycentrics.x = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(ray->GetDirection(), edgeB), Vec3Sub(ray->GetStartPos(),vertices[0]));
     barycentrics.y = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(Vec3Sub(ray->GetStartPos(),vertices[0]), edgeA), ray->GetDirection());
     barycentrics.z = 1.0f - barycentrics.x - barycentrics.y;
-    interpNormal = Vec3Add(Vec3ScalarMultiply(normals[1], barycentrics.x), Vec3Add(Vec3ScalarMultiply(normals[2], barycentrics.y), Vec3ScalarMultiply(normals[0], barycentrics.z)));
-    NormaliseVector(&interpNormal);
+	interpolateNormal();
+}
+
+void triangle::interpolateNormal(void) {
+	interpNormal = Vec3Add(Vec3ScalarMultiply(normals[1], barycentrics.x), Vec3Add(Vec3ScalarMultiply(normals[2], barycentrics.y), Vec3ScalarMultiply(normals[0], barycentrics.z)));
+	NormaliseVector(&interpNormal);
+}
+
+vec3f triangle::returnInterpNormal(void) {
+	return interpNormal;
 }
 
  void triangle::inputIntersectionCoords(vec3f &vector){
@@ -465,7 +473,7 @@ void Mesh::translate(vec3f translate){
     }
 }
 
-vec3f LightSurface::returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri){
+vec3f Mesh::returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri){
 	//pick a triangle, weighted by area.
 	std::piecewise_constant_distribution<> const_dist(BVH->triNumber.begin(), BVH->triNumber.end(), weightedArea);
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
@@ -483,6 +491,18 @@ vec3f LightSurface::returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * o
 	*outBarycentrics = randBarycentric;//this is ok, it's a struct! yay!
 	*outTri = randomTri;
 	return Vec3Add(Vec3Add(Vec3ScalarMultiply(TriangleCoords.coords[1], randBarycentric.x), Vec3ScalarMultiply(TriangleCoords.coords[2], randBarycentric.y)), Vec3ScalarMultiply(TriangleCoords.coords[0], randBarycentric.z));
+}
+vec3f Mesh::returnRandomDirection(vec3f * position, size_t triNumber){
+	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
+	std::random_device r;
+	std::default_random_engine e1(r());
+	vec3f interpNormal = tris[triNumber]->returnInterpNormal();
+	vec3f randDir;
+	do {
+		randDir = { uniform_dist(e1),uniform_dist(e1), uniform_dist(e1) };
+	} while (fabs(randDir.x - interpNormal.x) < 1e-4 && fabs(randDir.y - interpNormal.y) < 1e-4 && fabs(randDir.z - interpNormal.z) < 1e-4);
+	randDir = Vec3Sub(randDir, interpNormal);
+	NormaliseVector(&randDir);
 }
 void LightSurface::CalculateArea(void) {
 	if (weightedArea == nullptr) {
