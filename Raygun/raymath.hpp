@@ -6,25 +6,15 @@
 //  Copyright © 2017 Owen Morgan. All rights reserved.
 //
 
-#include <vector>
-#include <cmath>
-#include "color.hpp"
-//#include <assert.h>
 
 #ifndef raymath_hpp
 #define raymath_hpp
 
-template <typename T>
-struct vec3{
-    union{
-        struct{
-            T x, y, z;
-        };
-        T coords[3];
-    };
-};
-
-typedef vec3<float> vec3f;
+#include <vector>
+#include <cmath>
+#include "color.hpp"
+#include "vec3.hpp"
+//#include <assert.h>
 
 class Ray{
 public:
@@ -37,12 +27,10 @@ public:
 	vec3<bool> GetInvDirectionSign(void);
 	inline void SetColor(color c) {
 		RayColor = c;
-	}
-	inline color GetColor(void) {
+	};
+	color GetColor(void) {
 		return RayColor;
-	}
-	
-
+	};
 
 private:
     vec3f RayOrigin, RayDirection, InvDirection;

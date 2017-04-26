@@ -68,8 +68,11 @@ vec3f ForwardRayIntersection(Mesh * mesh, Ray * ray, size_t * out_tri_number) {
 Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
 	size_t outTriNum;
 	vec3f intersection = ForwardRayIntersection(mesh, ray, &outTriNum);
-
+	if (outTriNum == -1) { //no intersection
+		return nullptr;
+	}
 	//decide if we died:
+	assert(outTriNum < mesh->returnNumTris());
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
 	std::random_device r;
 	std::default_random_engine e1(r());

@@ -1,4 +1,23 @@
-#include "photon.hpp"
+#include "photonmap.hpp"
+
+void cleanupKDTree(KDTree * root) {
+	if (root == nullptr) {
+		return;
+	}
+	if (root->left != nullptr) {
+		cleanupKDTree(root->left);
+	}
+	if (root->right != nullptr) {
+		cleanupKDTree(root->right);
+	}
+	if (root->photon != nullptr) {
+		delete root->photon;
+		root->photon = nullptr;
+	}
+	delete root;
+	root = nullptr;
+	return;
+};
 
 Photonmap::Photonmap(Mesh * scene, LightSurface * light) {
 	this->scene = scene;
@@ -9,28 +28,36 @@ KDTree * Photonmap::BuildPhotonmap(void){
 	light->CalculateArea();
 	vec3f randBCs;
 	size_t randTri;
-	size_t NumPhotons = 1e2;
-	PhotonList = std::vector<Photon *>(NumPhotons);
+	size_t NumPhotons = 1e6;
+	;
 
 	for (size_t i = 0; i < NumPhotons; i++) {
 		vec3f randPos = light->returnSurfaceSamplePoint(&randBCs, &randTri);
-		light->tris[randTri]->inputBarycentrics[randBCs];
+		light->tris[randTri]->inputBarycentrics(randBCs);
 		light->tris[randTri]->interpolateNormal();
 		vec3f randDir = light->returnRandomDirection(&randPos, randTri);
 		Ray photonray(randPos, randDir);
-		PhotonList[i] = PhotonIntersection(scene, &photonray, 0);
+		Photon * tempPhoton = PhotonIntersection(scene, &photonray, 0);
+		if (tempPhoton != nullptr) {
+			PhotonList.push_back(tempPhoton);
+		}
 	}
 	// build kd tree
-	PhotonNumbers = std::vector<size_t>(NumPhotons);
-	KDTree * root = new KDTree;
-	std::iota(PhotonNumbers.begin(), PhotonNumbers.end(), 0);
-	root->PhotonNumbers = this->PhotonNumbers;
-	BuildKDTree(root);
-	return root;
+	if (PhotonList.size() > 0) {
+		PhotonNumbers = std::vector<size_t>(PhotonList.size());
+		KDTree * root = new KDTree;
+		std::iota(PhotonNumbers.begin(), PhotonNumbers.end(), 0);
+		root->PhotonNumbers = this->PhotonNumbers;
+		BuildKDTree(root);
+		return root;
+	}
+
+	return nullptr;
 
 }
 
 void Photonmap::BuildKDTree(KDTree * root) {
+
 	if (root->PhotonNumbers.size() == 1) {
 		root->photon = PhotonList[root->PhotonNumbers[0]];
 		return;

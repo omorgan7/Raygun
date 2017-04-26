@@ -254,6 +254,8 @@ bool ObjectLoader::loadIndices(std::vector<unsigned int> & out_vertex_indices, s
 		return 0;
 	}
 	out_vertex_indices.erase(out_vertex_indices.begin(),out_vertex_indices.end());
+	out_norm_indices.erase(out_norm_indices.begin(), out_norm_indices.end());
+	out_texture_indices.erase(out_texture_indices.begin(), out_texture_indices.end());
 	while (1) {
 
 		char lineHeader[128];

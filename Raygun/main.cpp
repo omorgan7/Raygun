@@ -21,7 +21,8 @@
 #include "raymath.hpp"
 #include "aabb.hpp"
 #include "objloader.hpp"
-
+#include "photonmap.hpp"
+#include "trace.hpp"
 
 
 
@@ -76,6 +77,8 @@ int main(int argc, char* argv[]) {
 	LightSurface light = LightSurface(&vertices, &vertex_indices, &normals, &normal_indices, nullptr, nullptr, nullptr);
 	light.computeBVH(&vertices, &vertex_indices);
 
+	Photonmap photonmap(&mesh,&light);
+	KDTree * photonmaptree = photonmap.BuildPhotonmap();
 
 	world::sunlightPosition.x = 0.0f;
 	world::sunlightPosition.y = 1.0f;
@@ -128,7 +131,7 @@ int main(int argc, char* argv[]) {
                 Ray R = Ray(eyevec,jitteredDirection);
                 
                 color tempColor;
-                mesh.RayIntersection(&R,&tempColor,&light);
+                mesh.RayIntersection(&R,&tempColor);
                 outColor += tempColor*(1.0f/((float)AAFactor));
             }
         }
@@ -136,7 +139,7 @@ int main(int argc, char* argv[]) {
             direction = Vec3Sub(direction, eyevec);
             NormaliseVector(&direction);
             Ray R = Ray(eyevec,direction);
-            mesh.RayIntersection(&R,&outColor, &light);
+            mesh.RayIntersection(&R,&outColor);
         }
 
         image[i] = outColor.Red();

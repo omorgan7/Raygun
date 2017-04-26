@@ -389,7 +389,7 @@ void Mesh::computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned
 	std::cout << "aabb tree depth = " << depth << "\n";
 }
 
-bool Mesh::RayIntersection(Ray * ray, color * outColor, LightSurface * light){
+bool Mesh::RayIntersection(Ray * ray, color * outColor){
     std::vector<unsigned int> intersectedTris;
     std::vector<vec3f> interSectionCoordinates;
     bool intersection = AABBRayIntersection(this->BVH, ray, &intersectedTris,0,0);
@@ -481,7 +481,7 @@ vec3f Mesh::returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri){
 	std::default_random_engine e1(r());
 	size_t randomTri = static_cast<size_t>(const_dist(e1));
 	assert(randomTri < num_tris && randomTri >= 0);
-	vec3<vec3f> TriangleCoords = tris[randomTri]->returnCoords;
+	vec3<vec3f> TriangleCoords = tris[randomTri]->returnCoords();
 	vec3f randBarycentric;
 	do{
 		randBarycentric.x = uniform_dist(e1);
@@ -503,6 +503,7 @@ vec3f Mesh::returnRandomDirection(vec3f * position, size_t triNumber){
 	} while (fabs(randDir.x - interpNormal.x) < 1e-4 && fabs(randDir.y - interpNormal.y) < 1e-4 && fabs(randDir.z - interpNormal.z) < 1e-4);
 	randDir = Vec3Sub(randDir, interpNormal);
 	NormaliseVector(&randDir);
+	return randDir;
 }
 void LightSurface::CalculateArea(void) {
 	if (weightedArea == nullptr) {

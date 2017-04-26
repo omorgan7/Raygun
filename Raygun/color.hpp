@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include "raymath.hpp"
+#include "vec3.hpp"
 
 class color{
 public:

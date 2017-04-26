@@ -137,10 +137,13 @@ class Mesh{
 			textureImage * texture);
         ~Mesh();
         void translate(vec3f translate);
-        bool RayIntersection(Ray * ray, color * outColor, LightSurface * light);
+        bool RayIntersection(Ray * ray, color * outColor);
 		void computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices);
 		vec3f returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri);
 		vec3f returnRandomDirection(vec3f * position, size_t triNumber);
+		inline size_t returnNumTris(void) {
+			return num_tris;
+		};
 		triangle ** tris;
 		AABB * BVH;
     protected:
@@ -162,6 +165,7 @@ class LightSurface : public Mesh{
 			std::vector<std::vector<float> > * uvs,
 			std::vector<unsigned int> * uv_indices,
 			textureImage * texture) : Mesh(v, v_indices, v_norms, v_norm_indices, uvs, uv_indices, texture) {};
+		~LightSurface();
 		void CalculateArea(void);
 		float returnArea(void);
 		float returnStrength(void);
