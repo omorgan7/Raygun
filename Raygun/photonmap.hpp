@@ -3,10 +3,16 @@
 
 #include <random>
 #include <numeric>
+#include <queue>
+#include <functional>
+
 #include "raymath.hpp"
 #include "photon.hpp"
 #include "shape.hpp"
 #include "trace.hpp"
+#include "color.hpp"
+
+#define PI 3.1415926f
 
 struct KDTree {
 	KDTree * left = nullptr;
@@ -19,21 +25,35 @@ struct KDTree {
 
 void cleanupKDTree(KDTree * root);
 
+//const auto queuecmp = [v](Photon * p1, Photon * p2){return Vec3DistanceSquare(p1->pos, v)>Vec3DistanceSquare(p2->pos, v);};
+
+
 class Photonmap {
-	public: 
-		Photonmap(Mesh * scene, LightSurface * light);
-		KDTree * BuildPhotonmap(void);
-		
-	private:
-		std::random_device random_dev;
-		std::default_random_engine e1;
-		std::uniform_real_distribution<float> uniform_dist; //constructor takes the upper and lower bounds.
-		std::bernoulli_distribution bernoulli_dist; //returns yes or no, constructor takes the probability.
-		Mesh * scene;
-		LightSurface * light;
-		void BuildKDTree(KDTree * root);
-		std::vector<Photon *> PhotonList;
-		std::vector<size_t> PhotonNumbers;
+public:
+    Photonmap(Mesh * scene, LightSurface * light);
+    ~Photonmap();
+    void BuildPhotonmap(void);
+    color getColor(vec3f pos);
+ 
+private:
+    std::random_device random_dev;
+    std::default_random_engine e1;
+    std::uniform_real_distribution<float> uniform_dist; //constructor takes the upper and lower bounds.
+    std::bernoulli_distribution bernoulli_dist; //returns yes or no, constructor takes the probability.
+    Mesh * scene;
+    LightSurface * light;
+    void BuildKDTree(KDTree * root);
+    void LocatePhoton(KDTree * root);
+    vec3f POI;
+    std::function<bool(Photon*, Photon*)> queuecmp = [this](Photon * p1, Photon * p2){
+        return Vec3DistanceSquare(p1->pos, POI)>Vec3DistanceSquare(p2->pos, POI);
+    };
+    std::priority_queue<Photon *,std::vector<Photon *>,decltype(queuecmp) > priorityQ;
+    
+    float distanceThresh = 0.6f;
+    KDTree * root = nullptr;
+    std::vector<Photon *> PhotonList;
+    std::vector<size_t> PhotonNumbers;
 };
 
 

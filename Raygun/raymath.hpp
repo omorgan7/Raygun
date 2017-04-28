@@ -142,6 +142,11 @@ inline vec3<T> Vec3ScalarMultiply(vec3<T> u, T m){
     MProduct.z = u.z*m;
     return MProduct;
 }
+template <typename T>
+inline T Vec3DistanceSquare(vec3<T> u, vec3<T> v){
+    //this will break on unsigned types, this may also possibly over/underflow
+    return (u.x-v.x)*(u.x-v.x) + (u.y-v.y)*(u.y-v.y) + (u.z-v.z)*(u.z-v.z);
+}
 
 template<typename T>
 inline void swap(T * a, T * b){

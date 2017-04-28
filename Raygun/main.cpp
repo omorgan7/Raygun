@@ -82,7 +82,8 @@ int main(int argc, char* argv[]) {
 	light.computeBVH(&vertices, &vertex_indices);
 
 	Photonmap photonmap(&mesh,&light);
-	KDTree * photonmaptree = photonmap.BuildPhotonmap();
+	photonmap.BuildPhotonmap();
+    std::cout<<"built environment photon map.\n";
 
 	world::sunlightPosition.x = 0.0f;
 	world::sunlightPosition.y = 1.0f;
@@ -95,7 +96,7 @@ int main(int argc, char* argv[]) {
     std::vector<float> eye_v;
     std::vector<float> eye_u;
     std::vector<float> c = { 0.0f,0.0f,-1.0f };
-    std::vector<float> eye_origin = {0.0f,0.0f,-3.0f};
+    std::vector<float> eye_origin = {0.0f,0.0f,-2.0f};
     std::vector<float> L_vector = std::vector<float>(3);
     vec3f direction;
     vec3f eyevec;
@@ -111,7 +112,7 @@ int main(int argc, char* argv[]) {
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.005f);
 	//float jitter;
     int AAFactor = 2;
-    int AA_status =1;
+    int AA_status =0;
     for(auto i = 0; i<width*height*3; i+=3){
         
         auto image_x = (i/3)%width;
@@ -143,7 +144,16 @@ int main(int argc, char* argv[]) {
             direction = Vec3Sub(direction, eyevec);
             NormaliseVector(&direction);
             Ray R = Ray(eyevec,direction);
-            mesh.RayIntersection(&R,&outColor);
+            size_t outTri;
+            vec3f intersectionPoint = ForwardRayIntersection(&mesh, &R, &outTri);
+            if(outTri == -1){
+                outColor = color();
+            }
+            else{
+                outColor = photonmap.getColor(intersectionPoint);
+            }
+            
+            //mesh.RayIntersection(&R,&outColor);
         }
 
         image[i] = outColor.Red();

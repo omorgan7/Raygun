@@ -131,9 +131,9 @@ triangle::triangle(
     }
     edgeA = Vec3Sub(vertices[1],vertices[0]);
     edgeB = Vec3Sub(vertices[2],vertices[0]);
-    ambientCoeff=0.3;
+    ambientCoeff=0.4;
     diffuseCoeff = 0.3;
-    specularCoeff = 0.4;
+    specularCoeff = 0.3;
     Color.changeRed(255);
     Color.changeBlue(255);
     ComputeNormal();
@@ -493,7 +493,7 @@ vec3f Mesh::returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri){
 	return Vec3Add(Vec3Add(Vec3ScalarMultiply(TriangleCoords.coords[1], randBarycentric.x), Vec3ScalarMultiply(TriangleCoords.coords[2], randBarycentric.y)), Vec3ScalarMultiply(TriangleCoords.coords[0], randBarycentric.z));
 }
 vec3f Mesh::returnRandomDirection(vec3f * position, size_t triNumber){
-	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
+	std::uniform_real_distribution<float> uniform_dist(-1.0f, 1.0f);
 	std::random_device r;
 	std::default_random_engine e1(r());
 	vec3f interpNormal = tris[triNumber]->returnInterpNormal();
@@ -526,11 +526,6 @@ float LightSurface::returnStrength(void) {
 }
 
 LightSurface::~LightSurface() {
-	for (size_t i = 0; i<num_tris; i++) {
-		delete tris[i];
-	}
-	delete[] tris;
-	cleanupAABBTree(BVH);
 	if (weightedArea != nullptr) {
 		delete[] weightedArea;
 		weightedArea = nullptr;

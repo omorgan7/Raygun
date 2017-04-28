@@ -81,10 +81,11 @@ Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
 	float specular = mesh->tris[outTriNum]->returnSpecular();
 
 	//we died
-	if (depth >= 5 || roulette >= diffuse + specular) {
+	if (depth >= 8 || roulette >= diffuse + specular) {
 		Photon * p = new Photon;
 		p->pos = intersection;
 		p->color = ray->GetColor();
+        p->direction = ray->GetDirection();
 		return p;
 	}
 	
@@ -98,7 +99,7 @@ Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
 		color materialColor = mesh->tris[outTriNum]->GetColor();
 		color rayCol = ray->GetColor();
 		vec3f fmatCol = Vec3ElementProduct(materialColor.floatingPointRep(), rayCol.floatingPointRep());
-		ray->SetColor(color(fmatCol.x * 255.0f, fmatCol.y * 255.0f, fmatCol.z * 255.0f));
+		reflectedRay.SetColor(color(fmatCol.x * 255.0f, fmatCol.y * 255.0f, fmatCol.z * 255.0f));
 		return PhotonIntersection(mesh, &reflectedRay, ++depth);
 	}
 
