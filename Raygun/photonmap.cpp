@@ -33,9 +33,8 @@ void Photonmap::BuildPhotonmap(void){
 	light->CalculateArea();
 	vec3f randBCs;
 	size_t randTri;
-	size_t NumPhotons = 1e6;
 
-	for (size_t i = 0; i < NumPhotons; i++) {
+	while(PhotonList.size() < NumPhotons) {
 		vec3f randPos = light->returnSurfaceSamplePoint(&randBCs, &randTri);
 		light->tris[randTri]->inputBarycentrics(randBCs);
 		light->tris[randTri]->interpolateNormal();
@@ -111,26 +110,21 @@ void Photonmap::BuildKDTree(KDTree * root) {
 }
 color Photonmap::getColor(vec3f pos){
     POI = pos;
-    distanceThresh = 1.0f;
-    //priorityQ = std::priority_queue<Photon *,std::vector<Photon *>,decltype(queuecmp) >(queuecmp);
+	distanceThresh = 0.7f;
+    priorityQ = std::priority_queue<Photon *,std::vector<Photon *>,decltype(queuecmp) >(queuecmp);
     LocatePhoton(root);
     vec3f tempColor = {0,0,0};
     float numPhotons = static_cast<float>(priorityQ.size());
     float unitArea;
     if(!priorityQ.empty()){
-        Photon * tempphoton = priorityQ.top();//furthest away
-        unitArea = PI*Vec3DistanceSquare(tempphoton->pos, POI);
+        //unitArea = PI*((priorityQ.top())->distance);
+		tempColor = (priorityQ.top())->color.floatingPointRep();
     }
-    while(!priorityQ.empty()){
-        Photon * tempphoton = priorityQ.top();
-        priorityQ.pop();
-        tempColor = Vec3Add(tempColor,Vec3ScalarMultiply(tempphoton->color.floatingPointRep(),1.0f/(numPhotons*unitArea)));
-        //std::cout<<"non empty queue\n";
-//        if(tempColor.Red() != 0 || tempColor.Green() != 0 || tempColor.Blue() != 0){
-//            std::cout<<(int)tempColor.Red()<<" "<<(int)tempColor.Green()<<" "<<(int)tempColor.Blue()<<"\n";
-//        }
-        //eventually we'll avg all the colours in here etc etc.
-    }
+    //while(!priorityQ.empty()){
+    //    Photon * tempphoton = priorityQ.top();
+    //    priorityQ.pop();
+    //    tempColor = Vec3Add(tempColor,Vec3ScalarMultiply(tempphoton->color.floatingPointRep(),1.0f/(numPhotons*unitArea)));
+    //}
     return color(255.0f*tempColor.x,255.0f*tempColor.y,255.0f*tempColor.z);
 }
 
@@ -152,16 +146,14 @@ void Photonmap::LocatePhoton(KDTree *root){
         }
     }
     else{//leaf node
-        float photonDistance = Vec3DistanceSquare(POI, root->photon->pos);//this is the squared difference!
-        if(photonDistance<distanceThresh){
+        root->photon->distance = Vec3DistanceSquare(POI, root->photon->pos);//this is the squared difference!
+        if(root->photon->distance<distanceThresh){
             priorityQ.push(root->photon);
             //adjust distance, we won't do this just yet.
-            if(priorityQ.size() >= 1e4){
-                distanceThresh = Vec3DistanceSquare((priorityQ.top())->pos, POI);
+            if(priorityQ.size() >= NumPhotons/10){
+				distanceThresh = (priorityQ.top())->distance;
                 priorityQ.pop();
-                
             }
         }
-        
     }
 }

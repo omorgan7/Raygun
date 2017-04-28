@@ -5,8 +5,6 @@ struct Photon {
 	color color;
     vec3f direction;
     int axes;
-	//float power;
-	//float phi, theta;
-	//enum axes{x,y,z};
+	float distance; //to sorting point.
 };
 #endif

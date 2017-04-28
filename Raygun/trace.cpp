@@ -80,7 +80,7 @@ Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
 	float diffuse = mesh->tris[outTriNum]->returnDiffuse();
 	float specular = mesh->tris[outTriNum]->returnSpecular();
 
-	//we died
+	//we died/got absorbed
 	if (depth >= 8 || roulette >= diffuse + specular) {
 		Photon * p = new Photon;
 		p->pos = intersection;
@@ -88,25 +88,28 @@ Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
         p->direction = ray->GetDirection();
 		return p;
 	}
-	
+
+	//specular, don't keep going, not useful.
+	if (roulette > diffuse) {
+		return nullptr;
+	}
+
 	//give me a new direction.
 	mesh->tris[outTriNum]->computeBarycentrics(ray);
 	vec3f randDir = mesh->returnRandomDirection(&intersection, outTriNum);
 	Ray reflectedRay = Ray(intersection, randDir);
 
 	//diffuse
-	if (roulette < diffuse) {
-		color materialColor = mesh->tris[outTriNum]->GetColor();
-		color rayCol = ray->GetColor();
-		vec3f fmatCol = Vec3ElementProduct(materialColor.floatingPointRep(), rayCol.floatingPointRep());
-		reflectedRay.SetColor(color(fmatCol.x * 255.0f, fmatCol.y * 255.0f, fmatCol.z * 255.0f));
-		return PhotonIntersection(mesh, &reflectedRay, ++depth);
-	}
-
-	//specular
-	vec3f interpNormal = mesh->tris[outTriNum]->returnInterpNormal();
-	vec3f reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNormal, 2.0f*Vec3DotProduct(interpNormal, ray->GetDirection())), ray->GetDirection());
-	NormaliseVector(&reflectionVector);
-	reflectedRay.SetDirection(reflectionVector);
+	color materialColor = mesh->tris[outTriNum]->GetColor();
+	color rayCol = ray->GetColor();
+	vec3f fmatCol = Vec3ElementProduct(materialColor.floatingPointRep(), rayCol.floatingPointRep());
+	reflectedRay.SetColor(color(fmatCol.x * 255.0f, fmatCol.y * 255.0f, fmatCol.z * 255.0f));
 	return PhotonIntersection(mesh, &reflectedRay, ++depth);
+
+	////specular
+	//vec3f interpNormal = mesh->tris[outTriNum]->returnInterpNormal();
+	//vec3f reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNormal, 2.0f*Vec3DotProduct(interpNormal, ray->GetDirection())), ray->GetDirection());
+	//NormaliseVector(&reflectionVector);
+	//reflectedRay.SetDirection(reflectionVector);
+	//return PhotonIntersection(mesh, &reflectedRay, ++depth);
 }

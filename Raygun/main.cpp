@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
     //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
     //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
    //std::string objectstring = "/Users/Owen/Dropbox/donut_uv.obj";
-//	std::string objectstring = "C:/Users/om371/Dropbox/lightscene.obj";
-//    std::string lightobjectstring = "C:/Users/om371/Dropbox/lightsurface.obj";
+	std::string objectstring = "C:/Users/om371/Dropbox/lightscene.obj";
+    std::string lightobjectstring = "C:/Users/om371/Dropbox/lightsurface.obj";
     //std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
 	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/cube.obj";
@@ -48,11 +48,11 @@ int main(int argc, char* argv[]) {
    //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
    // std::string texturestring = "/Users/Owen/Dropbox/donut_texture.bmp";
    //std::string texturestring = "C:/Users/om371/Dropbox/cube_texture.bmp";
-   //std::string texturestring = "C:/Users/om371/Dropbox/halo.bmp";
+   std::string texturestring = "C:/Users/om371/Dropbox/halo.bmp";
     
-    std::string objectstring = "/Users/Owen/Dropbox/lightscene.obj";
-    std::string lightobjectstring = "/Users/Owen/Dropbox/lightsurface.obj";
-    std::string texturestring = "/Users/Owen/Dropbox/halo.bmp";
+    //std::string objectstring = "/Users/Owen/Dropbox/lightscene.obj";
+    //std::string lightobjectstring = "/Users/Owen/Dropbox/lightsurface.obj";
+    //std::string texturestring = "/Users/Owen/Dropbox/halo.bmp";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;

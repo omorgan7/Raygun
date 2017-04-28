@@ -134,8 +134,8 @@ triangle::triangle(
     ambientCoeff=0.4;
     diffuseCoeff = 0.3;
     specularCoeff = 0.3;
-    Color.changeRed(255);
-    Color.changeBlue(255);
+    Color.changeRed(225);
+    Color.changeBlue(225);
     ComputeNormal();
     Mesh_Stats xyz;
     getminmaxmed(&tribox,input_vertices, &xyz);
@@ -324,7 +324,7 @@ Mesh::Mesh(
 	textureImage * texture){
     
     num_tris = v_indices->size()/3;
-    tris = new triangle* [num_tris];
+    tris = new triangle * [num_tris];
     BVH = new AABB;
     for(size_t i = 0; i<num_tris; i++){
         unsigned int v_i[] = {(*v_indices)[3*i],(*v_indices)[3*i+1],(*v_indices)[3*i+2]};
