@@ -12,6 +12,7 @@
 		5A41A8CB1E72C457002D2E72 /* objloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A41A8CA1E72C457002D2E72 /* objloader.cpp */; };
 		5A50E6561EB106BF00F834E6 /* photonmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A50E6511EB106BF00F834E6 /* photonmap.cpp */; };
 		5A50E6571EB106BF00F834E6 /* trace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A50E6531EB106BF00F834E6 /* trace.cpp */; };
+		5A537E8F1EB8F6E700D0CC46 /* CameraReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A537E8D1EB8F6E700D0CC46 /* CameraReader.cpp */; };
 		5A7FCFD71E575C8E002BBC75 /* bitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */; };
 		5A9656C61E546F9E005A8D95 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A9656C51E546F9E005A8D95 /* main.cpp */; };
 		5A9DFB381E772D8300BA3B30 /* aabb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DFB371E772D8300BA3B30 /* aabb.cpp */; };
@@ -44,6 +45,8 @@
 		5A50E6531EB106BF00F834E6 /* trace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trace.cpp; sourceTree = "<group>"; };
 		5A50E6541EB106BF00F834E6 /* trace.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = trace.hpp; sourceTree = "<group>"; };
 		5A50E6551EB106BF00F834E6 /* vec3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vec3.hpp; sourceTree = "<group>"; };
+		5A537E8D1EB8F6E700D0CC46 /* CameraReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CameraReader.cpp; sourceTree = "<group>"; };
+		5A537E8E1EB8F6E700D0CC46 /* CameraReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraReader.h; sourceTree = "<group>"; };
 		5A7FCFD51E572F9D002BBC75 /* bitmap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bitmap.hpp; sourceTree = "<group>"; };
 		5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bitmap.cpp; sourceTree = "<group>"; };
 		5A92340C1E82E1BE006FF027 /* raytrace.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = raytrace.bmp; path = "../../../../Library/Developer/Xcode/DerivedData/Raygun-hdpduejgbxvwwzhjaapakihvzbpx/Build/Products/Debug/raytrace.bmp"; sourceTree = "<group>"; };
@@ -102,6 +105,7 @@
 				5AAE57E51E5E071F00A562A8 /* raymath.cpp */,
 				5A41A8CA1E72C457002D2E72 /* objloader.cpp */,
 				5A9656C51E546F9E005A8D95 /* main.cpp */,
+				5A537E8D1EB8F6E700D0CC46 /* CameraReader.cpp */,
 				5AAE57E61E5E071F00A562A8 /* shape.cpp */,
 				5A50E6511EB106BF00F834E6 /* photonmap.cpp */,
 				5A50E6531EB106BF00F834E6 /* trace.cpp */,
@@ -124,6 +128,7 @@
 				5A2AF25C1E56371E00910E82 /* world.hpp */,
 				5A50E6551EB106BF00F834E6 /* vec3.hpp */,
 				5A50E6501EB106BF00F834E6 /* photon.hpp */,
+				5A537E8E1EB8F6E700D0CC46 /* CameraReader.h */,
 				5A50E6541EB106BF00F834E6 /* trace.hpp */,
 				5A50E6521EB106BF00F834E6 /* photonmap.hpp */,
 				5A9DFB361E772D8300BA3B30 /* aabb.hpp */,
@@ -193,6 +198,7 @@
 				5A2AF2601E56376C00910E82 /* color.cpp in Sources */,
 				5AAE57E71E5E071F00A562A8 /* raymath.cpp in Sources */,
 				5A50E6561EB106BF00F834E6 /* photonmap.cpp in Sources */,
+				5A537E8F1EB8F6E700D0CC46 /* CameraReader.cpp in Sources */,
 				5A41A8CB1E72C457002D2E72 /* objloader.cpp in Sources */,
 				5A2AF25D1E56371E00910E82 /* world.cpp in Sources */,
 				5A50E6571EB106BF00F834E6 /* trace.cpp in Sources */,
