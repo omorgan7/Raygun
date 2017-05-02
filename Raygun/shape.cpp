@@ -134,8 +134,8 @@ triangle::triangle(
     ambientCoeff=0.4;
     diffuseCoeff = 0.3;
     specularCoeff = 0.3;
-    Color.changeRed(225);
-    Color.changeBlue(225);
+    Color.changeRed(255);
+    Color.changeBlue(255);
     ComputeNormal();
     Mesh_Stats xyz;
     getminmaxmed(&tribox,input_vertices, &xyz);
@@ -183,27 +183,19 @@ color triangle::GetColor(void){
     //pixel neighbourhood index calculation and sanitisation.
     int pixNBH[4];
     
-    ///////////// THIS CODE IS BUGGY ///////////////
     pixNBH[0] = pixelU*texture->width * 3 + pixelV*3;
-	if (pixNBH[0] > textureSize - 1 - texture->width * 3) {//on the bottom row
-		if (pixNBH[0] == textureSize -3) {//in the bottom right corner
-			pixNBH[1] = 0;
-			pixNBH[2] = texture->width * 3;
-		}
-		else {
-			pixNBH[1] = pixNBH[0] + 3;
-			pixNBH[2] = pixelV * 3;
-		}
-		pixNBH[3] = pixNBH[2] + 3;
-	}
-	else {
-		pixNBH[1] = pixNBH[0] + 3;
-		pixNBH[2] = pixNBH[0] + texture->width * 3;
-		pixNBH[3] = pixNBH[2] + 3;
-	}
+    pixNBH[2] = (pixNBH[0] + texture->width * 3) % textureSize;
+    if(pixNBH[0] % texture->width*3 - 1 == 0){//at an edge
+        pixNBH[1] = pixNBH[0]-texture->width*3 - 1;
+        pixNBH[3] = pixNBH[2]-texture->width*3 - 1;
+    }
+    	else {
+    		pixNBH[1] = (pixNBH[0] + 3)%textureSize;
+    		pixNBH[3] = (pixNBH[2] + 3 )% textureSize;
+    	}
 
     for(int i =0; i<4; i++){
-		assert(pixNBH[i] < textureSize);
+		assert(pixNBH[i] < textureSize && pixNBH[i] > -1);
         pixColors[i] = {texture->imageData[pixNBH[i]],texture->imageData[pixNBH[i]+1],texture->imageData[pixNBH[i]+2]};
     }
     vec3f horizColor1,horizColor2,finalColor;
@@ -212,11 +204,63 @@ color triangle::GetColor(void){
         horizColor2.coords[i] = (float) pixColors[2].coords[i] * fracPixelU + (float) pixColors[3].coords[i] * (1.0f-fracPixelU);
         finalColor.coords[i] = horizColor1.coords[i]*fracPixelV + horizColor2.coords[i]*(1-fracPixelV);
     }
-    /////////////////////////////////////////////////
     return color(finalColor.x,finalColor.y,finalColor.z);
     
 }
-
+color triangle::GetColor(vec3f * bcs){
+    if(texture == nullptr){
+        return Color;
+    }
+    // assumption: barycentrics computed before this funciton is called.
+    vec3<unsigned char> pixColors[4];
+    vec3f interpUV = Vec3Add(Vec3ScalarMultiply(UVs[1], bcs->x), Vec3Add(Vec3ScalarMultiply(UVs[2], bcs->y), Vec3ScalarMultiply(UVs[0], bcs->z)));
+    
+    vec3f wholeUV, fracUV;
+    
+    fracUV.x = std::modf(interpUV.x, &(wholeUV.x));
+    fracUV.y = std::modf(interpUV.y, &(wholeUV.y));
+    
+    fracUV.x += 1.0f*(fracUV.x < 0);
+    fracUV.y += 1.0f*(fracUV.y < 0);
+    
+    interpUV = {fracUV.x * texture->width, fracUV.y * texture->height,0};
+    
+    float wholePixelU,fracPixelU,wholePixelV,fracPixelV;
+    fracPixelU = std::modf(interpUV.y,&wholePixelU);
+    fracPixelV = std::modf(interpUV.x,&wholePixelV);
+    int pixelU = (int) wholePixelU;
+    int pixelV = (int) wholePixelV; // SHOULD be safe: pixel values are unlikely to exceed INT_MAX (the image would be millions of gigabytes in size and i'd have other problems)
+    
+    //pixel neighbourhood index calculation and sanitisation.
+    int pixNBH[4];
+    
+    pixNBH[0] = pixelU*texture->width * 3 + pixelV*3;
+    pixNBH[2] = (pixNBH[0] + texture->width * 3) % textureSize;
+    if(pixNBH[0] % texture->width*3 - 1 == 0){//at an edge
+        pixNBH[1] = pixNBH[0]-texture->width*3 - 1;
+        pixNBH[3] = pixNBH[2]-texture->width*3 - 1;
+    }
+    else {
+        pixNBH[1] = (pixNBH[0] + 3) % textureSize;
+        pixNBH[3] = (pixNBH[2] + 3) % textureSize;
+    }
+    
+    for(int i =0; i<4; i++){
+        assert(pixNBH[i] < textureSize && pixNBH[i] > -1);
+        pixColors[i] = {texture->imageData[pixNBH[i]],texture->imageData[pixNBH[i]+1],texture->imageData[pixNBH[i]+2]};
+    }
+    vec3f horizColor1,horizColor2,finalColor;
+    for(int i= 0; i<3; i++){
+        horizColor1.coords[i] = (float) pixColors[0].coords[i] * fracPixelU + (float) pixColors[1].coords[i] * (1.0f-fracPixelU);
+        horizColor2.coords[i] = (float) pixColors[2].coords[i] * fracPixelU + (float) pixColors[3].coords[i] * (1.0f-fracPixelU);
+        finalColor.coords[i] = horizColor1.coords[i]*fracPixelV + horizColor2.coords[i]*(1-fracPixelV);
+    }
+    return color(finalColor.x,finalColor.y,finalColor.z);
+    
+}
+void triangle::SetColor(color C){
+    Color = C;
+}
 vec3<vec3f> triangle::returnCoords(void){
 	return { vertices[0],vertices[1],vertices[2] };
 }
@@ -281,38 +325,47 @@ float triangle::calculateInterSectionProduct(Ray * ray, int * success){
      NormaliseVector(&triangleNormal);
  }
  
-void triangle::computeBarycentrics(Ray * ray){
+vec3f triangle::computeBarycentrics(Ray * ray){
+    vec3f bcs;
     auto barycentricDivisor = 1.0f/(Vec3DotProduct(Vec3CrossProduct(ray->GetDirection(), edgeB), edgeA));
-    barycentrics.x = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(ray->GetDirection(), edgeB), Vec3Sub(ray->GetStartPos(),vertices[0]));
-    barycentrics.y = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(Vec3Sub(ray->GetStartPos(),vertices[0]), edgeA), ray->GetDirection());
-    barycentrics.z = 1.0f - barycentrics.x - barycentrics.y;
-	interpolateNormal();
+    bcs.x = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(ray->GetDirection(), edgeB), Vec3Sub(ray->GetStartPos(),vertices[0]));
+    bcs.y = barycentricDivisor * Vec3DotProduct(Vec3CrossProduct(Vec3Sub(ray->GetStartPos(),vertices[0]), edgeA), ray->GetDirection());
+    bcs.z = 1.0f - bcs.x - bcs.y;
+    return bcs;
 }
 
 void triangle::interpolateNormal(void) {
 	interpNormal = Vec3Add(Vec3ScalarMultiply(normals[1], barycentrics.x), Vec3Add(Vec3ScalarMultiply(normals[2], barycentrics.y), Vec3ScalarMultiply(normals[0], barycentrics.z)));
 	NormaliseVector(&interpNormal);
 }
+vec3f triangle::interpolateNormal(vec3f * bcs) {
+    vec3f Normal = Vec3Add(Vec3ScalarMultiply(normals[1], bcs->x), Vec3Add(Vec3ScalarMultiply(normals[2], bcs->y), Vec3ScalarMultiply(normals[0], bcs->z)));
+    NormaliseVector(&Normal);
+    return Normal;
+}
 
 vec3f triangle::returnInterpNormal(void) {
 	return interpNormal;
 }
+void triangle::inputInterpolateNormal(vec3f newInterpNormal){
+    interpNormal = newInterpNormal;
+}
 
- void triangle::inputIntersectionCoords(vec3f &vector){
-     rayintersectioncoords = vector;
-	 //lightvec = Vec3Sub(world::sunlightDirection, rayintersectioncoords);
-	 //lightvec = world::sunlightDirection;
-	 NormaliseVector(&lightvec);
- }
+void triangle::inputIntersectionCoords(vec3f &vector){
+    rayintersectioncoords = vector;
+	//lightvec = Vec3Sub(world::sunlightDirection, rayintersectioncoords);
+	//lightvec = world::sunlightDirection;
+    NormaliseVector(&lightvec);
+}
 
- void triangle::inputBarycentrics(vec3f &vector) {
-	 barycentrics = vector;
- }
+void triangle::inputBarycentrics(vec3f &vector) {
+    barycentrics = vector;
+}
 
- float triangle::getArea(void) {
-	 vec3f cross_prod = Vec3CrossProduct(edgeA, edgeB);
-	 return 0.5f * powf(Vec3DotProduct(cross_prod, cross_prod),0.5);
- }
+float triangle::getArea(void) {
+    vec3f cross_prod = Vec3CrossProduct(edgeA, edgeB);
+    return 0.5f * powf(Vec3DotProduct(cross_prod, cross_prod),0.5);
+}
 
 Mesh::Mesh(
     std::vector<std::vector<float> > * v, 
@@ -479,32 +532,59 @@ vec3f Mesh::returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri){
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
 	std::random_device r;
 	std::default_random_engine e1(r());
-	size_t randomTri = static_cast<size_t>(const_dist(e1));
+    
+	size_t randomTri = static_cast<size_t>(roundf(const_dist(e1)));
 	assert(randomTri < num_tris && randomTri >= 0);
 	vec3<vec3f> TriangleCoords = tris[randomTri]->returnCoords();
-	vec3f randBarycentric;
+	vec3f randBC;
 	do{
-		randBarycentric.x = uniform_dist(e1);
-		randBarycentric.y = uniform_dist(e1);
-	} while (randBarycentric.x + randBarycentric.y > 1);
-	randBarycentric.z = 1 - randBarycentric.x - randBarycentric.y;	
-	*outBarycentrics = randBarycentric;//this is ok, it's a struct! yay!
+		randBC.x = uniform_dist(e1);
+		randBC.y = uniform_dist(e1);
+	} while (randBC.x + randBC.y > 1);
+	randBC.z = 1 - randBC.x - randBC.y;
+	*outBarycentrics = randBC;//this is ok, it's a struct! yay!
 	*outTri = randomTri;
-	return Vec3Add(Vec3Add(Vec3ScalarMultiply(TriangleCoords.coords[1], randBarycentric.x), Vec3ScalarMultiply(TriangleCoords.coords[2], randBarycentric.y)), Vec3ScalarMultiply(TriangleCoords.coords[0], randBarycentric.z));
+	return Vec3Add(Vec3Add(Vec3ScalarMultiply(TriangleCoords.coords[1], randBC.x), Vec3ScalarMultiply(TriangleCoords.coords[2], randBC.y)), Vec3ScalarMultiply(TriangleCoords.coords[0], randBC.z));
 }
-vec3f Mesh::returnRandomDirection(vec3f * position, size_t triNumber){
-	std::uniform_real_distribution<float> uniform_dist(-1.0f, 1.0f);
+vec3f Mesh::returnRandomDirection(vec3f * N, size_t triNumber){
+	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
 	std::random_device r;
 	std::default_random_engine e1(r());
-	vec3f interpNormal = tris[triNumber]->returnInterpNormal();
-	vec3f randDir;
-	do {
-		randDir = { uniform_dist(e1),uniform_dist(e1), uniform_dist(e1) };
-	} while (fabs(randDir.x - interpNormal.x) < 1e-4 && fabs(randDir.y - interpNormal.y) < 1e-4 && fabs(randDir.z - interpNormal.z) < 1e-4);
-	randDir = Vec3Add(randDir, interpNormal);
-	NormaliseVector(&randDir);
-	return randDir;
+    vec3f Nt,Nb;
+    createHemisphereCoordinates(N, &Nb, &Nt, triNumber);
+    
+    float r1 = uniform_dist(e1);
+    float r2 = uniform_dist(e1);
+    float phi = 2*PI*r2;
+    float sinTheta = powf(1-r1*r1,0.5);
+    vec3f randDir = {sinTheta * cosf(phi),r1,sinTheta * sinf(phi)};
+    
+    randDir = {
+        randDir.x*Nb.x + randDir.y*N->x + randDir.z*Nt.x,
+        randDir.x*Nb.y + randDir.y*N->y + randDir.z*Nt.y,
+        randDir.x*Nb.z + randDir.y*N->z + randDir.z*Nt.z
+    };
+    
+    return randDir;
 }
+
+void Mesh::setColor(color c){
+    for(int i = 0; i<num_tris; i++){
+        tris[i]->SetColor(c);
+    }
+}
+
+void Mesh::createHemisphereCoordinates(vec3f * N, vec3f * Nb, vec3f * Nt, size_t triNumber){
+    if(fabs(N->x)> fabs(N->y)){
+        *Nt = {N->z,0,-N->x};
+    }
+    else{
+        *Nt = {0,-N->z,N->y};
+    }
+    NormaliseVector(Nt);
+    *Nb = Vec3CrossProduct(*N, *Nt);
+}
+
 void LightSurface::CalculateArea(void) {
 	if (weightedArea == nullptr) {
 		weightedArea = new float[num_tris];

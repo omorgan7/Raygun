@@ -19,13 +19,16 @@
 class Ray{
 public:
     vec3f GetStartPos(void);
+    Ray();
     Ray(vec3f origin, vec3f direction);
     void SetRayOrigin(vec3f origin);
     vec3f GetDirection(void);
     void SetDirection(vec3f direction);
     vec3f GetInvDirection(void);
 	vec3<bool> GetInvDirectionSign(void);
-	inline void SetColor(color c) {
+    float weight = 1.0f;
+    vec3f floatCol = {10.0f,10.0f,10.0f};
+	inline void SetColor(const color &c) {
 		RayColor = c;
 	};
 	color GetColor(void) {

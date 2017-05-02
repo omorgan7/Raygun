@@ -40,7 +40,7 @@ void Photonmap::BuildPhotonmap(void){
 		light->tris[randTri]->interpolateNormal();
 		vec3f randDir = light->returnRandomDirection(&randPos, randTri);
 		Ray photonray(randPos, randDir);
-		Photon * tempPhoton = PhotonIntersection(scene, &photonray, 0);
+        Photon * tempPhoton = new Photon();//PhotonIntersection(scene, &photonray, 0);
 		if (tempPhoton != nullptr) {
 			PhotonList.push_back(tempPhoton);
 		}
@@ -111,20 +111,20 @@ void Photonmap::BuildKDTree(KDTree * root) {
 color Photonmap::getColor(vec3f pos){
     POI = pos;
 	distanceThresh = 0.7f;
-    priorityQ = std::priority_queue<Photon *,std::vector<Photon *>,decltype(queuecmp) >(queuecmp);
+    //priorityQ = std::priority_queue<Photon *,std::vector<Photon *>,decltype(queuecmp) >(queuecmp);
     LocatePhoton(root);
     vec3f tempColor = {0,0,0};
-    float numPhotons = static_cast<float>(priorityQ.size());
+    //float numPhotons = static_cast<float>(priorityQ.size());
     float unitArea;
     if(!priorityQ.empty()){
-        //unitArea = PI*((priorityQ.top())->distance);
-		tempColor = (priorityQ.top())->color.floatingPointRep();
+        unitArea = PI*((priorityQ.top())->distance);
+		//tempColor = (priorityQ.top())->color.floatingPointRep();
     }
-    //while(!priorityQ.empty()){
-    //    Photon * tempphoton = priorityQ.top();
-    //    priorityQ.pop();
-    //    tempColor = Vec3Add(tempColor,Vec3ScalarMultiply(tempphoton->color.floatingPointRep(),1.0f/(numPhotons*unitArea)));
-    //}
+    while(!priorityQ.empty()){
+        Photon * tempphoton = priorityQ.top();
+        priorityQ.pop();
+        tempColor = Vec3Add(tempColor,Vec3ScalarMultiply(tempphoton->color.floatingPointRep(),1.0f/(static_cast<float>(NumPhotons)*unitArea)));
+    }
     return color(255.0f*tempColor.x,255.0f*tempColor.y,255.0f*tempColor.z);
 }
 
@@ -150,7 +150,7 @@ void Photonmap::LocatePhoton(KDTree *root){
         if(root->photon->distance<distanceThresh){
             priorityQ.push(root->photon);
             //adjust distance, we won't do this just yet.
-            if(priorityQ.size() >= NumPhotons/10){
+            if(priorityQ.size() >= NumPhotons   ){
 				distanceThresh = (priorityQ.top())->distance;
                 priorityQ.pop();
             }
