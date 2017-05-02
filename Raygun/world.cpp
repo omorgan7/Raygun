@@ -12,30 +12,17 @@ color world::background_color = color(5.0f,5.0f,5.0f);
 vec3f world::sunlightPosition;
 vec3f world::sunlightDirection;
 
-void world::assembleCameraCoords(std::vector<float> *eye_origin,std::vector<float> *camera_center, int width, int height, float field_of_view, std::vector<float> *eye_u, std::vector<float> *eye_v, std::vector<float> *L_vector,float * pixel_width, float* pixel_height){
-    
-    std::vector<float> eye_normal = std::vector<float>(3);
-    std::vector<float> v_up = std::vector<float>(3);
+void world::assembleCameraCoords(vec3f *eye_origin, vec3f *look_at, vec3f * look_up, int width, int height, float field_of_view,vec3f *eye_u,vec3f *eye_v,vec3f *L_vector,float * pixel_width, float* pixel_height,float focal_length){
 
-    
-    
-    eye_normal = *eye_origin;
-    eye_normal[2] = -eye_normal[2];
+    vec3f eye_normal = Vec3Sub(*eye_origin,*look_at);
     NormaliseVector(&eye_normal);
-    v_up[0] = 0;
-    v_up[1] = 1;
-    v_up[2] = (*eye_origin)[2];
-    NormaliseVector(&v_up);
-    std::vector<float> w = Vec3Sub(*eye_origin,eye_normal);
-    NormaliseVector(&w);
-    *eye_u = Vec3CrossProduct(v_up, w);
+
+    *eye_u = Vec3CrossProduct(*look_up, eye_normal);
     NormaliseVector(eye_u);
-    *eye_v = Vec3CrossProduct(w, *eye_u);
-    *pixel_height = tan((field_of_view/360) * PI)*(2*(*eye_origin)[2]);
+    *eye_v = Vec3CrossProduct(eye_normal, *eye_u);
+    *pixel_height = tan((field_of_view/360.0f) * PI)*(2.0f*focal_length);
     *pixel_width = *pixel_height * ((float)width/(float)height);
     
-    
-    for (auto i =0; i<3; i++){
-        (*L_vector)[i] = (*camera_center)[i] + (*eye_u)[i]*(*pixel_width/2.0f) - (*eye_v)[i]*(*pixel_height/2.0f);
-    }
+    vec3f C_vector = Vec3Sub(*eye_origin,Vec3ScalarMultiply(eye_normal,focal_length));
+    *L_vector = Vec3Sub(Vec3Add(C_vector,Vec3ScalarMultiply(*eye_u,*pixel_width*0.5f)),Vec3ScalarMultiply(*eye_v, *pixel_height*0.5f));
 }

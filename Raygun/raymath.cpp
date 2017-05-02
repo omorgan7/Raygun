@@ -9,6 +9,8 @@
 #include "raymath.hpp"
 
 //////////////////////// RAY CLASS ////////////////////////////
+Ray::Ray(){
+}
 vec3f Ray::GetStartPos(void){
     return RayOrigin;
 }

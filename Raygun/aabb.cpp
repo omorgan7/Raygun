@@ -201,8 +201,6 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
 		for (int i = 0; i<root->triNumber.size(); i++) {
 			(*intersectedVertices).push_back(root->triNumber[i]);
 		}
-		//        (*intersectedVertices) = root->triNumber;
-		//        *intersectedVertices =root->vertex_indices;
 		return 1;
 	}
 	if (root->leftbox != nullptr) {

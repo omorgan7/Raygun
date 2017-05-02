@@ -85,6 +85,7 @@ public:
 		unsigned int * UV_indices);
 
     color GetColor(void);
+    color GetColor(vec3f * bcs);
     void SetColor(color C);
     void SetVertexCoord(std::vector<float> vertex, int vertex_index);   
     void ChangeVertexCoord(std::vector<float> vertex, int vertex_index);
@@ -96,9 +97,11 @@ public:
     color SpecularColorCalc(Ray * ray);
     float calculateInterSectionProduct(Ray * ray, int * success);
     void inputIntersectionCoords(vec3f &coords);
-	void computeBarycentrics(Ray * ray);
+	vec3f computeBarycentrics(Ray * ray);
 	void interpolateNormal(void);
+    vec3f interpolateNormal(vec3f * bcs);
 	vec3f returnInterpNormal(void);
+    void inputInterpolateNormal(vec3f newInterpNormal);
 	void inputBarycentrics(vec3f &vector);
     void translateTri(vec3f translate);
 	float getArea(void);
@@ -140,7 +143,9 @@ class Mesh{
         bool RayIntersection(Ray * ray, color * outColor);
 		void computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices);
 		vec3f returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri);
-		vec3f returnRandomDirection(vec3f * position, size_t triNumber);
+		vec3f returnRandomDirection(vec3f * N, size_t triNumber);
+    
+        void setColor(color c);
 		inline size_t returnNumTris(void) {
 			return num_tris;
 		};
@@ -148,6 +153,7 @@ class Mesh{
 		AABB * BVH;
     protected:
 		bool ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<unsigned int> * intersectedTris);
+        void createHemisphereCoordinates(vec3f * N, vec3f * Nb, vec3f * Nt, size_t triNumber);
         size_t num_tris;
 		size_t objectIndex = 0;
 		size_t intersectedCoordsIndex = 0;
@@ -167,6 +173,7 @@ class LightSurface : public Mesh{
 			textureImage * texture) : Mesh(v, v_indices, v_norms, v_norm_indices, uvs, uv_indices, texture) {};
 		~LightSurface();
 		void CalculateArea(void);
+    
 		float returnArea(void);
 		float returnStrength(void);
 	private:
