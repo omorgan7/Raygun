@@ -26,7 +26,7 @@
 
 #define CHUNKSIZE 100
 
-#define NUM_MONTECARLO_SAMPLES 4
+#define NUM_MONTECARLO_SAMPLES 2
 
 int main(int argc, char* argv[]) {
     auto width = 180;
@@ -37,24 +37,15 @@ int main(int argc, char* argv[]) {
     }
     
     unsigned char *image = new unsigned char[width*height*3];
-    //std::string objectstring = "/Users/Owen/Dropbox/bender.obj";
-    //std::string objectstring = "/Users/Owen/Dropbox/diamond.obj";
-    //std::string objectstring = "/Users/Owen/Dropbox/suzanne_dense.obj";
-   //std::string objectstring = "/Users/Owen/Dropbox/donut_uv.obj";
-//	std::string objectstring = "C:/Users/om371/Dropbox/lightscene.obj";
-//    std::string lightobjectstring = "C:/Users/om371/Dropbox/lightsurface.obj";
-    //std::string objectstring = "C:/Dropbox/Dropbox/donut_smooth.obj";
-	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/floating_donut.obj";
-	//std::string objectstring = "H:/dos/C++/Raygun/Raygun/cube.obj";
-    //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/donut.obj";
-   //std::string objectstring = "/Users/Owen/Documents/Code/C++/Raygun/Raygun/sphere_normal.obj";
-   // std::string texturestring = "/Users/Owen/Dropbox/donut_texture.bmp";
-   //std::string texturestring = "C:/Users/om371/Dropbox/cube_texture.bmp";
-//   std::string texturestring = "C:/Users/om371/Dropbox/halo.bmp";
+
+
+   std::string objectstring = "C:/Users/om371/Dropbox/2001scene.obj";
+   std::string lightobjectstring = "C:/Users/om371/Dropbox/2001light.obj";
+   std::string texturestring = "C:/Users/om371/Dropbox/halo.bmp";
     
-    std::string objectstring = "/Users/Owen/Dropbox/halo.obj";
-    std::string lightobjectstring = "/Users/Owen/Dropbox/lightsurface.obj";
-    std::string texturestring = "/Users/Owen/Dropbox/halo.bmp";
+    //std::string objectstring = "/Users/Owen/Dropbox/halo.obj";
+    //std::string lightobjectstring = "/Users/Owen/Dropbox/lightsurface.obj";
+    //std::string texturestring = "/Users/Owen/Dropbox/halo.bmp";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -103,7 +94,7 @@ int main(int argc, char* argv[]) {
     vec3f look_at = {0.0f,0.0f,1.0f};
     vec3f look_up = {0.0f,-1.0f,0.0f};
     
-    float focal_length = 1.0f; //techically a dummy variable, and it cancels out, but is still needed.
+    float focal_length = 10.0f; //techically a dummy variable, and it cancels out, but is still needed.
     float fieldOV = 90.0f;
     
     float pixel_height, pixel_width;
@@ -120,7 +111,7 @@ int main(int argc, char* argv[]) {
     std::string filename = "frame";
     std::string bmp = ".bmp";
     
-    for(auto idx = 0; idx< 24*10; idx++){
+    for(auto idx = 0; idx< 24; idx++){
 
         float angularSpeed = -1.0f*PI/240.0f;
         float radius = 2.5;
