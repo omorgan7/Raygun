@@ -37,7 +37,7 @@ void Photonmap::BuildPhotonmap(void){
 		vec3f randPos = light->returnSurfaceSamplePoint(&randBCs, &randTri);
 		light->tris[randTri]->inputBarycentrics(randBCs);
 		light->tris[randTri]->interpolateNormal();
-		vec3f randDir = light->returnRandomDirection(&randPos, randTri);
+		vec3f randDir = light->returnRandomDirection(randPos, randTri);
 		Ray photonray(randPos, randDir);
         Photon * tempPhoton = new Photon();//PhotonIntersection(scene, &photonray, 0);
 		if (tempPhoton != nullptr) {

@@ -141,8 +141,7 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
     stats->max.z = *std::max_element(z.begin(),z.end());
 }
 
-bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices, int its, int readonly){
-    its++;
+bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices){
     vec3f InvDirection = R->GetInvDirection();
     vec3f origin = R->GetStartPos();
     
@@ -162,7 +161,8 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
     //if(tmax <= std::max(tmin,0.0f)){
     //    return 0;
     //}
-	float tmin, tmax, tymin, tymax, tzmin, tzmax;
+    
+    float tmin, tmax, tymin, tymax;
 
 	tmin = (root->min.x - origin.x)*InvDirection.x;
 	tmax = (root->max.x - origin.x)*InvDirection.x;
@@ -183,8 +183,10 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
 	if (tymax < tmax)
 		tmax = tymax;
 
+    float tzmin, tzmax;
 	tzmin = (root->min.z - origin.z)*InvDirection.z;
 	tzmax = (root->max.z - origin.z)*InvDirection.z;
+    
 	if (tzmin > tzmax) {
 		swap(&tzmin, &tzmax);
 	}
@@ -194,9 +196,6 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
 		
 
     bool leftret=0, rightret=0;
-    if(readonly == 1){
-        return 1;
-    }
 	if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
 		for (int i = 0; i<root->triNumber.size(); i++) {
 			(*intersectedVertices).push_back(root->triNumber[i]);
@@ -204,10 +203,10 @@ bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * inter
 		return 1;
 	}
 	if (root->leftbox != nullptr) {
-		leftret = AABBRayIntersection(root->leftbox, R, intersectedVertices, its, readonly);
+		leftret = AABBRayIntersection(root->leftbox, R, intersectedVertices);
 	}
 	if (root->rightbox != nullptr) {
-		rightret = AABBRayIntersection(root->rightbox, R, intersectedVertices, its, readonly);
+		rightret = AABBRayIntersection(root->rightbox, R, intersectedVertices);
 	}
     
     return leftret || rightret;

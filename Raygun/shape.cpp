@@ -207,13 +207,13 @@ color triangle::GetColor(void){
     return color(finalColor.x,finalColor.y,finalColor.z);
     
 }
-color triangle::GetColor(vec3f * bcs){
+color triangle::GetColor(vec3f bcs){
     if(texture == nullptr){
         return Color;
     }
     // assumption: barycentrics computed before this funciton is called.
     vec3<unsigned char> pixColors[4];
-    vec3f interpUV = Vec3Add(Vec3ScalarMultiply(UVs[1], bcs->x), Vec3Add(Vec3ScalarMultiply(UVs[2], bcs->y), Vec3ScalarMultiply(UVs[0], bcs->z)));
+    vec3f interpUV = Vec3Add(Vec3ScalarMultiply(UVs[1], bcs.x), Vec3Add(Vec3ScalarMultiply(UVs[2], bcs.y), Vec3ScalarMultiply(UVs[0], bcs.z)));
     
     vec3f wholeUV, fracUV;
     
@@ -234,7 +234,7 @@ color triangle::GetColor(vec3f * bcs){
     //pixel neighbourhood index calculation and sanitisation.
     int pixNBH[4];
     
-    pixNBH[0] = pixelU*texture->width * 3 + pixelV*3;
+    pixNBH[0] = (pixelU*texture->width * 3 + pixelV*3) % textureSize;
     pixNBH[2] = (pixNBH[0] + texture->width * 3) % textureSize;
     if(pixNBH[0] % texture->width*3 - 1 == 0){//at an edge
         pixNBH[1] = pixNBH[0]-texture->width*3 - 1;
@@ -338,8 +338,8 @@ void triangle::interpolateNormal(void) {
 	interpNormal = Vec3Add(Vec3ScalarMultiply(normals[1], barycentrics.x), Vec3Add(Vec3ScalarMultiply(normals[2], barycentrics.y), Vec3ScalarMultiply(normals[0], barycentrics.z)));
 	NormaliseVector(&interpNormal);
 }
-vec3f triangle::interpolateNormal(vec3f * bcs) {
-    vec3f Normal = Vec3Add(Vec3ScalarMultiply(normals[1], bcs->x), Vec3Add(Vec3ScalarMultiply(normals[2], bcs->y), Vec3ScalarMultiply(normals[0], bcs->z)));
+vec3f triangle::interpolateNormal(vec3f bcs) {
+    vec3f Normal = Vec3Add(Vec3ScalarMultiply(normals[1], bcs.x), Vec3Add(Vec3ScalarMultiply(normals[2], bcs.y), Vec3ScalarMultiply(normals[0], bcs.z)));
     NormaliseVector(&Normal);
     return Normal;
 }
@@ -445,7 +445,7 @@ void Mesh::computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned
 bool Mesh::RayIntersection(Ray * ray, color * outColor){
     std::vector<unsigned int> intersectedTris;
     std::vector<vec3f> interSectionCoordinates;
-    bool intersection = AABBRayIntersection(this->BVH, ray, &intersectedTris,0,0);
+    bool intersection = AABBRayIntersection(this->BVH, ray, &intersectedTris);
     if(intersection == 0){
 		*outColor = color();
         return 0;
@@ -501,7 +501,7 @@ bool Mesh::ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, s
 	NormaliseVector(&vectolight);
 	vectolight = Vec3ScalarMultiply(vectolight, -1.0f);
 	Ray shadowRay = Ray((*interSectionCoordinates)[intersectedCoordsIndex], vectolight);
-	bool shadowboxintersection = AABBRayIntersection(BVH, &shadowRay, &intersectedShadowTris, 0, 0);
+	bool shadowboxintersection = AABBRayIntersection(BVH, &shadowRay, &intersectedShadowTris);
 	if (shadowboxintersection == 0) {
 		return 0;
 	}
@@ -546,7 +546,7 @@ vec3f Mesh::returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri){
 	*outTri = randomTri;
 	return Vec3Add(Vec3Add(Vec3ScalarMultiply(TriangleCoords.coords[1], randBC.x), Vec3ScalarMultiply(TriangleCoords.coords[2], randBC.y)), Vec3ScalarMultiply(TriangleCoords.coords[0], randBC.z));
 }
-vec3f Mesh::returnRandomDirection(vec3f * N, size_t triNumber){
+vec3f Mesh::returnRandomDirection(vec3f N, size_t triNumber){
 	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
 	std::random_device r;
 	std::default_random_engine e1(r());
@@ -560,9 +560,30 @@ vec3f Mesh::returnRandomDirection(vec3f * N, size_t triNumber){
     vec3f randDir = {sinTheta * cosf(phi),r1,sinTheta * sinf(phi)};
     
     randDir = {
-        randDir.x*Nb.x + randDir.y*N->x + randDir.z*Nt.x,
-        randDir.x*Nb.y + randDir.y*N->y + randDir.z*Nt.y,
-        randDir.x*Nb.z + randDir.y*N->z + randDir.z*Nt.z
+        randDir.x*Nb.x + randDir.y*N.x + randDir.z*Nt.x,
+        randDir.x*Nb.y + randDir.y*N.y + randDir.z*Nt.y,
+        randDir.x*Nb.z + randDir.y*N.z + randDir.z*Nt.z
+    };
+    
+    return randDir;
+}
+vec3f Mesh::returnRandomSpecDirection(vec3f N, size_t triNumber){
+    std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
+    std::random_device r;
+    std::default_random_engine e1(r());
+    vec3f Nt,Nb,randDir;
+    createHemisphereCoordinates(N, &Nb, &Nt, triNumber);
+    do{
+    float r1 = uniform_dist(e1);
+    float r2 = uniform_dist(e1);
+    float phi = 2*PI*r2;
+    float sinTheta = powf(1-r1*r1,0.5);
+    randDir = {sinTheta * cosf(phi),r1,sinTheta * sinf(phi)};
+    }while(powf(Vec3DotProduct(randDir, {0.0f,1.0f,0.0f}),20.0f) < 0.1f);
+    randDir = {
+        randDir.x*Nb.x + randDir.y*N.x + randDir.z*Nt.x,
+        randDir.x*Nb.y + randDir.y*N.y + randDir.z*Nt.y,
+        randDir.x*Nb.z + randDir.y*N.z + randDir.z*Nt.z
     };
     
     return randDir;
@@ -574,15 +595,15 @@ void Mesh::setColor(color c){
     }
 }
 
-void Mesh::createHemisphereCoordinates(vec3f * N, vec3f * Nb, vec3f * Nt, size_t triNumber){
-    if(fabs(N->x)> fabs(N->y)){
-        *Nt = {N->z,0,-N->x};
+void Mesh::createHemisphereCoordinates(vec3f N, vec3f * Nb, vec3f * Nt, size_t triNumber){
+    if(fabs(N.x)> fabs(N.y)){
+        *Nt = {N.z,0,-N.x};
     }
     else{
-        *Nt = {0,-N->z,N->y};
+        *Nt = {0,-N.z,N.y};
     }
     NormaliseVector(Nt);
-    *Nb = Vec3CrossProduct(*N, *Nt);
+    *Nb = Vec3CrossProduct(N, *Nt);
 }
 
 void LightSurface::CalculateArea(void) {

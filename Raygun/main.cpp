@@ -23,17 +23,26 @@
 #include "objloader.hpp"
 #include "photonmap.hpp"
 #include "trace.hpp"
+#include "CameraReader.h"
 
 #define CHUNKSIZE 100
 
-#define NUM_MONTECARLO_SAMPLES 2
+#define NUM_MONTECARLO_SAMPLES 1024
+#define NUM_FRAMES 240
 
 int main(int argc, char* argv[]) {
     auto width = 180;
     auto height = 80;
+    int startFrame = 0;
+    int endFrame = 240;
     if(argc >1){
         width = atoi(argv[1]);
         height = atoi(argv[2]);
+        if(argc > 3){
+            startFrame = atoi(argv[3]);
+            endFrame = atoi(argv[4]);
+        }
+
     }
     
     unsigned char *image = new unsigned char[width*height*3];
@@ -53,7 +62,11 @@ int main(int argc, char* argv[]) {
     std::vector<unsigned int> normal_indices;
 	std::vector<std::vector<float> > UVs;
 	std::vector<unsigned int> uv_indices;
-
+    
+    //load camera matchmoving data
+    CameraReader::ParseCamera(cameradata);
+    
+    
     //Load scene
 	ObjectLoader sceneLoader(objectstring.c_str());
 	sceneLoader.loadVertices(vertices);
@@ -104,8 +117,6 @@ int main(int argc, char* argv[]) {
 	std::default_random_engine e1(r());
 	std::uniform_real_distribution<float> uniform_dist(-0.005f, 0.005f);
 	//float jitter;
-    int AAFactor = 2;
-    int AA_status =0;
     vec3f outColors[NUM_MONTECARLO_SAMPLES];
     std::ofstream ofs;
     std::string filename = "frame";
@@ -117,81 +128,66 @@ int main(int argc, char* argv[]) {
         float radius = 2.5;
         eye_origin = {0,-1.0f*radius*cosf(angularSpeed*(float)idx),radius*sinf(angularSpeed*(float)idx)};
         look_at = Vec3Add(eye_origin,{0,-1.0f*sinf(angularSpeed*(float)idx),-1.0f*cosf(angularSpeed*(float)idx)});
-        look_up = eye_origin;
+        look_at = Vec3Add(Vec3RotateX(Vec3Sub(look_at,eye_origin), angle),eye_origin);
+        look_up = Vec3RotateX(eye_origin,angle);
         world::assembleCameraCoords(&eye_origin, &look_at, &look_up, width, height, fieldOV, &eye_u, &eye_v, &L_vector, &pixel_width, &pixel_height, focal_length);
         for(auto i = 0; i<width*height*3; i+=3){
-            
             auto image_x = (i/3)%width;
             auto image_y = (i/3)/width;
 
             direction = Vec3Add(Vec3Sub(L_vector,Vec3ScalarMultiply(eye_u,image_x*(pixel_width/(float)width))),Vec3ScalarMultiply(eye_v,image_y*(pixel_height/(float)height)));
             //NormaliseVector(&direction);
             color outColor;
-            if(AA_status){
-                for(int j = 0; j<AAFactor; j++){
-                    vec3f noisevec {uniform_dist(e1),uniform_dist(e1),uniform_dist(e1)};
-                    vec3f jitteredDirection = Vec3Add(noisevec, direction);
-                    jitteredDirection = Vec3Sub(jitteredDirection,eye_origin);
-                    NormaliseVector(&jitteredDirection);
-                    Ray R = Ray(eye_origin,jitteredDirection);
-                    
-                    color tempColor;
-                    mesh.RayIntersection(&R,&tempColor);
-                    outColor += tempColor*(1.0f/((float)AAFactor));
+            //direction = Vec3Sub(direction, eyevec);
+            //NormaliseVector(&direction);
+            //Ray R = Ray(eyevec,direction);
+            vec3f noisevec,jitteredDirection;
+            Ray R;
+//            size_t outTri;
+//            float t_param;
+            int chunk = CHUNKSIZE;
+            float r=0,g=0,b=0;
+            size_t k;
+            #pragma omp parallel for \
+            shared(outColors,mesh,light,eye_origin,chunk) private(k,noisevec,jitteredDirection,R) \
+            schedule(static,chunk)
+            {
+            for(k = 0; k<NUM_MONTECARLO_SAMPLES; k++){
+                noisevec = {uniform_dist(e1),uniform_dist(e1),uniform_dist(e1)};
+                jitteredDirection = Vec3Sub(Vec3Add(noisevec, direction),eye_origin);
+                NormaliseVector(&jitteredDirection);
+                R = Ray(eye_origin,jitteredDirection);
+                
+                outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0);
+                //outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0, &outTri, &t_param);
+                //outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0, &outTri, &t_param);
+                //outColors[k] = ambientraytracer(&mesh, &light, &R);
+//                if(outTri != -1){
+//                    outColors[k] = Vec3Add(outColors[k], MC_direct_illumination(&mesh, &light, &R, outTri, t_param));
+//                }
+//                if(outTri == -1){
+//                    break;
+//                }
+                //integral = Vec3Add(indirectColor, integral);
+            }
+            }
+             #pragma omp parallel for      \
+             default(shared) private(k)  \
+             schedule(static,chunk)      \
+             reduction(+:r,g,b)
+            {
+                
+                for(k = 0; k<NUM_MONTECARLO_SAMPLES; k++){
+                    r = r + outColors[k].x/((float)NUM_MONTECARLO_SAMPLES);
+                    g = g + outColors[k].y/((float)NUM_MONTECARLO_SAMPLES);
+                    b = b + outColors[k].z/((float)NUM_MONTECARLO_SAMPLES);
                 }
             }
-            else{
-                vec3f integral = {0,0,0};
-                //direction = Vec3Sub(direction, eyevec);
-                //NormaliseVector(&direction);
-                //Ray R = Ray(eyevec,direction);
-                vec3f noisevec,jitteredDirection;
-                Ray R;
-                size_t outTri;
-                float t_param;
-                int chunk = CHUNKSIZE;
-                float r=0,g=0,b=0;
-                size_t k;
-                #pragma omp parallel for \
-                shared(outColors,mesh,light,eye_origin,chunk) private(k,noisevec,jitteredDirection,R,outTri,t_param) \
-                schedule(static,chunk)
-                {
-                for(k = 0; k<NUM_MONTECARLO_SAMPLES; k++){
-                    noisevec = {uniform_dist(e1),uniform_dist(e1),uniform_dist(e1)};
-                    jitteredDirection = Vec3Add(noisevec, direction);
-                    jitteredDirection = Vec3Sub(jitteredDirection,eye_origin);
-                    NormaliseVector(&jitteredDirection);
-                    R = Ray(eye_origin,jitteredDirection);
-                    //outColors[k] = Vec3Add(MC_LightSample(&mesh, &light, &R, 0, &outTri,&t_param),MC_specular_illumination(&mesh, &light, &R, 0, &outTri, &t_param));
-                    //outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0, &outTri, &t_param);
-                    outColors[k] = ambientraytracer(&mesh, &light, &R);
-    //                if(outTri != -1){
-    //                    outColors[k] = Vec3Add(outColors[k], MC_direct_illumination(&mesh, &light, &R, outTri, t_param));
-    //                }
-    //                if(outTri == -1){
-    //                    break;
-    //                }
-                    //integral = Vec3Add(indirectColor, integral);
-                }
-                }
-                 #pragma omp parallel for      \
-                 default(shared) private(k)  \
-                 schedule(static,chunk)      \
-                 reduction(+:r,g,b)
-                {
-                    
-                    for(k = 0; k<NUM_MONTECARLO_SAMPLES; k++){
-                        r = r + outColors[k].x/((float)NUM_MONTECARLO_SAMPLES);
-                        g = g + outColors[k].y/((float)NUM_MONTECARLO_SAMPLES);
-                        b = b + outColors[k].z/((float)NUM_MONTECARLO_SAMPLES);
-                    }
-                }
-                
-                outColor = color(255.0f*r,255.0f*g,255.0f*b);
-                }
-                //mesh.RayIntersection(&R,&outColor);
+            
+            outColor = color(255.0f*r,255.0f*g,255.0f*b);
+            //mesh.RayIntersection(&R,&outColor);
 
-            image[i] = outColor.Red();
+            image[i] =  outColor.Red();
             image[i+1] = outColor.Green();
             image[i+2]= outColor.Blue();
         }
@@ -199,7 +195,7 @@ int main(int argc, char* argv[]) {
     //    ofs << "P6\n" << width << " " << height << "\n255\n";
     //    ofs.write((const char*) image, width*height*3*sizeof(unsigned char));
         char frameNumber[3];
-        auto bytes_written = sprintf(&frameNumber[0],"%03d",idx);
+        auto bytes_written = sprintf(&frameNumber[0],"%03d",(int)idx);
         std::string frameString = std::string(frameNumber);
         ofs = std::ofstream(filename+frameString+bmp, std::ios::out | std::ios::binary);
         WINBMPFILEHEADER BMP_file_header;

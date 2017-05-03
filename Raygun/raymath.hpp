@@ -27,7 +27,7 @@ public:
     vec3f GetInvDirection(void);
 	vec3<bool> GetInvDirectionSign(void);
     float weight = 1.0f;
-    vec3f floatCol = {10.0f,10.0f,10.0f};
+    vec3f floatCol = {9.0f,10.0f,10.0f};
 	inline void SetColor(const color &c) {
 		RayColor = c;
 	};
@@ -150,7 +150,12 @@ inline T Vec3DistanceSquare(vec3<T> u, vec3<T> v){
     //this will break on unsigned types, this may also possibly over/underflow
     return (u.x-v.x)*(u.x-v.x) + (u.y-v.y)*(u.y-v.y) + (u.z-v.z)*(u.z-v.z);
 }
-
+template <typename T>
+inline vec3<T> Vec3RotateX(vec3<T> v, T angle){
+    float cos = cosf(angle);
+    float sin = sinf(angle);
+    return{v.x,cos*v.y - sin*v.z,sin*v.y+cos*v.z};
+}
 template<typename T>
 inline void swap(T * a, T * b){
     T temp = *a;
