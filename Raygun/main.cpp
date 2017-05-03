@@ -39,13 +39,13 @@ int main(int argc, char* argv[]) {
     unsigned char *image = new unsigned char[width*height*3];
 
 
-   std::string objectstring = "C:/Users/om371/Dropbox/2001scene.obj";
-   std::string lightobjectstring = "C:/Users/om371/Dropbox/2001light.obj";
-   std::string texturestring = "C:/Users/om371/Dropbox/halo.bmp";
-    
-    //std::string objectstring = "/Users/Owen/Dropbox/halo.obj";
-    //std::string lightobjectstring = "/Users/Owen/Dropbox/lightsurface.obj";
-    //std::string texturestring = "/Users/Owen/Dropbox/halo.bmp";
+//   std::string objectstring = "C:/Users/om371/Dropbox/2001scene.obj";
+//   std::string lightobjectstring = "C:/Users/om371/Dropbox/2001light.obj";
+//   std::string texturestring = "C:/Users/om371/Dropbox/halo.bmp";
+//    
+    std::string objectstring = "/Users/Owen/Dropbox/2001beds.obj";
+    std::string lightobjectstring = "/Users/Owen/Dropbox/2001light.obj";
+    std::string texturestring = "/Users/Owen/Dropbox/halo.bmp";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<float> > interSectionCoordinates;
 	std::random_device r;
 	std::default_random_engine e1(r());
-	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.005f);
+	std::uniform_real_distribution<float> uniform_dist(-0.005f, 0.005f);
 	//float jitter;
     int AAFactor = 2;
     int AA_status =0;
@@ -111,9 +111,9 @@ int main(int argc, char* argv[]) {
     std::string filename = "frame";
     std::string bmp = ".bmp";
     
-    for(auto idx = 0; idx< 24; idx++){
+    for(auto idx = 0; idx< 24*10; idx++){
 
-        float angularSpeed = -1.0f*PI/240.0f;
+        float angularSpeed = -3.0f*PI/240.0f;
         float radius = 2.5;
         eye_origin = {0,-1.0f*radius*cosf(angularSpeed*(float)idx),radius*sinf(angularSpeed*(float)idx)};
         look_at = Vec3Add(eye_origin,{0,-1.0f*sinf(angularSpeed*(float)idx),-1.0f*cosf(angularSpeed*(float)idx)});

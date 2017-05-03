@@ -45,15 +45,18 @@ private:
     void BuildKDTree(KDTree * root);
     void LocatePhoton(KDTree * root);
     vec3f POI;
-    std::function<bool(Photon*, Photon*)> queuecmp = [](Photon * p1, Photon * p2){
-        return p1->distance > p2->distance;
-    };
-    std::priority_queue<Photon *,std::vector<Photon *>,decltype(queuecmp) > priorityQ;
-    
+//    std::function<bool(Photon*, Photon*)> queuecmp = [](Photon * p1, Photon * p2){
+//        return p1->distance > p2->distance;
+//    };
+//    std::priority_queue<Photon *,std::vector<Photon *>,decltype(queuecmp) > priorityQ;
+//
+    std::vector<Photon *> Photons;
     float distanceThresh = 0.6f;
+    float maxPhotondistance;
     KDTree * root = nullptr;
 	size_t NumPhotons = 1e5;
     std::vector<Photon *> PhotonList;
+    size_t largestPhotonIndex;
     std::vector<size_t> PhotonNumbers;
 };
 

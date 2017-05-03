@@ -22,7 +22,6 @@ void cleanupKDTree(KDTree * root) {
 Photonmap::Photonmap(Mesh * scene, LightSurface * light) {
 	this->scene = scene;
 	this->light = light;
-    priorityQ = std::priority_queue<Photon *, std::vector<Photon *>,decltype(queuecmp) >(queuecmp);
 }
 
 Photonmap::~Photonmap(){
@@ -110,19 +109,23 @@ void Photonmap::BuildKDTree(KDTree * root) {
 }
 color Photonmap::getColor(vec3f pos){
     POI = pos;
+    maxPhotondistance = INFINITY;
 	distanceThresh = 0.7f;
+    Photons = std::vector<Photon *>();
     //priorityQ = std::priority_queue<Photon *,std::vector<Photon *>,decltype(queuecmp) >(queuecmp);
+    largestPhotonIndex = 0;
     LocatePhoton(root);
     vec3f tempColor = {0,0,0};
+
     //float numPhotons = static_cast<float>(priorityQ.size());
     float unitArea;
-    if(!priorityQ.empty()){
-        unitArea = PI*((priorityQ.top())->distance);
-		//tempColor = (priorityQ.top())->color.floatingPointRep();
+    if(Photons.size() == 0){
+        return {0.0f,0.0f,0.0f};
     }
-    while(!priorityQ.empty()){
-        Photon * tempphoton = priorityQ.top();
-        priorityQ.pop();
+    unitArea = PI*(Photons[largestPhotonIndex]->distance);
+	//tempColor = (priorityQ.top())->color.floatingPointRep();
+    for(size_t i =0; i<Photons.size(); i++){
+        Photon * tempphoton = Photons[i];
         tempColor = Vec3Add(tempColor,Vec3ScalarMultiply(tempphoton->color.floatingPointRep(),1.0f/(static_cast<float>(NumPhotons)*unitArea)));
     }
     return color(255.0f*tempColor.x,255.0f*tempColor.y,255.0f*tempColor.z);
@@ -148,11 +151,15 @@ void Photonmap::LocatePhoton(KDTree *root){
     else{//leaf node
         root->photon->distance = Vec3DistanceSquare(POI, root->photon->pos);//this is the squared difference!
         if(root->photon->distance<distanceThresh){
-            priorityQ.push(root->photon);
+            Photons.push_back((root->photon));
+            if(root->photon->distance < maxPhotondistance){
+                maxPhotondistance = root->photon->distance;
+                largestPhotonIndex = Photons.size();
+            }
             //adjust distance, we won't do this just yet.
-            if(priorityQ.size() >= NumPhotons   ){
-				distanceThresh = (priorityQ.top())->distance;
-                priorityQ.pop();
+            if(Photons.size() >= NumPhotons){
+				distanceThresh = maxPhotondistance;
+                Photons.pop_back();
             }
         }
     }

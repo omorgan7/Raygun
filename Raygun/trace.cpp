@@ -324,7 +324,7 @@ vec3f ambientraytracer(Mesh * object, LightSurface * light, Ray * ray){
     bool lightIntersection = ShadowRayIntersection(light,ray);
     if(objTri == -1){//didn't intersect a shape
         if(lightIntersection){//did intersect a light
-            return {1.0f,1.0f,1.0f};
+            return {0.8f,1.0f,1.0f};
         }
         return {0.0f,0.0f,0.0f};
     }
@@ -333,7 +333,7 @@ vec3f ambientraytracer(Mesh * object, LightSurface * light, Ray * ray){
         size_t outTriLightMesh;
         float t_light = ForwardRayIntersection(light,ray, &outTriLightMesh);
         if(t_light < t_object){//light came first
-            return {1.0f,1.0f,1.0f};
+            return {0.8f,1.0f,1.0f};
         }
     }
     vec3f bcs = object->tris[objTri]->computeBarycentrics(ray);
