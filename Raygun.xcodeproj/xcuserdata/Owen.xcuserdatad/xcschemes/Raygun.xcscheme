@@ -63,7 +63,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "1280 720"
+            argument = "1280 720 0 1"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
@@ -76,14 +76,14 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "1920 1080"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "100 100"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "320 180"
+            argument = "320 180 0 1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

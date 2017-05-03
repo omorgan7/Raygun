@@ -15,91 +15,6 @@ void object::SetColor(color C){
     Color = C;
 }
 
-//Sphere::Sphere(float x, float y, float z, float r){
-//    SetRadius(r);
-//    SetX(x);
-//    SetY(y);
-//    SetZ(z);
-//    ambientCoeff=0.2;
-//    diffuseCoeff = 0.4;
-//    specularCoeff = 0.4;
-//    Color.changeBlue(255);
-//}
-//
-//float Sphere::GetRadius(void){
-//    return radius;
-//}
-//void Sphere::SetRadius(float newRadius){
-//    radius = newRadius;
-//}
-//void Sphere::SetX(float x){
-//    SphereOrigin[0] = x;
-//}
-//void Sphere::SetY(float y){
-//    SphereOrigin[1] = y;
-//}
-//void Sphere::SetZ(float z){
-//    SphereOrigin[2] = z;
-//}
-//std::vector<float> Sphere::FindSurfaceNormal(std::vector<float> coords){
-//    //potential bugs: doesn't account for finding the surface normal for the same point as the origin.
-//    std::vector<float> normal = std::vector<float>(3);
-//    //assert(coords.size() == 3);
-//    for(auto i = 0; i<3; i++){
-//        normal[i] = coords[i] - SphereOrigin[i];
-//    }
-//    NormaliseVector(&normal);
-//    return normal;
-//}
-//color Sphere::AmbientRayInterSection(Ray * ray){
-//    int success = 1;
-//    float d = calculateInterSectionProduct(ray, &success);
-//    surfaceCoordinates = Vec3Add(ray->GetStartPos(), Vec3ScalarMultiply(ray->GetDirection(),d));
-//    normal = FindSurfaceNormal(surfaceCoordinates);
-//    return Color*ambientCoeff;
-//}
-//color Sphere::DiffuseColorCalc(void){
-//    //assert(distance>=0);
-//    auto lambertRay = Vec3DotProduct(normal,world::sunlightDirection);
-//    return Color*diffuseCoeff*lambertRay;
-//}
-//color Sphere::SpecularColorCalc(Ray * ray){
-//    auto reflectionFactor = 2.0f*Vec3DotProduct(normal,world::sunlightDirection);
-//    std::vector<float> reflectionVector = std::vector<float>(3);
-//    for(auto i = 0; i<3; i++) {
-//        reflectionVector[i] = normal[i]*reflectionFactor - world::sunlightDirection[i];
-//    }
-//    auto SpecRay = Vec3DotProduct(ray->GetDirection(),reflectionVector);
-//    if(SpecRay<0){
-//        return color(0,0,0);
-//    }
-//    return Color*specularCoeff*powf(SpecRay,20);
-//}
-//float Sphere::calculateInterSectionProduct(Ray * ray, int * success){
-//    auto distance_2norm = 0.0f;
-//    std::vector<float> difference = std::vector<float>(3);
-//    auto origin = ray->GetStartPos();
-////    if(fabs(origin[0]) < 0.00001f && fabs(origin[1]) < 0.00001f && origin[2] == 400.0f){
-////        std::cout<<origin[0]<<" "<<origin[1]<<" "<<origin[2]<<"\n";
-////    }
-//    for(auto i = 0; i<3; i++){
-//        difference[i] = origin[i] - SphereOrigin[i];
-//        distance_2norm += difference[i]*difference[i];
-//    }
-//    dist_dot_product = Vec3DotProduct(ray->GetDirection(), difference);
-//    float quadrant = powf(dist_dot_product,2) + radius*radius - distance_2norm;
-////    if(fabs(origin[0]) < 0.00001f && fabs(origin[1]) < 0.00001f && origin[2] == 400.0f){
-////        std::cout<<origin[0]<<" "<<origin[1]<<" "<<origin[2]<<"\n";
-////    }
-//    if(quadrant<0.0001f){
-//        *success = 0;
-//        return -1;
-//    }
-//    auto d = -1*dist_dot_product + powf(quadrant,0.5f);
-//    return d;
-//
-//};
-
 triangle::triangle(
         std::vector<std::vector<float> > * input_vertices, 
         unsigned int * indices, 
@@ -108,10 +23,6 @@ triangle::triangle(
 		std::vector<std::vector<float> > * input_UVs,
 		unsigned int * UV_indices
 	){
-
-    // vertex_0 = (*vertices)[v0];
-    // vertex_1 = (*vertices)[v1];
-    // vertex_2 = (*vertices)[v2];
     for(int i=0; i<3; i++){
         for(int j=0; j<3; j++){
             vertices[i].coords[j] = (*input_vertices)[indices[i]][j];
@@ -145,11 +56,6 @@ triangle::triangle(
     };
 
 }
-//void triangle::ChangeVertexCoord(std::vector<float> vertex, int vertex_index){
-//    SetVertexCoord(vertex,vertex_index);
-//    ComputeNormal();
-//}
-
 void triangle::translateTri(vec3f translate){
     for(int i =0; i<3; i++){
         vertices[i] = {vertices[i].x+translate.x,vertices[i].y+translate.y,vertices[i].z+translate.z};
@@ -211,7 +117,6 @@ color triangle::GetColor(vec3f bcs){
     if(texture == nullptr){
         return Color;
     }
-    // assumption: barycentrics computed before this funciton is called.
     vec3<unsigned char> pixColors[4];
     vec3f interpUV = Vec3Add(Vec3ScalarMultiply(UVs[1], bcs.x), Vec3Add(Vec3ScalarMultiply(UVs[2], bcs.y), Vec3ScalarMultiply(UVs[0], bcs.z)));
     
@@ -495,8 +400,6 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
 bool Mesh::ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, std::vector<unsigned int> * intersectedTris){
 	std::vector<unsigned int> intersectedShadowTris;
 	std::vector<vec3f> interSectionShadowCoordinates;
-	//vec3f vectolight = Vec3ScalarMultiply(world::sunlightDirection, -1.0f);
-	//NormaliseVector(&vectolight);
 	vec3f vectolight = Vec3Sub(world::sunlightDirection, (*interSectionCoordinates)[intersectedCoordsIndex]);
 	NormaliseVector(&vectolight);
 	vectolight = Vec3ScalarMultiply(vectolight, -1.0f);
@@ -606,7 +509,7 @@ void Mesh::createHemisphereCoordinates(vec3f N, vec3f * Nb, vec3f * Nt, size_t t
     *Nb = Vec3CrossProduct(N, *Nt);
 }
 
-void LightSurface::CalculateArea(void) {
+void Mesh::CalculateArea(void) {
 	if (weightedArea == nullptr) {
 		weightedArea = new float[num_tris];
 	}

@@ -67,7 +67,7 @@ void CameraReader::ParseCamera(string filename)
 	}
 }
 
-int CameraReader::GetFrameCount()
+size_t CameraReader::GetFrameCount()
 {
 	return cameras.size();
 }

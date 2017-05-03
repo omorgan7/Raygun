@@ -32,14 +32,15 @@ void Photonmap::BuildPhotonmap(void){
 	light->CalculateArea();
 	vec3f randBCs;
 	size_t randTri;
-
+    float offset = 0.02f;
 	while(PhotonList.size() < NumPhotons) {
 		vec3f randPos = light->returnSurfaceSamplePoint(&randBCs, &randTri);
-		light->tris[randTri]->inputBarycentrics(randBCs);
-		light->tris[randTri]->interpolateNormal();
-		vec3f randDir = light->returnRandomDirection(randPos, randTri);
-		Ray photonray(randPos, randDir);
-        Photon * tempPhoton = new Photon();//PhotonIntersection(scene, &photonray, 0);
+		//light->tris[randTri]->inputBarycentrics(randBCs);
+		vec3f interpNorm = light->tris[randTri]->interpolateNormal(randBCs);
+		vec3f randDir = Vec3Sub(scene->returnSurfaceSamplePoint(&randBCs, &randTri),randPos);
+        
+		Ray photonray(Vec3Add(randPos,Vec3ScalarMultiply(randDir, offset)), randDir);
+        Photon * tempPhoton = PhotonIntersection(scene, &photonray, 0);
 		if (tempPhoton != nullptr) {
 			PhotonList.push_back(tempPhoton);
 		}
@@ -104,10 +105,9 @@ void Photonmap::BuildKDTree(KDTree * root) {
     root->right->axes = axes;
 	BuildKDTree(root->left);
 	BuildKDTree(root->right);
-
 	return;
 }
-color Photonmap::getColor(vec3f pos){
+vec3f Photonmap::getColor(vec3f pos){
     POI = pos;
     maxPhotondistance = INFINITY;
 	distanceThresh = 0.7f;
@@ -118,17 +118,15 @@ color Photonmap::getColor(vec3f pos){
     vec3f tempColor = {0,0,0};
 
     //float numPhotons = static_cast<float>(priorityQ.size());
-    float unitArea;
     if(Photons.size() == 0){
         return {0.0f,0.0f,0.0f};
     }
-    unitArea = PI*(Photons[largestPhotonIndex]->distance);
-	//tempColor = (priorityQ.top())->color.floatingPointRep();
+    float unitArea = PI*(maxPhotondistance);
     for(size_t i =0; i<Photons.size(); i++){
         Photon * tempphoton = Photons[i];
-        tempColor = Vec3Add(tempColor,Vec3ScalarMultiply(tempphoton->color.floatingPointRep(),1.0f/(static_cast<float>(NumPhotons)*unitArea)));
+        tempColor = Vec3Add(tempColor,Vec3ScalarMultiply(tempphoton->color,1.0f/(static_cast<float>(NumPhotons)*unitArea)));
     }
-    return color(255.0f*tempColor.x,255.0f*tempColor.y,255.0f*tempColor.z);
+    return tempColor;
 }
 
 void Photonmap::LocatePhoton(KDTree *root){
@@ -154,10 +152,10 @@ void Photonmap::LocatePhoton(KDTree *root){
             Photons.push_back((root->photon));
             if(root->photon->distance < maxPhotondistance){
                 maxPhotondistance = root->photon->distance;
-                largestPhotonIndex = Photons.size();
+                largestPhotonIndex = Photons.size()-1;
             }
             //adjust distance, we won't do this just yet.
-            if(Photons.size() >= NumPhotons){
+            if(Photons.size() >= NumPhotons/100){
 				distanceThresh = maxPhotondistance;
                 Photons.pop_back();
             }

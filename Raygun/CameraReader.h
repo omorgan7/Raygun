@@ -47,7 +47,7 @@ struct CameraModel {
 class CameraReader {
 public:
 	static void ParseCamera(string filename);
-	static int GetFrameCount();
+	static size_t GetFrameCount();
 	static CameraModel GetCameraModelForFrame(size_t frame);
 	static vec3f GetCameraRotationForFrame(size_t frame);
 

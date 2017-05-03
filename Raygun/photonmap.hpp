@@ -33,7 +33,7 @@ public:
     Photonmap(Mesh * scene, LightSurface * light);
     ~Photonmap();
     void BuildPhotonmap(void);
-    color getColor(vec3f pos);
+    vec3f getColor(vec3f pos);
  
 private:
     std::random_device random_dev;

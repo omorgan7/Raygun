@@ -47,6 +47,7 @@
 		5A50E6551EB106BF00F834E6 /* vec3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vec3.hpp; sourceTree = "<group>"; };
 		5A537E8D1EB8F6E700D0CC46 /* CameraReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CameraReader.cpp; sourceTree = "<group>"; };
 		5A537E8E1EB8F6E700D0CC46 /* CameraReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraReader.h; sourceTree = "<group>"; };
+		5A78BCCA1EBA5E5E007615A7 /* frame000.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = frame000.bmp; path = "../../../../Library/Developer/Xcode/DerivedData/Raygun-cgmjnkgzhkldjbbjjhvxgcfbturh/Build/Products/Debug/frame000.bmp"; sourceTree = "<group>"; };
 		5A7FCFD51E572F9D002BBC75 /* bitmap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bitmap.hpp; sourceTree = "<group>"; };
 		5A7FCFD61E575C8E002BBC75 /* bitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bitmap.cpp; sourceTree = "<group>"; };
 		5A92340C1E82E1BE006FF027 /* raytrace.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = raytrace.bmp; path = "../../../../Library/Developer/Xcode/DerivedData/Raygun-hdpduejgbxvwwzhjaapakihvzbpx/Build/Products/Debug/raytrace.bmp"; sourceTree = "<group>"; };
@@ -79,6 +80,7 @@
 				5A9656C31E546F9E005A8D95 /* Products */,
 				5A92340C1E82E1BE006FF027 /* raytrace.bmp */,
 				5AAE57E91E5E073800A562A8 /* raytrace.bmp */,
+				5A78BCCA1EBA5E5E007615A7 /* frame000.bmp */,
 			);
 			sourceTree = "<group>";
 		};

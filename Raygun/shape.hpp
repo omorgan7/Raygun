@@ -42,37 +42,10 @@ public:
 	virtual inline float returnSpecular(void) {
 		return specularCoeff;
 	}
-    //virtual void inputIntersectionCoords(std::vector<float> &coords)= 0;
 protected:
     color Color = color();
     float ambientCoeff, diffuseCoeff, specularCoeff, reflectCoeff;
 };
-
-//class Sphere : public object{
-//public:
-//    Sphere(float x, float y, float z, float r);
-//    color GetColor(void);
-//    void SetColor(color C);
-//    float GetRadius(void);
-//    void SetRadius(float newRadius);
-//    void SetX(float x);
-//    void SetY(float y);  
-//    void SetZ(float z);
-//    std::vector<float> FindSurfaceNormal(std::vector<float> coords);
-//    color AmbientRayInterSection(Ray * ray);
-//    color DiffuseColorCalc(void);
-//    color SpecularColorCalc(Ray * ray);
-//    float calculateInterSectionProduct(Ray * ray, int * success);
-//    void inputIntersectionCoords(std::vector<float> &coords){};
-//    
-//    
-//private:
-//    float radius;
-//    std::vector<float> SphereOrigin = std::vector<float>(3);
-//    std::vector<float> surfaceCoordinates = std::vector<float>(3);
-//    std::vector<float> normal = std::vector<float>(3);
-//    float dist_dot_product;
-//};
 
 class triangle : public object{
 public:
@@ -150,6 +123,7 @@ class Mesh{
 		inline size_t returnNumTris(void) {
 			return num_tris;
 		};
+        void CalculateArea(void);
 		triangle ** tris;
 		AABB * BVH;
     protected:
@@ -173,7 +147,7 @@ class LightSurface : public Mesh{
 			std::vector<unsigned int> * uv_indices,
 			textureImage * texture) : Mesh(v, v_indices, v_norms, v_norm_indices, uvs, uv_indices, texture) {};
 		~LightSurface();
-		void CalculateArea(void);
+
     
 		float returnArea(void);
 		float returnStrength(void);

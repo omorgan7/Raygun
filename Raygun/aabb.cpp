@@ -1,11 +1,6 @@
 #include "aabb.hpp"
 
-int buildAABBTree(AABB * root,
-                  std::vector<std::vector<float> > * vertices,
-                  std::vector<unsigned int> *vertex_indices,
-                  std::vector<std::vector<float> > * medians,
-                  int depth){
-    //int axes = depth%3;
+int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, std::vector<unsigned int> *vertex_indices,std::vector<std::vector<float> > * medians, int depth){
     depth++;
     
     if(root->vertex_indices.size() <= 3){
@@ -27,12 +22,10 @@ int buildAABBTree(AABB * root,
 
     int axes = maxrange_index;//0==x 1==y or 2==z
     std::vector<float > median_subset = std::vector<float>(root->vertex_indices.size()/3);
-//    for(int i= 0;i<root->triNumber.size(); i++){
-//        median_subset[i] = (*medians)[root->triNumber[i]][axes];
-//    }
+    std::sort(root->triNumber.begin(),root->triNumber.end(),
+              [medians,axes](size_t i1, size_t i2){return (*medians)[i1][axes]<(*medians)[i2][axes];}
+              );
 
-    std::sort(root->triNumber.begin(),root->triNumber.end(),[medians,axes](size_t i1, size_t i2){return (*medians)[i1][axes]<(*medians)[i2][axes];});
-    //std::sort(median_subset.begin(),median_subset.end());
 
     root->leftbox = new AABB;
     root->rightbox = new AABB;
@@ -121,18 +114,7 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
         x.push_back((*vertices)[VI_sorted[i]][0]);
         y.push_back((*vertices)[VI_sorted[i]][1]);
         z.push_back((*vertices)[VI_sorted[i]][2]);
-        
     }
-//    std::sort(x.begin(),x.end());
-//    std::sort(y.begin(),y.end());
-//    std::sort(z.begin(),z.end());
-//
-//    stats->min[0] = x[0];
-//    stats->max[0] = x[x.size()-1];
-//    stats->min[1] = y[0];
-//    stats->max[1] = y[y.size()-1];
-//    stats->min[2] = z[0];
-//    stats->max[2] = z[z.size()-1];
     stats->min.x = *std::min_element(x.begin(),x.end());
     stats->max.x = *std::max_element(x.begin(),x.end());
     stats->min.y = *std::min_element(y.begin(),y.end());
@@ -144,23 +126,6 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
 bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices){
     vec3f InvDirection = R->GetInvDirection();
     vec3f origin = R->GetStartPos();
-    
-    //float t1 = (root->min.x - origin.x)*InvDirection.x;
-    //float t2 = (root->max.x - origin.x)*InvDirection.x;
-    //
-    //float tmin = std::min(t1, t2);
-    //float tmax = std::max(t1, t2);
-    //
-    //for (int i = 1; i < 3; i++) {
-    //    t1 = (root->min.coords[i] - origin.coords[i])*InvDirection.coords[i];
-    //    t2 = (root->max.coords[i] - origin.coords[i])*InvDirection.coords[i];
-    //    
-    //    tmin = std::max(tmin, std::min(std::min(t1, t2), tmax));
-    //    tmax = std::min(tmax, std::max(std::max(t1, t2), tmin));
-    //}
-    //if(tmax <= std::max(tmin,0.0f)){
-    //    return 0;
-    //}
     
     float tmin, tmax, tymin, tymax;
 

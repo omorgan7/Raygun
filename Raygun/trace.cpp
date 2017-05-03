@@ -58,54 +58,53 @@ float ForwardRayIntersection(Mesh * mesh, Ray * ray, size_t * out_tri_number) {
     return max_depth;//mesh->tris[intersectedTris[objectIndex]]->calculateInterSectionProduct(ray, &successState[objectIndex]);
 }
 
-//Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
-//	size_t outTriNum;
-//	vec3f intersection = ForwardRayIntersection(mesh, ray, &outTriNum);
-//	if (outTriNum == -1) { //no intersection
-//		return nullptr;
-//	}
-//	//decide if we died:
-//	assert(outTriNum < mesh->returnNumTris());
-//	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
-//	std::random_device r;
-//	std::default_random_engine e1(r());
-//	float roulette = uniform_dist(e1);
-//	float diffuse = mesh->tris[outTriNum]->returnDiffuse();
-//	float specular = mesh->tris[outTriNum]->returnSpecular();
-//
-//	//we died/got absorbed
-//	if (depth >= 2 || roulette >= diffuse + specular) {
-//		Photon * p = new Photon;
-//		p->pos = intersection;
-//		p->color = ray->GetColor();
-//        p->direction = ray->GetDirection();
-//		return p;
-//	}
-//
-//	//specular, don't keep going, not useful.
-//	if (roulette > diffuse) {
-//		return nullptr;
-//	}
-//
-//	//give me a new direction.
-//	mesh->tris[outTriNum]->computeBarycentrics(ray);
-//	vec3f randDir = mesh->returnRandomDirection(&intersection, outTriNum);
-//	Ray reflectedRay = Ray(intersection, randDir);
-//
-//	//diffuse
-//	color materialColor = mesh->tris[outTriNum]->GetColor();
-//	color rayCol = ray->GetColor();
-//	vec3f fmatCol = Vec3ElementProduct(materialColor.floatingPointRep(), rayCol.floatingPointRep());
-//	reflectedRay.SetColor(color(fmatCol.x * 255.0f, fmatCol.y * 255.0f, fmatCol.z * 255.0f));
-//	return PhotonIntersection(mesh, &reflectedRay, ++depth);
-//
-//	////specular
-//	//vec3f interpNormal = mesh->tris[outTriNum]->returnInterpNormal();
-//	//vec3f reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNormal, 2.0f*Vec3DotProduct(interpNormal, ray->GetDirection())), ray->GetDirection());
-//	//NormaliseVector(&reflectionVector);
-//	//reflectedRay.SetDirection(reflectionVector);
-//	//return PhotonIntersection(mesh, &reflectedRay, ++depth);
-//}
+Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
+	size_t outTriNum;
+	float t_param = ForwardRayIntersection(mesh, ray, &outTriNum);
+	if (outTriNum == -1) { //no intersection
+		return nullptr;
+	}
+	//decide if we died:
+	//assert(outTriNum < mesh->returnNumTris());
+	std::uniform_real_distribution<float> uniform_dist(0.0f, 1.0f);
+	std::random_device r;
+	std::default_random_engine e1(r());
+	float roulette = uniform_dist(e1);
+    float diffuse = 0.5;//mesh->tris[outTriNum]->returnDiffuse();
+    float specular = 0.0f;//mesh->tris[outTriNum]->returnSpecular();
+    vec3f intersection = Vec3Add(Vec3ScalarMultiply(ray->GetDirection(), t_param),ray->GetStartPos());
+	//we died/got absorbed
+	if (depth >= 5 || roulette >= diffuse + specular) {
+		Photon * p = new Photon;
+		p->pos = intersection;
+		p->color = ray->floatCol;
+        p->direction = ray->GetDirection();
+		return p;
+	}
+
+	//specular, don't keep going, not useful.
+	if (roulette > diffuse) {
+		return nullptr;
+	}
+
+	//give me a new direction.
+	vec3f bcs = mesh->tris[outTriNum]->computeBarycentrics(ray);
+    vec3f interpNormal = mesh->tris[outTriNum]->interpolateNormal(bcs);
+	vec3f randDir = mesh->returnRandomDirection(interpNormal, outTriNum);
+	Ray reflectedRay = Ray(intersection, randDir);
+    
+	//diffuse
+    vec3f BRDF = Vec3ScalarMultiply((mesh->tris[outTriNum]->GetColor(bcs)).floatingPointRep(),Vec3DotProduct(randDir, interpNormal));
+    reflectedRay.floatCol = Vec3ElementProduct(reflectedRay.floatCol, BRDF);
+	return PhotonIntersection(mesh, &reflectedRay, ++depth);
+
+	////specular
+	//vec3f interpNormal = mesh->tris[outTriNum]->returnInterpNormal();
+	//vec3f reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNormal, 2.0f*Vec3DotProduct(interpNormal, ray->GetDirection())), ray->GetDirection());
+	//NormaliseVector(&reflectionVector);
+	//reflectedRay.SetDirection(reflectionVector);
+	//return PhotonIntersection(mesh, &reflectedRay, ++depth);
+}
 
 vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t depth, size_t  * outTri, float * t_param){
     *outTri = -1;
@@ -133,7 +132,6 @@ vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t de
     
     //give me a new direction.
     vec3f bcs = object->tris[objTri]->computeBarycentrics(ray);
-    
     vec3f intersectionPoint = Vec3Add(ray->GetStartPos(),Vec3ScalarMultiply(ray->GetDirection(), t_object));
     //compute the BCs
     //compute the normal.
@@ -302,7 +300,7 @@ vec3f ambientraytracer(Mesh * object, LightSurface * light, Ray * ray){
     bool lightIntersection = ShadowRayIntersection(light,ray);
     if(objTri == -1){//didn't intersect a shape
         if(lightIntersection){//did intersect a light
-            return {0.8f,1.0f,1.0f};
+            return {0.9f,1.0f,1.0f};
         }
         return {0.0f,0.0f,0.0f};
     }
@@ -311,7 +309,7 @@ vec3f ambientraytracer(Mesh * object, LightSurface * light, Ray * ray){
         size_t outTriLightMesh;
         float t_light = ForwardRayIntersection(light,ray, &outTriLightMesh);
         if(t_light < t_object){//light came first
-            return {0.8f,1.0f,1.0f};
+            return {0.9f,1.0f,1.0f};
         }
     }
     vec3f bcs = object->tris[objTri]->computeBarycentrics(ray);
