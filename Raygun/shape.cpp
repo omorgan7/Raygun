@@ -245,10 +245,10 @@ color triangle::GetColor(vec3f bcs){
         pixNBH[3] = (pixNBH[2] + 3) % textureSize;
     }
     
-//    for(int i =0; i<4; i++){
-//        assert(pixNBH[i] < textureSize && pixNBH[i] > -1);
-//        pixColors[i] = {texture->imageData[pixNBH[i]],texture->imageData[pixNBH[i]+1],texture->imageData[pixNBH[i]+2]};
-//    }
+    for(int i =0; i<4; i++){
+        assert(pixNBH[i] < textureSize && pixNBH[i] > -1);
+        pixColors[i] = {texture->imageData[pixNBH[i]],texture->imageData[pixNBH[i]+1],texture->imageData[pixNBH[i]+2]};
+    }
     vec3f horizColor1,horizColor2,finalColor;
     for(int i= 0; i<3; i++){
         horizColor1.coords[i] = (float) pixColors[0].coords[i] * fracPixelU + (float) pixColors[1].coords[i] * (1.0f-fracPixelU);

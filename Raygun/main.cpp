@@ -27,15 +27,22 @@
 
 #define CHUNKSIZE 100
 
-#define NUM_MONTECARLO_SAMPLES 512
-#define NUM_FRAMES 1
+#define NUM_MONTECARLO_SAMPLES 1024
+#define NUM_FRAMES 240
 
 int main(int argc, char* argv[]) {
     auto width = 180;
     auto height = 80;
+    int startFrame = 0;
+    int endFrame = 240;
     if(argc >1){
         width = atoi(argv[1]);
         height = atoi(argv[2]);
+        if(argc > 3){
+            startFrame = atoi(argv[3]);
+            endFrame = atoi(argv[4]);
+        }
+
     }
     
     unsigned char *image = new unsigned char[width*height*3];
@@ -116,7 +123,7 @@ int main(int argc, char* argv[]) {
     std::string filename = "frame";
     std::string bmp = ".bmp";
     
-    for(size_t idx = 0; idx< NUM_FRAMES; idx++){
+    for(size_t idx = startFrame; idx< endFrame; idx++){
 
         float angularSpeed = -1.0f*PI/240.0f;
         float radius = 2.0f;
@@ -135,19 +142,18 @@ int main(int argc, char* argv[]) {
             direction = Vec3Add(Vec3Sub(L_vector,Vec3ScalarMultiply(eye_u,image_x*(pixel_width/(float)width))),Vec3ScalarMultiply(eye_v,image_y*(pixel_height/(float)height)));
             //NormaliseVector(&direction);
             color outColor;
-            vec3f integral = {0,0,0};
             //direction = Vec3Sub(direction, eyevec);
             //NormaliseVector(&direction);
             //Ray R = Ray(eyevec,direction);
             vec3f noisevec,jitteredDirection;
             Ray R;
-            size_t outTri;
-            float t_param;
+//            size_t outTri;
+//            float t_param;
             int chunk = CHUNKSIZE;
             float r=0,g=0,b=0;
             size_t k;
             #pragma omp parallel for \
-            shared(outColors,mesh,light,eye_origin,chunk) private(k,noisevec,jitteredDirection,R,outTri,t_param) \
+            shared(outColors,mesh,light,eye_origin,chunk) private(k,noisevec,jitteredDirection,R) \
             schedule(static,chunk)
             {
             for(k = 0; k<NUM_MONTECARLO_SAMPLES; k++){
@@ -156,7 +162,7 @@ int main(int argc, char* argv[]) {
                 NormaliseVector(&jitteredDirection);
                 R = Ray(eye_origin,jitteredDirection);
                 
-                outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0, &outTri,&t_param);
+                outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0);
                 //outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0, &outTri, &t_param);
                 //outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0, &outTri, &t_param);
                 //outColors[k] = ambientraytracer(&mesh, &light, &R);

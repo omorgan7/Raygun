@@ -163,9 +163,7 @@ vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t de
     return Vec3ScalarMultiply(Vec3ElementProduct(BRDF, ray->floatCol),cosTheta_i*2.0f);
 }
 
-vec3f MC_GlobalSample(Mesh * object, LightSurface * light, Ray * ray, size_t depth, size_t * outTri, float * t_param){
-    *outTri = -1;
-    *t_param = INFINITY;
+vec3f MC_GlobalSample(Mesh * object, LightSurface * light, Ray * ray, size_t depth){
     if(depth>4){
         return {0.0f,0.0f,0.0f};
     }
@@ -199,7 +197,7 @@ vec3f MC_GlobalSample(Mesh * object, LightSurface * light, Ray * ray, size_t dep
     
     Ray newRay = Ray(Vec3Add(intersectionPoint,Vec3ScalarMultiply(randDir, offset)), randDir);
     vec3f BRDF = Vec3ScalarMultiply((object->tris[objTri]->GetColor(bcs)).floatingPointRep(),0.5f);
-    vec3f retCol = MC_GlobalSample(object, light, &newRay, ++depth, outTri, t_param);
+    vec3f retCol = MC_GlobalSample(object, light, &newRay, ++depth);
     float cosTheta_i = Vec3DotProduct(interpNorm,randDir);
     return Vec3ScalarMultiply(Vec3ElementProduct(BRDF, retCol),cosTheta_i*2.0f);
 }
