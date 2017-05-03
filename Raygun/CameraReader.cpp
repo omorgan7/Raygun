@@ -59,8 +59,11 @@ void CameraReader::ParseCamera(string filename)
 	}
 	else
 	{
-		cout << "File Open Failed." << endl;
-		return;
+        std::string tempName;
+		cout << "Camera File Open Failed." << endl;
+        std::cout << "Please enter the name of a file: \n";
+        getline(std::cin, tempName);
+		ParseCamera(tempName);
 	}
 }
 
