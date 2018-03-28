@@ -89,7 +89,7 @@ struct vec3 {
     
     static inline vec3 min(vec3 a, vec3 b) {
         a.v = _mm_min_ps(a.v, b.v);
-        return b;
+        return a;
     }
     
     inline float minElement() {
@@ -175,31 +175,37 @@ inline vec3& operator/= (vec3& a, float b) {
 
 inline vec3 operator== (vec3 a, vec3 b) {
     a.v = _mm_cmpeq_ps(a.v, b.v);
+    a.v = _mm_and_ps(a.v, _mm_set_epi32(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000));
     return a;
 }
 
 inline vec3 operator!= (vec3 a, vec3 b) {
     a.v = _mm_cmpneq_ps(a.v, b.v);
+    a.v = _mm_and_ps(a.v, _mm_set_epi32(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000));
     return a;
 }
 
 inline vec3 operator< (vec3 a, vec3 b) {
     a.v = _mm_cmplt_ps(a.v, b.v);
+    a.v = _mm_and_ps(a.v, _mm_set_epi32(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000));
     return a;
 }
 
 inline vec3 operator> (vec3 a, vec3 b) {
     a.v = _mm_cmpgt_ps(a.v, b.v);
+    a.v = _mm_and_ps(a.v, _mm_set_epi32(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000));
     return a;
 }
 
 inline vec3 operator<= (vec3 a, vec3 b) {
     a.v = _mm_cmple_ps(a.v, b.v);
+    a.v = _mm_and_ps(a.v, _mm_set_epi32(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000));
     return a;
 }
 
 inline vec3 operator>= (vec3 a, vec3 b) {
     a.v = _mm_cmpge_ps(a.v, b.v);
+    a.v = _mm_and_ps(a.v, _mm_set_epi32(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000));
     return a;
 }
 
