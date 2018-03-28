@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
                         eye_u * image_x * pixel_width / (float)width +
                         eye_v * image_y * pixel_height / (float)height;
             
-            color outColor;
+            array3<unsigned char> outColor;
             vec3f noisevec,jitteredDirection;
             Ray R;
             int chunk = CHUNKSIZE; //needed for OpenMP for... something.
@@ -170,10 +170,10 @@ int main(int argc, char* argv[]) {
                 }
             }
             
-            outColor = color(255.0f*r,255.0f*g,255.0f*b);
-            image[i] =  outColor.Red();
-            image[i+1] = outColor.Green();
-            image[i+2]= outColor.Blue();
+            outColor = color(r, g, b).ucharRep();
+            image[i] =  outColor[0];
+            image[i+1] = outColor[1];
+            image[i+2]= outColor[2];
         }
         
         char frameNumber[3];

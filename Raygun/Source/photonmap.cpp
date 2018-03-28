@@ -115,7 +115,7 @@ vec3f Photonmap::getColor(vec3f pos){
 //    //priorityQ = std::priority_queue<Photon *,std::vector<Photon *>,decltype(queuecmp) >(queuecmp);
 //    largestPhotonIndex = 0;
 //    LocatePhoton(root);
-    vec3f tempColor = vec3(0);
+    vec3f tempColor = vec3(0.0f, 0.0f, 0.0f);
 //
 //    //float numPhotons = static_cast<float>(priorityQ.size());
 //    if(Photons.size() == 0){

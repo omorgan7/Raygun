@@ -234,7 +234,7 @@ inline vec3 abs(vec3 a) {
 }
 
 inline vec3 sign(vec3 a) {
-    return (a > vec3(0)) - (a < vec3(0));
+    return (a > vec3(0.0f, 0.0f, 0.0f)) - (a < vec3(0.0f, 0.0f, 0.0f));
 }
 
 inline vec3 clamp(vec3 t, vec3 a, vec3 b) {

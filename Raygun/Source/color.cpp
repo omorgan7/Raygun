@@ -13,7 +13,7 @@ inline float colourClamp(unsigned char c) {
 }
 
 color::color(){
-    rgb = vec3(0);
+    rgb = vec3(0.0f, 0.0f, 0.0f);
 }
 
 color::color(vec3 colour) {
@@ -70,18 +70,18 @@ color color::operator+(const color &c){
 }
 color color::operator+=(const color &c){
     rgb += c.rgb;
-    rgb = clamp(rgb, vec3(0), vec3(1.0f, 1.0f, 1.0f));
+    rgb = clamp(rgb, vec3(0.0f, 0.0f, 0.0f), vec3(1.0f, 1.0f, 1.0f));
     return *this;
 }
 
 color color::operator-(const color &c){
     vec3 temp = rgb - c.rgb;
-    temp = clamp(temp, vec3(0), vec3(1.0f, 1.0f, 1.0f));
+    temp = clamp(temp, vec3(0.0f, 0.0f, 0.0f), vec3(1.0f, 1.0f, 1.0f));
     return temp;
 }
 color color::operator*(const float f){
     vec3 temp = rgb * f;
-    temp = clamp(temp, vec3(0), vec3(1.0f, 1.0f, 1.0f));
+    temp = clamp(temp, vec3(0.0f, 0.0f, 0.0f), vec3(1.0f, 1.0f, 1.0f));
     return temp;
 }
 bool color::operator==(const color& c){

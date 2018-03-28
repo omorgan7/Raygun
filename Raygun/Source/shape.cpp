@@ -76,7 +76,7 @@ color triangle::GetColor(vec3f bcs){
     
     wholeUV = vec3(tempX, tempY, 0.0f);
     
-    fracUV += fracUV < vec3(0);
+    fracUV += fracUV < vec3(0.0f, 0.0f, 0.0f);
     
     interpUV = fracUV * textureSizeVec;
     

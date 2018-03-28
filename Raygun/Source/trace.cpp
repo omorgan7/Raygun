@@ -111,7 +111,7 @@ vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t de
     *outTri = -1;
     *t_param = INFINITY;
     if (depth > 13) {
-        return vec3f(0);
+        return vec3f(0.0f, 0.0f, 0.0f);
     }
     size_t objTri;
     float t_object = ForwardRayIntersection(object, ray, &objTri);
@@ -120,7 +120,7 @@ vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t de
         if(lightIntersection){//did intersect a light
             return ray->floatCol;
         }
-        return vec3f(0);
+        return vec3f(0.0f, 0.0f, 0.0f);
     }
     
     if(lightIntersection){
@@ -145,14 +145,14 @@ vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t de
     size_t outNewTri;
     float t_lights = ForwardRayIntersection(light, &newRay, &outNewTri);
     if(outNewTri == -1){
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     bool intersectScene = ShadowRayIntersection(object, &newRay);
     if(intersectScene){
         size_t temp;
         float t_scene = ForwardRayIntersection(object, &newRay, &temp);
         if(t_scene < t_lights){
-            return vec3(0);
+            return vec3(0.0f, 0.0f, 0.0f);
         }
     }
     *outTri = objTri;
@@ -164,7 +164,7 @@ vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t de
 
 vec3f MC_GlobalSample(Mesh * object, LightSurface * light, Ray * ray, size_t depth){
     if(depth > 3){
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     size_t objTri;
     float t_object = ForwardRayIntersection(object, ray, &objTri);
@@ -173,7 +173,7 @@ vec3f MC_GlobalSample(Mesh * object, LightSurface * light, Ray * ray, size_t dep
         if(lightIntersection){//did intersect a light
             return ray->floatCol;
         }
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     
     if(lightIntersection){
@@ -205,7 +205,7 @@ vec3f MC_LightSample(Mesh * object, LightSurface * light, Ray * ray, size_t dept
     *outTri = -1;
     *t_param = INFINITY;
     if(depth > 13){
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     size_t objTri;
     float t_object = ForwardRayIntersection(object, ray, &objTri);
@@ -214,7 +214,7 @@ vec3f MC_LightSample(Mesh * object, LightSurface * light, Ray * ray, size_t dept
         if(lightIntersection){//did intersect a light
             return ray->floatCol;
         }
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     
     if(lightIntersection){
@@ -238,13 +238,13 @@ vec3f MC_LightSample(Mesh * object, LightSurface * light, Ray * ray, size_t dept
     float cosTheta_o = dot(-randDir, light->tris[temptris]->interpolateNormal(lightbcs));
     float cosTheta_i = dot(interpNorm, randDir);
     if(cosTheta_i <= 0.0f || cosTheta_o <= 0.0f){
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     
     //float brdf = 0.1f;
     bool shadowIntersection = ShadowRayIntersection(object, &newRay);
     if(shadowIntersection){
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     float solidAngle = cosTheta_i * cosTheta_o * light->returnArea() * (1.0f/dist);
     vec3f BRDF = (object->tris[objTri]->GetColor(objbcs)).RGB() * 0.5f * INVPI * solidAngle;
@@ -254,7 +254,7 @@ vec3f MC_LightSample(Mesh * object, LightSurface * light, Ray * ray, size_t dept
 vec3f MC_specular_illumination(Mesh * object, LightSurface * light, Ray * ray,size_t depth, size_t * outTri, float * t_param){
 
     if(*outTri == -1){//didn't intersect a shape
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     size_t objTri;
     float t_object = ForwardRayIntersection(object, ray, &objTri);
@@ -275,14 +275,14 @@ vec3f MC_specular_illumination(Mesh * object, LightSurface * light, Ray * ray,si
     size_t outNewTri;
     float t_lights = ForwardRayIntersection(light, &newRay, &outNewTri);
     if(outNewTri == -1){
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     bool intersectScene = ShadowRayIntersection(object, &newRay);
     if(intersectScene){
         size_t temp;
         float t_scene = ForwardRayIntersection(object, &newRay, &temp);
         if(t_scene < t_lights){
-            return vec3(0);
+            return vec3(0.0f, 0.0f, 0.0f);
         }
     }
     *outTri = objTri;
@@ -303,7 +303,7 @@ vec3f ambientraytracer(Mesh * object, LightSurface * light, Ray * ray){
         if(lightIntersection){//did intersect a light
             return vec3(0.9f,1.0f,1.0f);
         }
-        return vec3(0);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
     
     if(lightIntersection){
