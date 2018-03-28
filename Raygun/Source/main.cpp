@@ -28,14 +28,14 @@
 #define CHUNKSIZE 100
 
 #define NUM_MONTECARLO_SAMPLES 1
-#define NUM_FRAMES 240
+#define NUM_FRAMES 1
 
 int main(int argc, char* argv[]) {
-    auto width = 180;
-    auto height = 80;
+    auto width = 1280;
+    auto height = 720;
     int startFrame = 0;
     int endFrame = 240;
-    if(argc >1){
+    if(argc > 1){
         width = atoi(argv[1]);
         height = atoi(argv[2]);
         if(argc > 3){
@@ -47,9 +47,9 @@ int main(int argc, char* argv[]) {
     
     unsigned char *image = new unsigned char[width*height*3];
 
-    std::string objectstring = "/Users/owen/Dropbox/halo.obj";
-    std::string lightobjectstring = "/Users/owen/Dropbox/2001light.obj";
-    std::string texturestring = "/Users/owen/Dropbox/halo.bmp";
+    std::string objectstring = "/Users/owen/Documents/C++/Raygun/Raygun/2001scene.obj";
+    std::string lightobjectstring = "/Users/owen/Documents/C++/Raygun/Raygun/2001light.obj";
+    std::string texturestring = "/Users/owen/Documents/C++/Raygun/Raygun/halo.bmp";
     std::string cameradata = "/Users/owen/Dropbox/out.txt";
     
     std::vector<std::vector<float> > vertices;
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 	std::vector<unsigned int> uv_indices;
     
     //load camera matchmoving data
-    CameraReader::ParseCamera(cameradata);
+//    CameraReader::ParseCamera(cameradata);
     
     
     //Load scene
@@ -81,7 +81,15 @@ int main(int argc, char* argv[]) {
 	lightLoader.loadNormals(normals);
 	lightLoader.loadUVs(UVs);
 	lightLoader.loadIndices(vertex_indices, normal_indices, uv_indices);
-	LightSurface light = LightSurface(&vertices, &vertex_indices, &normals, &normal_indices, nullptr,nullptr, nullptr );
+    
+	LightSurface light = LightSurface(&vertices,
+                                      &vertex_indices,
+                                      &normals,
+                                      &normal_indices,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr);
+    
 	light.computeBVH(&vertices, &vertex_indices);
     light.setColor(color(255.0f,255.0f,255.0f));
     light.CalculateArea();
@@ -96,8 +104,7 @@ int main(int argc, char* argv[]) {
     float pixel_height, pixel_width;
     
     std::vector<std::vector<float> > interSectionCoordinates;
-	std::random_device r;
-	std::default_random_engine e1(r());
+	std::default_random_engine e1;
 	std::uniform_real_distribution<float> uniform_dist(-0.005f, 0.005f);
 	//float jitter;
     vec3f outColors[NUM_MONTECARLO_SAMPLES];
@@ -108,23 +115,29 @@ int main(int argc, char* argv[]) {
     float angularSpeed = -1.0f*PI/240.0f;
     float radius = 2.0f;
     
-    for(size_t idx = startFrame; idx< endFrame; idx++){
+    for(size_t idx = startFrame; idx < endFrame; idx++){
 
-        vec3f rotation = CameraReader::GetCameraRotationForFrame(idx);
-        float angle = -PI*rotation.x/180.0f;
+        vec3f rotation = vec3f(0.0f, 0.0f, 0.0f);//CameraReader::GetCameraRotationForFrame(idx);
+        float angle = 0.0f; //-PI * rotation.x / 180.0f;
 
-        eye_origin = {0,-1.0f*radius*cosf(angularSpeed*(float)idx),radius*sinf(angularSpeed*(float)idx)};
-        look_at = Vec3Add(eye_origin,{0,-1.0f*sinf(angularSpeed*(float)idx),-1.0f*cosf(angularSpeed*(float)idx)});
-        look_at = Vec3Add(Vec3RotateX(Vec3Sub(look_at,eye_origin), angle),eye_origin);
+        eye_origin = vec3(0,
+            -1.0f * radius * cosf(angularSpeed * (float)idx),
+            radius * sinf(angularSpeed*(float)idx)
+        );
+        
+        look_at = eye_origin + vec3(0.0f ,-1.0f*sinf(angularSpeed * (float)idx), -1.0f * cosf(angularSpeed * (float)idx));
+        look_at = Vec3RotateX(look_at - eye_origin, angle) + eye_origin;
         look_up = Vec3RotateX(eye_origin,angle);
         
-        world::assembleCameraCoords(&eye_origin, &look_at, &look_up, width, height, fieldOV, &eye_u, &eye_v, &L_vector, &pixel_width, &pixel_height, focal_length);
+        world::assembleCameraCoords(eye_origin, look_at, look_up, width, height, fieldOV, eye_u, eye_v, L_vector, pixel_width, pixel_height, focal_length);
         
         for(auto i = 0; i<width*height*3; i+=3){
             auto image_x = (i/3) % width;
             auto image_y = (i/3) / width;
 
-            direction = Vec3Add(Vec3Sub(L_vector,Vec3ScalarMultiply(eye_u,image_x*(pixel_width/(float)width))),Vec3ScalarMultiply(eye_v,image_y*(pixel_height/(float)height)));
+            direction = L_vector -
+                        eye_u * image_x * pixel_width / (float)width +
+                        eye_v * image_y * pixel_height / (float)height;
             
             color outColor;
             vec3f noisevec,jitteredDirection;
@@ -137,9 +150,9 @@ int main(int argc, char* argv[]) {
              schedule(static,chunk)
             {
             for(k = 0; k<NUM_MONTECARLO_SAMPLES; k++){
-                noisevec = {uniform_dist(e1),uniform_dist(e1),uniform_dist(e1)};
-                jitteredDirection = Vec3Sub(Vec3Add(noisevec, direction),eye_origin);
-                NormaliseVector(&jitteredDirection);
+                noisevec = vec3(uniform_dist(e1),uniform_dist(e1),uniform_dist(e1));
+                jitteredDirection = noisevec + direction - eye_origin;
+                normalise(jitteredDirection);
                 R = Ray(eye_origin,jitteredDirection);
                 outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0);
             }
@@ -151,9 +164,9 @@ int main(int argc, char* argv[]) {
             {
                 
                 for(k = 0; k<NUM_MONTECARLO_SAMPLES; k++){
-                    r = r + outColors[k].x/((float)NUM_MONTECARLO_SAMPLES);
-                    g = g + outColors[k].y/((float)NUM_MONTECARLO_SAMPLES);
-                    b = b + outColors[k].z/((float)NUM_MONTECARLO_SAMPLES);
+                    r = r + outColors[k].x() / ((float)NUM_MONTECARLO_SAMPLES);
+                    g = g + outColors[k].y() / ((float)NUM_MONTECARLO_SAMPLES);
+                    b = b + outColors[k].z() / ((float)NUM_MONTECARLO_SAMPLES);
                 }
             }
             

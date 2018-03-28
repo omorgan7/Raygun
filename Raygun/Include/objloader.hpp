@@ -27,7 +27,7 @@ class ObjectLoader {
 		~ObjectLoader() {
 			fclose(file);
 		}
-		bool GetMeshFileType(void);
+		bool GetMeshFileType();
 		bool loadVertices(std::vector<std::vector<float> > & out_vertices);
 		bool loadIndices(std::vector<unsigned int> & out_vertex_indices, std::vector<unsigned int> & out_norm_indices, std::vector<unsigned int> &out_texture_indices);
 		bool loadNormals(std::vector<std::vector<float> > & out_vertex_norms);

@@ -6,15 +6,13 @@
 //  Copyright © 2017 Owen Morgan. All rights reserved.
 //
 
-#include <vector>
-//#include <assert.h>
-#include <cmath>
 #include <random>
 
 #include "color.hpp"
 #include "raymath.hpp"
 #include "world.hpp"
 #include "aabb.hpp"
+#include "Containers.hpp"
 
 #ifndef shape_hpp
 #define shape_hpp
@@ -27,19 +25,19 @@ struct textureImage{
 
 class object{
 public:
-    color GetColor(void);
+    color GetColor();
     void SetColor(color C);
     virtual color AmbientRayInterSection(Ray * ray) = 0;
     virtual color DiffuseColorCalc(Ray * ray) = 0;
     virtual color SpecularColorCalc(Ray * ray) = 0;
     virtual float calculateInterSectionProduct(Ray * ray, int * success) =0;
-	virtual inline float returnAmbient(void) {
+	virtual inline float returnAmbient() {
 		return ambientCoeff;
 	}
-	virtual inline float returnDiffuse(void) {
+	virtual inline float returnDiffuse() {
 		return diffuseCoeff;
 	}
-	virtual inline float returnSpecular(void) {
+	virtual inline float returnSpecular() {
 		return specularCoeff;
 	}
 protected:
@@ -57,27 +55,27 @@ public:
 		std::vector<std::vector<float> > * input_UVs,
 		unsigned int * UV_indices);
 
-    color GetColor(void);
+    color GetColor();
     color GetColor(vec3f bcs);
     void SetColor(color C);
     void SetVertexCoord(std::vector<float> vertex, int vertex_index);   
     void ChangeVertexCoord(std::vector<float> vertex, int vertex_index);
-	vec3<vec3f> returnCoords(void);
-	vec3<vec3f> returnNormalCoords(void);
-	vec3<vec3f> returnUVCoords(void);
+	array3<vec3f> returnCoords();
+	array3<vec3f> returnNormalCoords();
+	array3<vec3f> returnUVCoords();
     color AmbientRayInterSection(Ray * ray);
     color DiffuseColorCalc(Ray * ray);
     color SpecularColorCalc(Ray * ray);
     float calculateInterSectionProduct(Ray * ray, int * success);
     void inputIntersectionCoords(vec3f &coords);
 	vec3f computeBarycentrics(Ray * ray);
-	void interpolateNormal(void);
+	void interpolateNormal();
     vec3f interpolateNormal(vec3f bcs);
-	vec3f returnInterpNormal(void);
+	vec3f returnInterpNormal();
     void inputInterpolateNormal(vec3f newInterpNormal);
 	void inputBarycentrics(vec3f &vector);
     void translateTri(vec3f translate);
-	float getArea(void);
+	float getArea();
     inline void setImageTexture(textureImage * imTexture ){
         texture = imTexture;
 		textureSize = imTexture->height*imTexture->width * 3;
@@ -90,8 +88,8 @@ private:
 	vec3f UVs[3];
     vec3f triangleNormal,interpNormal,edgeA,edgeB, barycentrics,rayintersectioncoords,lightvec;
     //float barycentricDivisor;
-    void ComputeNormal(void);
-    //void flipNormal(void);
+    void ComputeNormal();
+    //void flipNormal();
     float normalDist;
     vec3f reflectionVector;
     AABB tribox;
@@ -120,10 +118,10 @@ class Mesh{
         vec3f returnRandomSpecDirection(vec3f N, size_t triNumber);
     
         void setColor(color c);
-		inline size_t returnNumTris(void) {
+		inline size_t returnNumTris() {
 			return num_tris;
 		};
-        void CalculateArea(void);
+        void CalculateArea();
 		triangle ** tris;
 		AABB * BVH;
     protected:
@@ -149,8 +147,8 @@ class LightSurface : public Mesh{
 		~LightSurface();
 
     
-		float returnArea(void);
-		float returnStrength(void);
+		float returnArea();
+		float returnStrength();
 	private:
 		color Colour = color();
 		float strength = 10.0f;

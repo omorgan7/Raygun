@@ -8,45 +8,42 @@
 
 #include "color.hpp"
 
+inline float colourClamp(unsigned char c) {
+    return std::min(std::max(0.0f, float(c) / 255.0f), 1.0f);
+}
+
 color::color(){
-    red = 0;
-    green = 0;
-    blue = 0;
+    rgb = vec3(0);
+}
+
+color::color(vec3 colour) {
+    rgb = colour;
 }
 
 color::color(unsigned char r, unsigned char g, unsigned char b){
-    red = r;
-    green = g;
-    blue = b;
+    rgb = vec3(colourClamp(r), colourClamp(g), colourClamp(b));
 }
 color::color(float r, float g, float b){
     //clamp
-    red = (unsigned char) std::min(std::max(0.0f,r),255.0f);
-    green = (unsigned char) std::min(std::max(0.0f,g),255.0f);
-    blue = (unsigned char) std::min(std::max(0.0f,b),255.0f);
+    rgb = vec3(r, g, b);
 }
-unsigned char color::Red(void) const {
-    return red;
+float color::Red() const {
+    return rgb.x();
 }
-unsigned char color::Green(void) const {
-    return green;
+float color::Green() const {
+    return rgb.y();
 }
-unsigned char color::Blue(void) const {
-    return blue;
+float color::Blue() const {
+    return rgb.z();
 }
 
-void color::changeRed(unsigned char R){
-    red = R;
-}
-void color::changeGreen(unsigned char G){
-    green = G;
-}
-void color::changeBlue(unsigned char B){
-    blue = B;
+vec3f color::RGB() const {
+    return rgb;
 }
 
-vec3f color::floatingPointRep(void){
-	return { (float)red / 255.0f , (float)green / 255.0f, (float)blue / 255.0f };
+array3<unsigned char> color::ucharRep(){
+    vec3f temp = rgb * vec3(255.0f, 255.0f, 255.0f);
+    return {(unsigned char) temp.x(), (unsigned char) temp.y(), (unsigned char) temp.z()};
 }
 
 color color::operator+(const color &c){
@@ -72,90 +69,24 @@ color color::operator+(const color &c){
     return color(newRed,newGreen,newBlue);
 }
 color color::operator+=(const color &c){
-    if(((int) this->Red() + (int) c.Red())>255){
-        this->changeRed(255);
-    }
-    else{
-        this->changeRed(this->Red() + c.Red());
-    }
-    if(((int) this->Green() + (int) c.Green())>255){
-        this->changeGreen(255);
-    }
-    else{
-        this->changeGreen(this->Green() + c.Green());
-    }
-    if(((int) this->Blue() + (int) c.Blue())>255){
-        this->changeBlue(255);
-    }
-    else{
-        this->changeBlue(this->Blue() + c.Blue());
-    }
+    rgb += c.rgb;
+    rgb = clamp(rgb, vec3(0), vec3(1.0f, 1.0f, 1.0f));
     return *this;
 }
-color& color::operator=(const color &c){
-    if(this != &c){
-        this->changeRed(c.Red());
-        this->changeGreen(c.Green());
-        this->changeBlue(c.Blue());
-    }
-    return *this;
-}
+
 color color::operator-(const color &c){
-    unsigned char newRed, newGreen, newBlue;
-    if(((int) this->Red() - (int) c.Red())<0){
-        newRed = 0;
-    }
-    else{
-        newRed = this->Red() - c.Red();
-    }
-    if(((int) this->Green() - (int) c.Green())<0){
-        newGreen = 0;
-    }
-    else{
-        newGreen = this->Green() - c.Green();
-    }
-    if(((int) this->Blue() - (int) c.Blue())<0){
-        newBlue = 0;
-    }
-    else{
-        newBlue = this->Blue() - c.Blue();
-    }
-    return color(newRed,newGreen,newBlue);
+    vec3 temp = rgb - c.rgb;
+    temp = clamp(temp, vec3(0), vec3(1.0f, 1.0f, 1.0f));
+    return temp;
 }
 color color::operator*(const float f){
-    unsigned char newRed, newGreen, newBlue;
-    if((float) red*f > 255.0f){
-        newRed = 255;
-    }
-    else if((float) red*f < 0.0f){
-        newRed = 0;
-    }
-    else{
-        newRed = (unsigned char) ((float) red)*f;
-    }
-    if((float) green*f > 255.0f){
-        newGreen = 255;
-    }
-    else if((float) green*f < 0.0f){
-        newGreen = 0;
-    }
-    else{
-        newGreen = (unsigned char) ((float) green)*f;
-    }
-    if((float) blue*f > 255.0f){
-        newBlue = 255;
-    }
-    else if((float) blue*f < 0.0f){
-        newBlue = 0;
-    }
-    else{
-        newBlue = (unsigned char) ((float) blue)*f;
-    }
-    return color(newRed,newGreen,newBlue);
+    vec3 temp = rgb * f;
+    temp = clamp(temp, vec3(0), vec3(1.0f, 1.0f, 1.0f));
+    return temp;
 }
 bool color::operator==(const color& c){
-    return (c.Red() == red)&&(c.Green() == green)&&(c.Blue() == blue);
+    return rgb.x() == c.rgb.x() && rgb.y() == c.rgb.y() && rgb.z() == c.rgb.z();
 }
 bool color::operator!=(const color& c){
-    return !((c.Red() == red)&&(c.Green() == green)&&(c.Blue() == blue));
+    return !(rgb.x() == c.rgb.x() && rgb.y() == c.rgb.y() && rgb.z() == c.rgb.z());
 }

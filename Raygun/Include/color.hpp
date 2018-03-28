@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "Containers.hpp"
+
 #include "vec3.hpp"
 
 class color{
@@ -20,25 +22,22 @@ public:
     color();
     color(unsigned char r, unsigned char g, unsigned char b);
     color(float r, float g, float b);
-    unsigned char Red(void) const;
-    unsigned char Green(void) const;
-    unsigned char Blue(void) const;
-    void changeRed(unsigned char R);
-    void changeGreen(unsigned char G);
-    void changeBlue(unsigned char B);
-	vec3f floatingPointRep(void);
+    color(vec3 colour);
+    float Red() const;
+    float Green() const;
+    float Blue() const;
+    vec3f RGB() const;
+    
+	array3<unsigned char> ucharRep();
     //operators
     color operator+(const color& c);
     color operator+=(const color& c);
     color operator*(const float f);
     color operator-(const color& c);
-    color& operator=(const color &c);
     bool operator==(const color& c);
     bool operator!=(const color& c);
 private:
-    unsigned char red;
-    unsigned char green;
-    unsigned char blue;
+    mutable vec3f rgb;
 };
 
 #endif /* color_hpp */

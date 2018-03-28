@@ -11,37 +11,32 @@
 //////////////////////// RAY CLASS ////////////////////////////
 Ray::Ray(){
 }
-vec3f Ray::GetStartPos(void){
+vec3f Ray::GetStartPos(){
     return RayOrigin;
 }
 
 Ray::Ray(vec3f origin, vec3f direction){
-    for(int i =0; i<3; i++){
-        RayOrigin.coords[i] = origin.coords[i];
-        RayDirection.coords[i] = direction.coords[i];
-        InvDirection.coords[i] = 1.0f/RayDirection.coords[i];
-        InvDirSign.coords[i] = InvDirection.coords[i] < 0;
-    }
+    RayOrigin = origin;
+    RayDirection = direction;
+    InvDirection = 1.0f / direction;
+    InvDirSign = sign(InvDirection);
+    
 }
 void Ray::SetRayOrigin(vec3f origin){
-    RayOrigin.x = origin.x;
-    RayOrigin.y = origin.y;
-    RayOrigin.z = origin.z;
+    RayOrigin = origin;
 }
-vec3f Ray::GetDirection(void){
+vec3f Ray::GetDirection(){
     return RayDirection;
 }
-vec3f Ray::GetInvDirection(void){
+vec3f Ray::GetInvDirection(){
     return InvDirection;
 }
-vec3<bool> Ray::GetInvDirectionSign(void) {
+vec3b Ray::GetInvDirectionSign() {
 	return InvDirSign;
 }
 void Ray::SetDirection(vec3f direction){
-	for (int i = 0; i<3; i++) {
-		RayDirection.coords[i] = direction.coords[i];
-		InvDirection.coords[i] = 1.0f / RayDirection.coords[i];
-		InvDirSign.coords[i] = InvDirection.coords[i] < 0;
-	}
+    RayDirection = direction;
+    InvDirection = 1.0f / direction;
+    InvDirSign = sign(InvDirection);
 };
 

@@ -80,7 +80,7 @@ bool loadSimpleOBJ(const char * path, std::vector<std::vector<float> > & out_ver
     return true;
 }
 
-bool ObjectLoader::GetMeshFileType(void) {
+bool ObjectLoader::GetMeshFileType() {
 	unsigned int vertexIndex[3], normalIndex[3], textureIndex[3];
 	int vertex_test = 0;
 	int normal_test = 0;
@@ -294,7 +294,10 @@ bool ObjectLoader::loadIndices(std::vector<unsigned int> & out_vertex_indices, s
 				out_texture_indices.push_back(textureIndex[1] - 1);
 				out_texture_indices.push_back(textureIndex[2] - 1);
 				break;
+            default:
+                ;
 			}
+            
 			out_vertex_indices.push_back(vertexIndex[0] - 1);
 			out_vertex_indices.push_back(vertexIndex[1] - 1);
 			out_vertex_indices.push_back(vertexIndex[2] - 1);
@@ -329,7 +332,7 @@ bool ObjectLoader::loadTextureImage(const char* image_path, unsigned char ** out
 	}
 
 	unsigned char bitmap_header[54];
-	int headerbytesread = fread(bitmap_header, sizeof(unsigned char), 54, image_fp);
+	size_t headerbytesread = fread(bitmap_header, sizeof(unsigned char), 54, image_fp);
     if(headerbytesread != 54){
         std::cerr<<"Warning! texture file header not read correctly, data corruption may occur.\n";
     }

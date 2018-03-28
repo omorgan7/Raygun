@@ -72,7 +72,8 @@ Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
 	float roulette = uniform_dist(e1);
     float diffuse = 0.5;//mesh->tris[outTriNum]->returnDiffuse();
     float specular = 0.0f;//mesh->tris[outTriNum]->returnSpecular();
-    vec3f intersection = Vec3Add(Vec3ScalarMultiply(ray->GetDirection(), t_param),ray->GetStartPos());
+    vec3f intersection = ray->GetDirection() * t_param + ray->GetStartPos();
+    
 	//we died/got absorbed
 	if (depth >= 5 || roulette >= diffuse + specular) {
 		Photon * p = new Photon;
@@ -94,14 +95,14 @@ Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
 	Ray reflectedRay = Ray(intersection, randDir);
     
 	//diffuse
-    vec3f BRDF = Vec3ScalarMultiply((mesh->tris[outTriNum]->GetColor(bcs)).floatingPointRep(),Vec3DotProduct(randDir, interpNormal));
-    reflectedRay.floatCol = Vec3ElementProduct(reflectedRay.floatCol, BRDF);
+    vec3f BRDF = mesh->tris[outTriNum]->GetColor(bcs).RGB() * dot(randDir, interpNormal);
+    reflectedRay.floatCol = reflectedRay.floatCol *  BRDF;
 	return PhotonIntersection(mesh, &reflectedRay, ++depth);
 
 	////specular
 	//vec3f interpNormal = mesh->tris[outTriNum]->returnInterpNormal();
-	//vec3f reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNormal, 2.0f*Vec3DotProduct(interpNormal, ray->GetDirection())), ray->GetDirection());
-	//NormaliseVector(&reflectionVector);
+	//vec3f reflectionVector = interpNormal, 2.0f*dot(interpNormal - ray->GetDirection())) * ray->GetDirection(;
+	//reflectionVector = normalise(reflectionVector);
 	//reflectedRay.SetDirection(reflectionVector);
 	//return PhotonIntersection(mesh, &reflectedRay, ++depth);
 }
@@ -109,8 +110,8 @@ Photon * PhotonIntersection(Mesh * mesh, Ray * ray, size_t depth){
 vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t depth, size_t  * outTri, float * t_param){
     *outTri = -1;
     *t_param = INFINITY;
-    if(depth>13){
-        return {0.0f,0.0f,0.0f};
+    if (depth > 13) {
+        return vec3f(0);
     }
     size_t objTri;
     float t_object = ForwardRayIntersection(object, ray, &objTri);
@@ -119,7 +120,7 @@ vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t de
         if(lightIntersection){//did intersect a light
             return ray->floatCol;
         }
-        return {0.0f,0.0f,0.0f};
+        return vec3f(0);
     }
     
     if(lightIntersection){
@@ -132,7 +133,7 @@ vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t de
     
     //give me a new direction.
     vec3f bcs = object->tris[objTri]->computeBarycentrics(ray);
-    vec3f intersectionPoint = Vec3Add(ray->GetStartPos(),Vec3ScalarMultiply(ray->GetDirection(), t_object));
+    vec3f intersectionPoint = ray->GetStartPos() + ray->GetDirection() * t_object;
     //compute the BCs
     //compute the normal.
     
@@ -140,30 +141,30 @@ vec3f MC_SurfaceSample(Mesh * object, LightSurface * light, Ray * ray, size_t de
     vec3f randDir = object->returnRandomDirection(interpNorm, objTri);
     float offset = 0.02f;
     
-    Ray newRay = Ray(Vec3Add(intersectionPoint,Vec3ScalarMultiply(randDir, offset)), randDir);
+    Ray newRay = Ray(intersectionPoint + randDir * offset, randDir);
     size_t outNewTri;
     float t_lights = ForwardRayIntersection(light, &newRay, &outNewTri);
     if(outNewTri == -1){
-        return {0.0f,0.0f,0.0f};
+        return vec3(0);
     }
     bool intersectScene = ShadowRayIntersection(object, &newRay);
     if(intersectScene){
         size_t temp;
         float t_scene = ForwardRayIntersection(object, &newRay, &temp);
         if(t_scene < t_lights){
-            return {0.0f,0.0f,0.0f};
+            return vec3(0);
         }
     }
     *outTri = objTri;
     *t_param = t_object;
-    vec3f BRDF = Vec3ScalarMultiply((object->tris[objTri]->GetColor(bcs)).floatingPointRep(),0.9f);
-    float cosTheta_i = Vec3DotProduct(interpNorm,randDir);
-    return Vec3ScalarMultiply(Vec3ElementProduct(BRDF, ray->floatCol),cosTheta_i*2.0f);
+    vec3f BRDF = (object->tris[objTri]->GetColor(bcs)).RGB() * 0.9f;
+    float cosTheta_i = dot(interpNorm, randDir);
+    return BRDF * ray->floatCol * cosTheta_i * 2.0f;
 }
 
 vec3f MC_GlobalSample(Mesh * object, LightSurface * light, Ray * ray, size_t depth){
-    if(depth>4){
-        return {0.0f,0.0f,0.0f};
+    if(depth > 3){
+        return vec3(0);
     }
     size_t objTri;
     float t_object = ForwardRayIntersection(object, ray, &objTri);
@@ -172,7 +173,7 @@ vec3f MC_GlobalSample(Mesh * object, LightSurface * light, Ray * ray, size_t dep
         if(lightIntersection){//did intersect a light
             return ray->floatCol;
         }
-        return {0.0f,0.0f,0.0f};
+        return vec3(0);
     }
     
     if(lightIntersection){
@@ -185,7 +186,7 @@ vec3f MC_GlobalSample(Mesh * object, LightSurface * light, Ray * ray, size_t dep
     
     //give me a new direction.
     vec3f bcs = object->tris[objTri]->computeBarycentrics(ray);
-    vec3f intersectionPoint = Vec3Add(ray->GetStartPos(),Vec3ScalarMultiply(ray->GetDirection(), t_object));
+    vec3f intersectionPoint = ray->GetStartPos() + ray->GetDirection() * t_object;
     //compute the BCs
     //compute the normal.
     
@@ -193,18 +194,18 @@ vec3f MC_GlobalSample(Mesh * object, LightSurface * light, Ray * ray, size_t dep
     vec3f randDir = object->returnRandomDirection(interpNorm, objTri);
     float offset = 0.02f;
     
-    Ray newRay = Ray(Vec3Add(intersectionPoint,Vec3ScalarMultiply(randDir, offset)), randDir);
-    vec3f BRDF = Vec3ScalarMultiply((object->tris[objTri]->GetColor(bcs)).floatingPointRep(),0.5f);
+    Ray newRay = Ray(intersectionPoint + randDir * offset, randDir);
+    vec3f BRDF = (object->tris[objTri]->GetColor(bcs)).RGB() * 0.5f;
     vec3f retCol = MC_GlobalSample(object, light, &newRay, ++depth);
-    float cosTheta_i = Vec3DotProduct(interpNorm,randDir);
-    return Vec3ScalarMultiply(Vec3ElementProduct(BRDF, retCol),cosTheta_i*2.0f);
+    float cosTheta_i = dot(interpNorm, randDir);
+    return BRDF * retCol * cosTheta_i*2.0f;
 }
 
 vec3f MC_LightSample(Mesh * object, LightSurface * light, Ray * ray, size_t depth, size_t  * outTri, float * t_param){
     *outTri = -1;
     *t_param = INFINITY;
-    if(depth>13){
-        return {0.0f,0.0f,0.0f};
+    if(depth > 13){
+        return vec3(0);
     }
     size_t objTri;
     float t_object = ForwardRayIntersection(object, ray, &objTri);
@@ -213,7 +214,7 @@ vec3f MC_LightSample(Mesh * object, LightSurface * light, Ray * ray, size_t dept
         if(lightIntersection){//did intersect a light
             return ray->floatCol;
         }
-        return {0.0f,0.0f,0.0f};
+        return vec3(0);
     }
     
     if(lightIntersection){
@@ -224,74 +225,74 @@ vec3f MC_LightSample(Mesh * object, LightSurface * light, Ray * ray, size_t dept
         }
     }
     *t_param = 0.0f;
-    vec3f intersectionPoint = Vec3Add(ray->GetStartPos(),Vec3ScalarMultiply(ray->GetDirection(), t_object));
+    vec3f intersectionPoint = ray->GetStartPos() + ray->GetDirection() * t_object;
     vec3f lightbcs,objbcs;
     size_t temptris;
-    vec3f randDir = Vec3Sub(light->returnSurfaceSamplePoint(&lightbcs, &temptris),intersectionPoint);
+    vec3f randDir = light->returnSurfaceSamplePoint(&lightbcs, &temptris) - intersectionPoint;
     objbcs = object->tris[objTri]->computeBarycentrics(ray);
-    float dist = Vec3DotProduct(randDir, randDir);
-    NormaliseVector(&randDir);
+    float dist = dot(randDir, randDir);
+    randDir = normalise(randDir);
     float offset = 0.02f;
-    Ray newRay = Ray(Vec3Add(intersectionPoint,Vec3ScalarMultiply(randDir, offset)), randDir);
+    Ray newRay = Ray(intersectionPoint + randDir * offset, randDir);
     vec3f interpNorm = object->tris[objTri]->interpolateNormal(objbcs);
-    float cosTheta_o = Vec3DotProduct(Vec3ScalarMultiply(randDir,-1.0f),light->tris[temptris]->interpolateNormal(lightbcs));
-    float cosTheta_i = Vec3DotProduct(interpNorm, randDir);
+    float cosTheta_o = dot(-randDir, light->tris[temptris]->interpolateNormal(lightbcs));
+    float cosTheta_i = dot(interpNorm, randDir);
     if(cosTheta_i <= 0.0f || cosTheta_o <= 0.0f){
-        return {0.0f,0.0f,0.0f};
+        return vec3(0);
     }
     
     //float brdf = 0.1f;
     bool shadowIntersection = ShadowRayIntersection(object, &newRay);
     if(shadowIntersection){
-        return {0.0f,0.0f,0.0f};
+        return vec3(0);
     }
     float solidAngle = cosTheta_i * cosTheta_o * light->returnArea() * (1.0f/dist);
-    vec3f BRDF = Vec3ScalarMultiply((object->tris[objTri]->GetColor(objbcs)).floatingPointRep(),0.5f*INVPI*solidAngle);
-    return Vec3ElementProduct(BRDF, ray->floatCol);
+    vec3f BRDF = (object->tris[objTri]->GetColor(objbcs)).RGB() * 0.5f * INVPI * solidAngle;
+    return BRDF * ray->floatCol;
     
 }
 vec3f MC_specular_illumination(Mesh * object, LightSurface * light, Ray * ray,size_t depth, size_t * outTri, float * t_param){
 
     if(*outTri == -1){//didn't intersect a shape
-        return {0.0f,0.0f,0.0f};
+        return vec3(0);
     }
     size_t objTri;
     float t_object = ForwardRayIntersection(object, ray, &objTri);
 
     vec3f bcs = object->tris[objTri]->computeBarycentrics(ray);
     
-    vec3f intersectionPoint = Vec3Add(ray->GetStartPos(),Vec3ScalarMultiply(ray->GetDirection(), t_object));
+    vec3f intersectionPoint = ray->GetStartPos() + ray->GetDirection() * t_object;
     //compute the BCs
     //compute the normal.
     
     vec3f interpNorm = object->tris[objTri]->interpolateNormal(bcs);
-    vec3f reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNorm, 2.0f*Vec3DotProduct(interpNorm,Vec3ScalarMultiply(ray->GetDirection(),-1.0f))),Vec3ScalarMultiply(ray->GetDirection(),-1.0f));
-    NormaliseVector(&reflectionVector);
+    vec3f reflectionVector = interpNorm * 2.0f * dot(interpNorm ,ray->GetDirection() * -1.0f) + ray->GetDirection();
+    reflectionVector = normalise(reflectionVector);
     vec3f randDir = object->returnRandomSpecDirection(reflectionVector, objTri);
     float offset = 0.02f;
     
-    Ray newRay = Ray(Vec3Add(intersectionPoint,Vec3ScalarMultiply(randDir, offset)), randDir);
+    Ray newRay = Ray(intersectionPoint + randDir * offset, randDir);
     size_t outNewTri;
     float t_lights = ForwardRayIntersection(light, &newRay, &outNewTri);
     if(outNewTri == -1){
-        return {0.0f,0.0f,0.0f};
+        return vec3(0);
     }
     bool intersectScene = ShadowRayIntersection(object, &newRay);
     if(intersectScene){
         size_t temp;
         float t_scene = ForwardRayIntersection(object, &newRay, &temp);
         if(t_scene < t_lights){
-            return {0.0f,0.0f,0.0f};
+            return vec3(0);
         }
     }
     *outTri = objTri;
     *t_param = t_object;
     
-    float cosTheta_i = Vec3DotProduct(interpNorm,randDir);
-    //vec3f reflectionVector = Vec3Sub(Vec3ScalarMultiply(interpNorm, 2.0f*Vec3DotProduct(interpNorm,randDir)), randDir);
-    float SpecRay = Vec3DotProduct(randDir,reflectionVector);
-    vec3f BRDF = Vec3ScalarMultiply(ray->floatCol,0.5f*powf(SpecRay,20)*cosTheta_i);
-    return Vec3ElementProduct(BRDF, ray->floatCol);
+    float cosTheta_i = dot(interpNorm, randDir);
+    //vec3f reflectionVector = interpNorm, 2.0f*dot(interpNorm - randDir) * randDir;
+    float SpecRay = dot(randDir, reflectionVector);
+    vec3f BRDF = ray->floatCol * 0.5f * powf(SpecRay, 20) * cosTheta_i;
+    return BRDF *  ray->floatCol;
 }
 vec3f ambientraytracer(Mesh * object, LightSurface * light, Ray * ray){
 
@@ -300,18 +301,18 @@ vec3f ambientraytracer(Mesh * object, LightSurface * light, Ray * ray){
     bool lightIntersection = ShadowRayIntersection(light,ray);
     if(objTri == -1){//didn't intersect a shape
         if(lightIntersection){//did intersect a light
-            return {0.9f,1.0f,1.0f};
+            return vec3(0.9f,1.0f,1.0f);
         }
-        return {0.0f,0.0f,0.0f};
+        return vec3(0);
     }
     
     if(lightIntersection){
         size_t outTriLightMesh;
         float t_light = ForwardRayIntersection(light,ray, &outTriLightMesh);
         if(t_light < t_object){//light came first
-            return {0.9f,1.0f,1.0f};
+            return vec3(0.9f,1.0f,1.0f);
         }
     }
     vec3f bcs = object->tris[objTri]->computeBarycentrics(ray);
-    return (object->tris[objTri]->GetColor(bcs)).floatingPointRep();
+    return (object->tris[objTri]->GetColor(bcs)).RGB();
 }

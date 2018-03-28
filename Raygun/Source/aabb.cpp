@@ -10,21 +10,19 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, std:
     Mesh_Stats xyz;
     getminmaxmed(root,vertices, &xyz);
 
-    float range[3] = {xyz.max.x - xyz.min.x, xyz.max.y - xyz.min.y, xyz.max.z - xyz.min.z};
-    float maxrange = range[0];
-    int maxrange_index = 0;
-    for(int i = 1; i<3; i++){
-        if(maxrange < range[i]){
-            maxrange = range[i];
-            maxrange_index = i;
-        }
-    }
+    vec3f range = xyz.max - xyz.min;
+    
+    int maxrange_index = 2;
+    float maxrange = range.maxElement();
+    
+    maxrange_index = maxrange == range.x() ? 0 : maxrange_index;
+    maxrange_index = maxrange == range.y() ? 1 : maxrange_index;
 
     int axes = maxrange_index;//0==x 1==y or 2==z
     std::vector<float > median_subset = std::vector<float>(root->vertex_indices.size()/3);
-    std::sort(root->triNumber.begin(),root->triNumber.end(),
-              [medians,axes](size_t i1, size_t i2){return (*medians)[i1][axes]<(*medians)[i2][axes];}
-              );
+    std::sort(root->triNumber.begin(),root->triNumber.end(), [medians, axes](size_t i1, size_t i2){
+        return (*medians)[i1][axes] < (*medians)[i2][axes];
+    });
 
 
     root->leftbox = new AABB;
@@ -60,19 +58,15 @@ int buildAABBTree(AABB * root, std::vector<std::vector<float> > * vertices, std:
     if(!leftnul){
         Mesh_Stats left;
         getminmaxmed(root->leftbox, vertices, &left);
-        for(int i = 0; i<3; i++){
-            root->leftbox->min.coords[i] = left.min.coords[i];
-            root->leftbox->max.coords[i] = left.max.coords[i];
-        };
+        root->leftbox->min = left.min;
+        root->leftbox->max = left.max;
 
     }
     if(!rightnul){
         Mesh_Stats right;
         getminmaxmed(root->rightbox, vertices, &right);
-        for(int i = 0; i<3; i++){
-            root->rightbox->min.coords[i] = right.min.coords[i];
-            root->rightbox->max.coords[i] = right.max.coords[i];
-        };
+        root->rightbox->min = right.min;
+        root->rightbox->max = right.max;
     }
     if(!leftnul && root->leftbox->vertex_indices.size() != root->vertex_indices.size()){
         leftdepth = buildAABBTree(root->leftbox,vertices,vertex_indices,medians,depth);
@@ -115,57 +109,41 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
         y.push_back((*vertices)[VI_sorted[i]][1]);
         z.push_back((*vertices)[VI_sorted[i]][2]);
     }
-    stats->min.x = *std::min_element(x.begin(),x.end());
-    stats->max.x = *std::max_element(x.begin(),x.end());
-    stats->min.y = *std::min_element(y.begin(),y.end());
-    stats->max.y = *std::max_element(y.begin(),y.end());
-    stats->min.z = *std::min_element(z.begin(),z.end());
-    stats->max.z = *std::max_element(z.begin(),z.end());
+    stats->min.setX(*std::min_element(x.begin(),x.end()));
+    stats->max.setX(*std::max_element(x.begin(),x.end()));
+    stats->min.setY(*std::min_element(y.begin(),y.end()));
+    stats->max.setY(*std::max_element(y.begin(),y.end()));
+    stats->min.setZ(*std::min_element(z.begin(),z.end()));
+    stats->max.setZ(*std::max_element(z.begin(),z.end()));
 }
 
 bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices){
+    
     vec3f InvDirection = R->GetInvDirection();
     vec3f origin = R->GetStartPos();
     
-    float tmin, tmax, tymin, tymax;
+    vec3f boxmin, boxmax;
 
-	tmin = (root->min.x - origin.x)*InvDirection.x;
-	tmax = (root->max.x - origin.x)*InvDirection.x;
-	if (tmin > tmax) {
-		swap(&tmin, &tmax);
-	}
-	tymin = (root->min.y - origin.y)*InvDirection.y;
-	tymax = (root->max.y - origin.y)*InvDirection.y;
-	if (tymin > tymax) {
-		swap(&tymin, &tymax);
-	}
-	if ((tmin > tymax) || (tymin > tmax)) {
-		return false;
-	}
-		
-	if (tymin > tmin)
-		tmin = tymin;
-	if (tymax < tmax)
-		tmax = tymax;
-
-    float tzmin, tzmax;
-	tzmin = (root->min.z - origin.z)*InvDirection.z;
-	tzmax = (root->max.z - origin.z)*InvDirection.z;
+    boxmin = (root->min - origin) * InvDirection;
+    boxmax = (root->max - origin) * InvDirection;
     
-	if (tzmin > tzmax) {
-		swap(&tzmin, &tzmax);
-	}
-	if ((tmin > tzmax) || (tzmin > tmax)) {
+    vec3f minintersection = vec3::min(boxmin, boxmax);
+    vec3f maxintersection = vec3::max(boxmin, boxmax);
+    
+    float tmin = minintersection.maxElement();
+    float tmax = maxintersection.minElement();
+    
+    bool hit = (tmax >= 0) && (tmax >= tmin);
+	if (!hit) {
 		return false;
 	}
 		
-
-    bool leftret=0, rightret=0;
+    bool leftret = false, rightret = false;
 	if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
 		for (int i = 0; i<root->triNumber.size(); i++) {
 			(*intersectedVertices).push_back(root->triNumber[i]);
 		}
-		return 1;
+        return true;
 	}
 	if (root->leftbox != nullptr) {
 		leftret = AABBRayIntersection(root->leftbox, R, intersectedVertices);

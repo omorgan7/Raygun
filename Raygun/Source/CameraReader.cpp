@@ -83,9 +83,9 @@ vec3f CameraReader::GetCameraRotationForFrame(size_t frame)
 	assert(frame >= 0 && frame < cameras.size());
 	auto camera = GetCameraModelForFrame(frame);
 	vec3f theta;
-	theta.z = atan2(camera.Vx, camera.Hx) / PI * 180;
-	theta.y = atan2(-1 * camera.Ax, sqrt(camera.Ay * camera.Ay + camera.Az * camera.Az)) / PI * 180;
-	theta.x = atan2(camera.Ay, camera.Az) / PI * 180;
+//    theta.z = atan2(camera.Vx, camera.Hx) / PI * 180;
+//    theta.y = atan2(-1 * camera.Ax, sqrt(camera.Ay * camera.Ay + camera.Az * camera.Az)) / PI * 180;
+//    theta.x = atan2(camera.Ay, camera.Az) / PI * 180;
 
 	return theta;
 }

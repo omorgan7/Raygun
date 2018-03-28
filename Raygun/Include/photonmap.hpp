@@ -32,7 +32,7 @@ class Photonmap {
 public:
     Photonmap(Mesh * scene, LightSurface * light);
     ~Photonmap();
-    void BuildPhotonmap(void);
+    void BuildPhotonmap();
     vec3f getColor(vec3f pos);
  
 private:
