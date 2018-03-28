@@ -31,10 +31,10 @@
 #define NUM_FRAMES 1
 
 int main(int argc, char* argv[]) {
-    auto width = 1280;
-    auto height = 720;
+    auto width = 180;
+    auto height = 80;
     int startFrame = 0;
-    int endFrame = 240;
+    int endFrame = 1;
     if(argc > 1){
         width = atoi(argv[1]);
         height = atoi(argv[2]);
@@ -154,7 +154,8 @@ int main(int argc, char* argv[]) {
                 jitteredDirection = noisevec + direction - eye_origin;
                 normalise(jitteredDirection);
                 R = Ray(eye_origin,jitteredDirection);
-                outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0);
+//                outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0);
+                outColors[k] = ambientraytracer(&mesh, &light, &R);
             }
             }
              #pragma omp parallel for      \

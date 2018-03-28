@@ -83,12 +83,12 @@ struct vec3 {
     }
     
     static inline vec3 max(vec3 a, vec3 b) {
-        a.v = _mm_max_ss(a.v, b.v);
+        a.v = _mm_max_ps(a.v, b.v);
         return a;
     }
     
     static inline vec3 min(vec3 a, vec3 b) {
-        a.v = _mm_min_ss(a.v, b.v);
+        a.v = _mm_min_ps(a.v, b.v);
         return b;
     }
     
@@ -105,12 +105,12 @@ struct vec3 {
 
 
 inline vec3 operator+ (vec3 a, vec3 b) {
-    a.v = _mm_add_ss(a.v, b.v);
+    a.v = _mm_add_ps(a.v, b.v);
     return a;
 }
 
 inline vec3 operator- (vec3 a, vec3 b) {
-    a.v = _mm_sub_ss(a.v, b.v);
+    a.v = _mm_sub_ps(a.v, b.v);
     return a;
 }
 
@@ -119,27 +119,27 @@ inline vec3 operator- (vec3 a) {
 }
 
 inline vec3 operator* (vec3 a, vec3 b) {
-    a.v = _mm_mul_ss(a.v, b.v);
+    a.v = _mm_mul_ps(a.v, b.v);
     return a;
 }
 
 inline vec3 operator* (vec3 a, float b) {
-    a.v = _mm_mul_ss(a.v, _mm_set_ps1(b));
+    a.v = _mm_mul_ps(a.v, _mm_set_ps1(b));
     return a;
 }
 
 inline vec3 operator/ (vec3 a, vec3 b) {
-    a.v = _mm_div_ss(a.v, b.v);
+    a.v = _mm_div_ps(a.v, b.v);
     return a;
 }
 
 inline vec3 operator/ (vec3 a, float b) {
-    a.v = _mm_div_ss(a.v, _mm_set_ps1(b));
+    a.v = _mm_div_ps(a.v, _mm_set_ps1(b));
     return a;
 }
 
 inline vec3 operator/ (float a, vec3 b) {
-    b.v = _mm_div_ss(_mm_set_ps1(a), b.v);
+    b.v = _mm_div_ps(_mm_set_ps1(a), b.v);
     return b;
 }
 
@@ -174,32 +174,32 @@ inline vec3& operator/= (vec3& a, float b) {
 }
 
 inline vec3 operator== (vec3 a, vec3 b) {
-    a.v = _mm_cmpeq_ss(a.v, b.v);
+    a.v = _mm_cmpeq_ps(a.v, b.v);
     return a;
 }
 
 inline vec3 operator!= (vec3 a, vec3 b) {
-    a.v = _mm_cmpneq_ss(a.v, b.v);
+    a.v = _mm_cmpneq_ps(a.v, b.v);
     return a;
 }
 
 inline vec3 operator< (vec3 a, vec3 b) {
-    a.v = _mm_cmplt_ss(a.v, b.v);
+    a.v = _mm_cmplt_ps(a.v, b.v);
     return a;
 }
 
 inline vec3 operator> (vec3 a, vec3 b) {
-    a.v = _mm_cmpgt_ss(a.v, b.v);
+    a.v = _mm_cmpgt_ps(a.v, b.v);
     return a;
 }
 
 inline vec3 operator<= (vec3 a, vec3 b) {
-    a.v = _mm_cmple_ss(a.v, b.v);
+    a.v = _mm_cmple_ps(a.v, b.v);
     return a;
 }
 
 inline vec3 operator>= (vec3 a, vec3 b) {
-    a.v = _mm_cmpge_ss(a.v, b.v);
+    a.v = _mm_cmpge_ps(a.v, b.v);
     return a;
 }
 
@@ -208,7 +208,7 @@ inline vec3 cross(vec3 a, vec3 b) {
 }
 
 inline float sum(vec3 a) {
-    a.v = _mm_add_ss(_mm_add_ss(a.v, a.zyx().v), a.yxz().v);
+    a.v = _mm_add_ps(_mm_add_ps(a.v, a.zyx().v), a.yxz().v);
     return a.x();
 }
 
@@ -225,7 +225,7 @@ inline float length(vec3 a) {
 }
 
 inline vec3 normalise(vec3 a) {
-    return a / lengthSquared(a);
+    return a / length(a);
 }
 
 inline vec3 abs(vec3 a) {
