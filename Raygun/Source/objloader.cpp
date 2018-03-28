@@ -295,7 +295,8 @@ bool ObjectLoader::loadIndices(std::vector<unsigned int> & out_vertex_indices, s
 				out_texture_indices.push_back(textureIndex[2] - 1);
 				break;
             default:
-                ;
+                // something is screwed up
+                __builtin_trap();
 			}
             
 			out_vertex_indices.push_back(vertexIndex[0] - 1);

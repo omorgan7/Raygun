@@ -45,7 +45,7 @@ protected:
     float ambientCoeff, diffuseCoeff, specularCoeff, reflectCoeff;
 };
 
-class triangle : public object{
+class triangle {
 public:
     triangle(
 		std::vector<std::vector<float> > * input_vertices,
@@ -66,7 +66,38 @@ public:
     color AmbientRayInterSection(Ray * ray);
     color DiffuseColorCalc(Ray * ray);
     color SpecularColorCalc(Ray * ray);
-    float calculateInterSectionProduct(Ray * ray, int * success);
+    
+    FORCE_INLINE float calculateInterSectionProduct(vec3 origin, vec3 direction, int * success){
+        
+        float denominator = dot(triangleNormal, direction);
+        
+        if(fabs(denominator) < 0.001f){
+            *success = 0;
+            return -1;
+        }
+        
+        float numerator = dot(triangleNormal, vertices[0]) - dot(triangleNormal, origin);
+        
+        float t = numerator / denominator;
+        
+        if (t < 0) {
+            *success = 0;
+            return -1;
+        }
+        
+        vec3 Q = origin + direction * t;
+        bool firstNorm = (dot(cross(vertices[1] - vertices[0], Q - vertices[0]), triangleNormal) >= 0.0f) &&
+        (dot(cross(vertices[2] - vertices[1], Q - vertices[1]), triangleNormal) >= 0.0f) &&
+        (dot(cross(vertices[0] - vertices[2] , Q - vertices[2]), triangleNormal) >= 0.0f);
+        if(firstNorm){
+            *success = 1;
+            return t;
+        }
+        
+        *success = 0;
+        return -1;
+    }
+    
     void inputIntersectionCoords(vec3f &coords);
 	vec3f computeBarycentrics(Ray * ray);
 	void interpolateNormal();
@@ -86,7 +117,7 @@ private:
     vec3f vertices[3];
     vec3f normals[3];
 	vec3f UVs[3];
-    vec3f triangleNormal,interpNormal,edgeA,edgeB, barycentrics,rayintersectioncoords,lightvec;
+    vec3f triangleNormal, interpNormal, edgeA, edgeB, barycentrics, rayintersectioncoords, lightvec;
     //float barycentricDivisor;
     void ComputeNormal();
     //void flipNormal();
@@ -95,7 +126,8 @@ private:
     AABB tribox;
     textureImage * texture = nullptr;
 	long long unsigned int textureSize;
-    
+    color Color = color();
+    float ambientCoeff, diffuseCoeff, specularCoeff, reflectCoeff;
     
 };
 
@@ -103,16 +135,16 @@ class Mesh{
     public:
         Mesh(
 			std::vector<std::vector<float> > * v,
-			std::vector<unsigned int> * v_indices,
+			std::vector<unsigned int> * vIndices,
 			std::vector<std::vector<float> > * v_norms,
 			std::vector<unsigned int> * v_norm_indices,
 			std::vector<std::vector<float> > * uvs,
-			std::vector<unsigned int> * uv_indices,
+			std::vector<unsigned int> * uvIndices,
 			textureImage * texture);
         ~Mesh();
         void translate(vec3f translate);
         bool RayIntersection(Ray * ray, color * outColor);
-		void computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices);
+		void computeBVH(std::vector<std::vector<float>>& vertices, std::vector<unsigned int>& vertexIndices);
 		vec3f returnSurfaceSamplePoint(vec3f * outBarycentrics, size_t * outTri);
 		vec3f returnRandomDirection(vec3f N, size_t triNumber);
         vec3f returnRandomSpecDirection(vec3f N, size_t triNumber);
@@ -138,12 +170,12 @@ class LightSurface : public Mesh{
 	public:
 		LightSurface(
 			std::vector<std::vector<float> > * v,
-			std::vector<unsigned int> * v_indices,
+			std::vector<unsigned int> * vIndices,
 			std::vector<std::vector<float> > * v_norms,
 			std::vector<unsigned int> * v_norm_indices,
 			std::vector<std::vector<float> > * uvs,
-			std::vector<unsigned int> * uv_indices,
-			textureImage * texture) : Mesh(v, v_indices, v_norms, v_norm_indices, uvs, uv_indices, texture) {};
+			std::vector<unsigned int> * uvIndices,
+			textureImage * texture) : Mesh(v, vIndices, v_norms, v_norm_indices, uvs, uvIndices, texture) {};
 		~LightSurface();
 
     

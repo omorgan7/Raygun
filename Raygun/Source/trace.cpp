@@ -11,15 +11,15 @@ bool ShadowRayIntersection(Mesh * mesh, Ray * shadowRay) {
     //returns false otherwise.
     
 	std::vector<unsigned int> intersectedShadowTris;
-	bool shadowboxintersection = AABBRayIntersection(mesh->BVH, shadowRay, &intersectedShadowTris);
+	bool shadowboxintersection = AABBRayIntersection(mesh->BVH, shadowRay->GetStartPos(), shadowRay->GetInvDirection(), &intersectedShadowTris);
 	if (shadowboxintersection == 0) {
 		return 0;
 	}
 	size_t numShadowTris = intersectedShadowTris.size();
     int successShadowState;
-	for (int j = 0; j<numShadowTris; j++) {
+	for (size_t j = 0; j < numShadowTris; j++) {
 		successShadowState = 1;
-		mesh->tris[intersectedShadowTris[j]]->calculateInterSectionProduct(shadowRay, &successShadowState);
+		mesh->tris[intersectedShadowTris[j]]->calculateInterSectionProduct(shadowRay->GetStartPos(), shadowRay->GetDirection(), &successShadowState);
 		if (successShadowState == 1) {
 			//return straight away if we find an intersection.
 			//IDC if there are closer ones.
@@ -31,7 +31,7 @@ bool ShadowRayIntersection(Mesh * mesh, Ray * shadowRay) {
 
 float ForwardRayIntersection(Mesh * mesh, Ray * ray, size_t * out_tri_number) {
 	std::vector<unsigned int> intersectedTris;
-	bool intersection = AABBRayIntersection(mesh->BVH, ray, &intersectedTris);
+	bool intersection = AABBRayIntersection(mesh->BVH, ray->GetStartPos(), ray->GetInvDirection(), &intersectedTris);
 	if (intersection == 0) {
 		*out_tri_number = -1;
 		return -INFINITY;
@@ -42,7 +42,7 @@ float ForwardRayIntersection(Mesh * mesh, Ray * ray, size_t * out_tri_number) {
     int successState;
 	for (size_t j = 0; j<num_intersected_tris; j++) {
 		successState = 1;
-		float t = mesh->tris[intersectedTris[j]]->calculateInterSectionProduct(ray, &successState);
+		float t = mesh->tris[intersectedTris[j]]->calculateInterSectionProduct(ray->GetStartPos(), ray->GetDirection(), &successState);
 		if (successState == 1) {
 			if (t < max_depth) {
 				max_depth = t;

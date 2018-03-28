@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<float> > normals;
     std::vector<unsigned int> normal_indices;
 	std::vector<std::vector<float> > UVs;
-	std::vector<unsigned int> uv_indices;
+	std::vector<unsigned int> uvIndices;
     
     //load camera matchmoving data
 //    CameraReader::ParseCamera(cameradata);
@@ -68,11 +68,11 @@ int main(int argc, char* argv[]) {
 	sceneLoader.loadVertices(vertices);
 	sceneLoader.loadNormals(normals);
 	sceneLoader.loadUVs(UVs);
-	sceneLoader.loadIndices(vertex_indices, normal_indices, uv_indices);
+	sceneLoader.loadIndices(vertex_indices, normal_indices, uvIndices);
     textureImage texture;
 	sceneLoader.loadTextureImage(texturestring.c_str(), &(texture.imageData),&(texture.width),&(texture.height));
-    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices,/*nullptr,nullptr, nullptr*/&UVs,&uv_indices,&texture);
-	mesh.computeBVH(&vertices, &vertex_indices);
+    Mesh mesh = Mesh(&vertices, &vertex_indices, &normals, &normal_indices,/*nullptr,nullptr, nullptr*/&UVs,&uvIndices,&texture);
+	mesh.computeBVH(vertices, vertex_indices);
     //mesh.CalculateArea();
     
     //Load light surfaces
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
     lightLoader.loadVertices(vertices);
 	lightLoader.loadNormals(normals);
 	lightLoader.loadUVs(UVs);
-	lightLoader.loadIndices(vertex_indices, normal_indices, uv_indices);
+	lightLoader.loadIndices(vertex_indices, normal_indices, uvIndices);
     
 	LightSurface light = LightSurface(&vertices,
                                       &vertex_indices,
@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
                                       nullptr,
                                       nullptr);
     
-	light.computeBVH(&vertices, &vertex_indices);
+	light.computeBVH(vertices, vertex_indices);
     light.setColor(color(255.0f,255.0f,255.0f));
     light.CalculateArea();
     

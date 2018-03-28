@@ -32,18 +32,20 @@ triangle::triangle(
         if (input_UVs != nullptr) {
             UVs[i] = vec3((*input_UVs)[UV_indices[i]][0], (*input_UVs)[UV_indices[i]][1], 0.0f);
         }
-        tribox.vertex_indices.push_back(indices[i]);
+//        tribox.vertex_indices.push_back(indices[i]);
     }
     
     edgeA = vertices[1] - vertices[0];
     edgeB = vertices[2] - vertices[0];
-    ambientCoeff=0.4;
-    diffuseCoeff = 0.3;
-    specularCoeff = 0.3;
+    ambientCoeff = 0.4f;
+    diffuseCoeff = 0.3f;
+    specularCoeff = 0.3f;
     Color = color(1.0f, 0, 1.0f);
     ComputeNormal();
-    Mesh_Stats xyz;
-    getminmaxmed(&tribox,input_vertices, &xyz);
+    MinMax xyz;
+    std::vector<unsigned int> vertexIndices(indices, indices + 3);
+    tribox.triNumber.push_back(0);
+    getminmaxmed(&tribox, *input_vertices, vertexIndices, xyz);
     tribox.min = xyz.min;
     tribox.max = xyz.max;
 
@@ -150,33 +152,6 @@ color triangle::SpecularColorCalc(Ray * ray){
     return GetColor()*specularCoeff*powf(SpecRay,200);
 }
 
-float triangle::calculateInterSectionProduct(Ray * ray, int * success){
-    vec3 RayDirection = ray->GetDirection();
-    float denominator = dot(triangleNormal, RayDirection);
-    if(fabs(denominator) < 0.0000001f){
-        *success = 0;
-        return -1;
-    }
-    vec3 origin = ray->GetStartPos();
-    float numerator = dot(triangleNormal, vertices[0]) - dot(triangleNormal, ray->GetStartPos());
-    float t = numerator / denominator;
-    if (t < 0) {
-        *success = 0;
-        return -1;
-    }
-    //std::cout<<"t positive\n";
-    vec3 Q = origin + RayDirection * t;
-	bool firstNorm = (dot(cross(vertices[1] - vertices[0], Q - vertices[0]), triangleNormal) >= 0.0f) &&
-		(dot(cross(vertices[2] - vertices[1], Q - vertices[1]), triangleNormal) >= 0.0f) &&
-                    (dot(cross(vertices[0] - vertices[2] , Q - vertices[2]), triangleNormal) >= 0.0f);
-    if(firstNorm){
-        *success = 1;
-        return t;
-    }
-    *success = 0;
-    return -1;
-    
-}
  void triangle::ComputeNormal(){
      vec3f LHS = vertices[1] - vertices[0];
      vec3f RHS = vertices[2] - vertices[0];
@@ -228,18 +203,18 @@ float triangle::getArea() {
 
 Mesh::Mesh(
     std::vector<std::vector<float> > * v, 
-    std::vector<unsigned int> * v_indices, 
+    std::vector<unsigned int> * vIndices, 
     std::vector<std::vector<float> > * v_norms, 
     std::vector<unsigned int> * v_norm_indices,
 	std::vector<std::vector<float> > * uvs,
-	std::vector<unsigned int> * uv_indices,
+	std::vector<unsigned int> * uvIndices,
 	textureImage * texture){
     
-    num_tris = v_indices->size()/3;
+    num_tris = vIndices->size()/3;
     tris = new triangle * [num_tris];
     BVH = new AABB;
     for(size_t i = 0; i<num_tris; i++){
-        unsigned int v_i[] = {(*v_indices)[3*i],(*v_indices)[3*i+1],(*v_indices)[3*i+2]};
+        unsigned int v_i[] = {(*vIndices)[3*i],(*vIndices)[3*i+1],(*vIndices)[3*i+2]};
 		unsigned int v_n[3], v_uv[3];
 		if (v_norms != nullptr) {
 			for (int j = 0; j < 3; j++) {
@@ -248,7 +223,7 @@ Mesh::Mesh(
 		}
 		if (uvs != nullptr) {
 			for (int j = 0; j < 3; j++) {
-				v_uv[j] = (*uv_indices)[3 * i + j];
+				v_uv[j] = (*uvIndices)[3 * i + j];
 			}
 			
 		}
@@ -277,32 +252,34 @@ Mesh::~Mesh(){
     cleanupAABBTree(BVH);
 }
 
-void Mesh::computeBVH(std::vector<std::vector<float> > * v, std::vector<unsigned int> * v_indices) {
-	BVH->vertex_indices = *v_indices;
-	Mesh_Stats xyz;
-	getminmaxmed(BVH, v, &xyz);
+void Mesh::computeBVH(std::vector<std::vector<float> >& vertices, std::vector<unsigned int>& vertexIndices) {
+    
+	MinMax xyz;
+    BVH->triNumber = std::vector<unsigned int>(num_tris);
+    std::iota(BVH->triNumber.begin(), BVH->triNumber.end(), 0);
+    
+	getminmaxmed(BVH, vertices, vertexIndices, xyz);
     BVH->min = xyz.min;
     BVH->max = xyz.max;
 
-	BVH->triNumber = std::vector<unsigned int>(num_tris);
-	std::iota(BVH->triNumber.begin(), BVH->triNumber.end(), 0);
+
 	std::vector<std::vector<float> > medians = std::vector<std::vector<float> >(num_tris);
-	for (int i = 0; i<num_tris; i++) {
+	for (size_t i = 0; i < num_tris; i++) {
 		medians[i] = std::vector<float>(3);
 		for (int j = 0; j<3; j++) {
-			medians[i][j] = (*v)[(*v_indices)[3 * i]][j] + (*v)[(*v_indices)[3 * i + 1]][j] + (*v)[(*v_indices)[3 * i + 2]][j];
+			medians[i][j] = vertices[vertexIndices[3 * i]][j] + vertices[vertexIndices[3 * i + 1]][j] + vertices[vertexIndices[3 * i + 2]][j];
 			medians[i][j] /= 3.0f;
 		}
 	}
 
-	int depth = buildAABBTree(BVH, v, v_indices, &medians, 0);
+    int depth = buildAABBTree(BVH, vertices, vertexIndices, medians, 0);
 	std::cout << "aabb tree depth = " << depth << "\n";
 }
 
 bool Mesh::RayIntersection(Ray * ray, color * outColor){
     std::vector<unsigned int> intersectedTris;
     std::vector<vec3f> interSectionCoordinates;
-    bool intersection = AABBRayIntersection(this->BVH, ray, &intersectedTris);
+    bool intersection = AABBRayIntersection(this->BVH, ray->GetStartPos(), ray->GetInvDirection(), &intersectedTris);
     if(intersection == 0){
 		*outColor = color();
         return 0;
@@ -316,7 +293,7 @@ bool Mesh::RayIntersection(Ray * ray, color * outColor){
 	int intersectionCount = -1;
     for(int j = 0; j<num_intersected_tris; j++){
         successState[j] = 1;
-        auto t = tris[intersectedTris[j]]->calculateInterSectionProduct(ray,&successState[j]);
+        auto t = tris[intersectedTris[j]]->calculateInterSectionProduct(ray->GetStartPos(), ray->GetDirection(), &successState[j]);
         if(successState[j] == 1){
             interSectionCoordinates.push_back(ray->GetStartPos() + ray->GetDirection() * t);
             intersectionCount++;
@@ -357,18 +334,18 @@ bool Mesh::ShadowRayIntersection(std::vector<vec3f> * interSectionCoordinates, s
 	vectolight = normalise(vectolight);
 	vectolight = vectolight * -1.0f;
 	Ray shadowRay = Ray((*interSectionCoordinates)[intersectedCoordsIndex], vectolight);
-	bool shadowboxintersection = AABBRayIntersection(BVH, &shadowRay, &intersectedShadowTris);
+	bool shadowboxintersection = AABBRayIntersection(BVH, shadowRay.GetStartPos(), shadowRay.GetInvDirection(), &intersectedShadowTris);
 	if (shadowboxintersection == 0) {
 		return 0;
 	}
 	size_t numShadowTris = intersectedShadowTris.size();
 	std::vector<int> successShadowState = std::vector<int>(numShadowTris);
-	for (int j = 0; j<numShadowTris; j++) {
+	for (size_t j = 0; j<numShadowTris; j++) {
 		successShadowState[j] = 1;
 		if (intersectedShadowTris[j] == (*intersectedTris)[objectIndex]) {
 			continue;
 		}
-		tris[intersectedShadowTris[j]]->calculateInterSectionProduct(&shadowRay, &successShadowState[j]);
+		tris[intersectedShadowTris[j]]->calculateInterSectionProduct(shadowRay.GetStartPos(), shadowRay.GetDirection(), &successShadowState[j]);
 		if (successShadowState[j] == 1) {
 			return 1;
 		}
