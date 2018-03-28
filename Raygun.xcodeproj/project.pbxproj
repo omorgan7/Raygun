@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A1D4008206BA99400970FE3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A1D4007206BA99400970FE3 /* main.cpp */; };
 		5A2AF25D1E56371E00910E82 /* world.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A2AF25B1E56371E00910E82 /* world.cpp */; };
 		5A2AF2601E56376C00910E82 /* color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A2AF25E1E56376C00910E82 /* color.cpp */; };
 		5A41A8CB1E72C457002D2E72 /* objloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A41A8CA1E72C457002D2E72 /* objloader.cpp */; };
@@ -21,6 +22,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		5A1D4003206BA99400970FE3 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		5A9656C01E546F9E005A8D95 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -35,6 +45,9 @@
 /* Begin PBXFileReference section */
 		5A1D3FFF206AED6300970FE3 /* frame000.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = frame000.bmp; path = "../../../Library/Developer/Xcode/DerivedData/Raygun-axcudgmpnnfcdxdbxtwjdvjtmfyb/Build/Products/Debug/frame000.bmp"; sourceTree = "<group>"; };
 		5A1D4000206B877F00970FE3 /* Containers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Containers.hpp; sourceTree = "<group>"; };
+		5A1D4005206BA99400970FE3 /* SIMD_Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SIMD_Tests; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A1D4007206BA99400970FE3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		5A1D400C206BB1AA00970FE3 /* frame000.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = frame000.bmp; path = "../../../Library/Developer/Xcode/DerivedData/Raygun-axcudgmpnnfcdxdbxtwjdvjtmfyb/Build/Products/Release/frame000.bmp"; sourceTree = "<group>"; };
 		5A2AF25B1E56371E00910E82 /* world.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = world.cpp; sourceTree = "<group>"; };
 		5A2AF25C1E56371E00910E82 /* world.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = world.hpp; sourceTree = "<group>"; };
 		5A2AF25E1E56376C00910E82 /* color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = color.cpp; sourceTree = "<group>"; };
@@ -65,6 +78,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5A1D4002206BA99400970FE3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5A9656BF1E546F9E005A8D95 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -75,10 +95,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A1D4006206BA99400970FE3 /* SIMD_Tests */ = {
+			isa = PBXGroup;
+			children = (
+				5A1D4007206BA99400970FE3 /* main.cpp */,
+			);
+			path = SIMD_Tests;
+			sourceTree = "<group>";
+		};
 		5A9656B91E546F9E005A8D95 = {
 			isa = PBXGroup;
 			children = (
 				5A9656C41E546F9E005A8D95 /* Raygun */,
+				5A1D4006206BA99400970FE3 /* SIMD_Tests */,
+				5A1D400C206BB1AA00970FE3 /* frame000.bmp */,
 				5A9656C31E546F9E005A8D95 /* Products */,
 				5A1D3FFF206AED6300970FE3 /* frame000.bmp */,
 				5A92340C1E82E1BE006FF027 /* raytrace.bmp */,
@@ -91,6 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				5A9656C21E546F9E005A8D95 /* Raygun */,
+				5A1D4005206BA99400970FE3 /* SIMD_Tests */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -146,6 +177,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5A1D4004206BA99400970FE3 /* SIMD_Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A1D4009206BA99400970FE3 /* Build configuration list for PBXNativeTarget "SIMD_Tests" */;
+			buildPhases = (
+				5A1D4001206BA99400970FE3 /* Sources */,
+				5A1D4002206BA99400970FE3 /* Frameworks */,
+				5A1D4003206BA99400970FE3 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SIMD_Tests;
+			productName = SIMD_Tests;
+			productReference = 5A1D4005206BA99400970FE3 /* SIMD_Tests */;
+			productType = "com.apple.product-type.tool";
+		};
 		5A9656C11E546F9E005A8D95 /* Raygun */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5A9656C91E546F9E005A8D95 /* Build configuration list for PBXNativeTarget "Raygun" */;
@@ -172,6 +220,10 @@
 				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = "Owen Morgan";
 				TargetAttributes = {
+					5A1D4004206BA99400970FE3 = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+					};
 					5A9656C11E546F9E005A8D95 = {
 						CreatedOnToolsVersion = 8.2.1;
 						ProvisioningStyle = Automatic;
@@ -191,11 +243,20 @@
 			projectRoot = "";
 			targets = (
 				5A9656C11E546F9E005A8D95 /* Raygun */,
+				5A1D4004206BA99400970FE3 /* SIMD_Tests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5A1D4001206BA99400970FE3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A1D4008206BA99400970FE3 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5A9656BE1E546F9E005A8D95 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -217,6 +278,44 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		5A1D400A206BA99400970FE3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		5A1D400B206BA99400970FE3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		5A9656C71E546F9E005A8D95 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -334,6 +433,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5A1D4009206BA99400970FE3 /* Build configuration list for PBXNativeTarget "SIMD_Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A1D400A206BA99400970FE3 /* Debug */,
+				5A1D400B206BA99400970FE3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		5A9656BD1E546F9E005A8D95 /* Build configuration list for PBXProject "Raygun" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
