@@ -47,19 +47,19 @@ struct vec3 {
     }
     
     inline void setX(float x) {
-        _mm_move_ss(v, _mm_set_ss(x));
+        v = _mm_move_ss(v, _mm_set_ss(x));
     }
     
     inline void setY(float y) {
         __m128 temp = _mm_move_ss(v, _mm_set_ss(y));
         temp = _mm_shuffle_ps(temp, temp, _MM_SHUFFLE(3, 2, 0, 0));
-        _mm_move_ss(temp, v);
+        v = _mm_move_ss(temp, v);
     }
     
     inline void setZ(float z) {
         __m128 temp = _mm_move_ss(v, _mm_set_ss(z));
         temp = _mm_shuffle_ps(temp, temp, _MM_SHUFFLE(3, 0, 1, 0));
-        _mm_move_ss(temp, v);
+        v = _mm_move_ss(temp, v);
     }
     
     inline vec3 xzy() {

@@ -415,7 +415,10 @@
 		5A9656CA1E546F9E005A8D95 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_SIGN_COMPARE = YES;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -424,7 +427,10 @@
 		5A9656CB1E546F9E005A8D95 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_SIGN_COMPARE = YES;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

@@ -33,6 +33,33 @@ bool unaryTest(float a, float b, float c, Pred pred)
 
 int main() {
     
+    if (!unaryTest(0.0f, 0.0f, 3.0f, [] (vec3 v1, float* t1) {
+        
+        v1.setX(t1[2]);
+        
+        return v1.x() == t1[2];
+    })) {
+        printf("setX failed\n");
+    }
+    
+    if (!unaryTest(0.0f, 0.0f, 3.0f, [] (vec3 v1, float* t1) {
+        
+        v1.setY(t1[2]);
+        
+        return v1.y() == t1[2];
+    })) {
+        printf("setY failed\n");
+    }
+    
+    if (!unaryTest(3.0f, 0.0f, 0.0f, [] (vec3 v1, float* t1) {
+        
+        v1.setZ(t1[0]);
+        
+        return v1.z() == t1[0];
+    })) {
+        printf("setZ failed\n");
+    }
+    
     if (!binaryTest(1.0f, 2.0f, 3.0f, 5.0f, -7.0f, -299.0f, [] (vec3 v1, vec3 v2, float* t1, float* t2) {
         float t3[] = {t1[0] + t2[0], t1[1] + t2[1], t1[2] + t2[2]};
         vec3 v3 = v1 + v2;

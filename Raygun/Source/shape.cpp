@@ -67,7 +67,7 @@ color triangle::GetColor(vec3f bcs){
     vec3f pixColors[4];
     vec3f interpUV = UVs[1] * bcs.x() + UVs[2] * bcs.y() + UVs[0] * bcs.z();
     
-    vec3f wholeUV, fracUV(0);
+    vec3f wholeUV, fracUV(0.0f, 0.0f, 0.0f);
     vec3f textureSizeVec = vec3((float) texture->width, (float) texture->height, 0.0f);
     
     float tempX, tempY;
@@ -186,7 +186,7 @@ float triangle::calculateInterSectionProduct(Ray * ray, int * success){
  }
  
 vec3f triangle::computeBarycentrics(Ray * ray){
-    vec3f bcs(0);
+    vec3f bcs(0.0f, 0.0f, 0.0f);
     float barycentricDivisor = 1.0f / (dot(cross(ray->GetDirection(), edgeB), edgeA));
     bcs.setX(barycentricDivisor * dot(cross(ray->GetDirection(), edgeB), ray->GetStartPos() - vertices[0]));
     bcs.setY(barycentricDivisor * dot(cross(ray->GetStartPos() - vertices[0], edgeA), ray->GetDirection()));

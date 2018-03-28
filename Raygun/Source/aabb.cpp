@@ -97,7 +97,7 @@ void cleanupAABBTree(AABB * root){
 };
 
 void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh_Stats * stats){
-    std::vector<float> x,y,z;
+    std::vector<float> x, y, z;
     //std::vector<std::vector<float> > medians;
     std::vector<unsigned int> VI_sorted = root->vertex_indices;
 
@@ -109,12 +109,12 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> > * vertices, Mesh
         y.push_back((*vertices)[VI_sorted[i]][1]);
         z.push_back((*vertices)[VI_sorted[i]][2]);
     }
-    stats->min.setX(*std::min_element(x.begin(),x.end()));
-    stats->max.setX(*std::max_element(x.begin(),x.end()));
-    stats->min.setY(*std::min_element(y.begin(),y.end()));
-    stats->max.setY(*std::max_element(y.begin(),y.end()));
-    stats->min.setZ(*std::min_element(z.begin(),z.end()));
-    stats->max.setZ(*std::max_element(z.begin(),z.end()));
+    stats->min.setX(*std::min_element(x.begin(), x.end()));
+    stats->max.setX(*std::max_element(x.begin(), x.end()));
+    stats->min.setY(*std::min_element(y.begin(), y.end()));
+    stats->max.setY(*std::max_element(y.begin(), y.end()));
+    stats->min.setZ(*std::min_element(z.begin(), z.end()));
+    stats->max.setZ(*std::max_element(z.begin(), z.end()));
 }
 
 bool AABBRayIntersection(AABB * root, Ray * R, std::vector<unsigned int> * intersectedVertices){
