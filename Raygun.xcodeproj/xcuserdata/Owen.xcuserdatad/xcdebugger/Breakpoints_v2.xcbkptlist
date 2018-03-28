@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Source/objloader.cpp"
-            timestampString = "543928825.781212"
+            timestampString = "543929072.01563"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "88"
@@ -26,7 +26,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Include/objloader.hpp"
-            timestampString = "543928825.781316"
+            timestampString = "543929072.015746"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "25"
@@ -38,12 +38,12 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             condition = "i == 50 * 50 * 3"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Source/main.cpp"
-            timestampString = "543928825.781412"
+            timestampString = "543929072.01581"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "158"
@@ -59,7 +59,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SIMD_Tests/main.cpp"
-            timestampString = "543928825.7815059"
+            timestampString = "543929072.015873"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "37"
@@ -75,7 +75,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SIMD_Tests/main.cpp"
-            timestampString = "543928825.7819999"
+            timestampString = "543929072.0159481"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "38"
@@ -91,7 +91,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Include/vec3.hpp"
-            timestampString = "543928825.782377"
+            timestampString = "543929072.016022"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "108"
@@ -107,7 +107,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SIMD_Tests/main.cpp"
-            timestampString = "543928825.7824529"
+            timestampString = "543929072.016083"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "107"
@@ -123,7 +123,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SIMD_Tests/main.cpp"
-            timestampString = "543928825.782737"
+            timestampString = "543929072.0161411"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "105"
@@ -139,7 +139,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Include/vec3.hpp"
-            timestampString = "543928825.782994"
+            timestampString = "543929072.016198"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "211"
@@ -155,7 +155,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Include/vec3.hpp"
-            timestampString = "543928825.783053"
+            timestampString = "543929072.016252"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "216"
@@ -171,7 +171,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SIMD_Tests/main.cpp"
-            timestampString = "543928825.7831039"
+            timestampString = "543929072.016304"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "98"
@@ -210,6 +210,22 @@
                   offsetFromSymbolStart = "37">
                </Location>
             </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Raygun/Source/trace.cpp"
+            timestampString = "543929072.016361"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "300"
+            endingLineNumber = "300"
+            landmarkName = "ambientraytracer(Mesh * object, LightSurface * light, Ray * ray)"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

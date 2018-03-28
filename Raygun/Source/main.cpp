@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
     
     std::vector<std::vector<float> > interSectionCoordinates;
 	std::default_random_engine e1;
-	std::uniform_real_distribution<float> uniform_dist(-0.005f, 0.005f);
+	std::uniform_real_distribution<float> uniform_dist(0.0f, 0.0f/*-0.005f, 0.005f*/);
 	//float jitter;
     vec3f outColors[NUM_MONTECARLO_SAMPLES];
     std::ofstream ofs;
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
                         eye_v * image_y * pixel_height / (float)height;
             
             array3<unsigned char> outColor;
-            vec3f noisevec,jitteredDirection;
+            vec3f noisevec, jitteredDirection;
             Ray R;
             int chunk = CHUNKSIZE; //needed for OpenMP for... something.
             float r=0,g=0,b=0;
