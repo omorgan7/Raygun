@@ -47,10 +47,10 @@ int main(int argc, char* argv[]) {
     
     unsigned char *image = new unsigned char[width*height*3];
 
-    std::string objectstring = "/Users/owen/Dropbox/halo.obj";
-    std::string lightobjectstring = "/Users/owen/Dropbox/2001light.obj";
-    std::string texturestring = "/Users/owen/Dropbox/halo.bmp";
-    std::string cameradata = "/Users/owen/Dropbox/out.txt";
+    std::string objectstring = "//Users/owen/Documents/C++/Raygun/Raygun/2001scene.obj";
+    std::string lightobjectstring = "/Users/owen/Documents/C++/Raygun/Raygun/2001light.obj";
+    std::string texturestring = "/Users/owen/Documents/C++/Raygun/Raygun/halo.bmp";
+//    std::string cameradata = "/Users/owen/Dropbox/out.txt";
     
     std::vector<std::vector<float> > vertices;
     std::vector<unsigned int> vertex_indices;
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 	std::vector<unsigned int> uv_indices;
     
     //load camera matchmoving data
-    CameraReader::ParseCamera(cameradata);
+//    CameraReader::ParseCamera(cameradata);
     
     
     //Load scene
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
     
     for(size_t idx = startFrame; idx< endFrame; idx++){
 
-        vec3f rotation = CameraReader::GetCameraRotationForFrame(idx);
+        vec3f rotation = {0,0,0};// CameraReader::GetCameraRotationForFrame(idx);
         float angle = -PI*rotation.x/180.0f;
 
         eye_origin = {0,-1.0f*radius*cosf(angularSpeed*(float)idx),radius*sinf(angularSpeed*(float)idx)};
@@ -141,7 +141,8 @@ int main(int argc, char* argv[]) {
                 jitteredDirection = Vec3Sub(Vec3Add(noisevec, direction),eye_origin);
                 NormaliseVector(&jitteredDirection);
                 R = Ray(eye_origin,jitteredDirection);
-                outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0);
+                outColors[k] = ambientraytracer(&mesh, &light, &R);
+//                outColors[k] = MC_GlobalSample(&mesh, &light, &R, 0);
             }
             }
              #pragma omp parallel for      \

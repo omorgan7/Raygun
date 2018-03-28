@@ -33,6 +33,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5A1D400D206BDA8100970FE3 /* frame000.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = frame000.bmp; path = "../../../Library/Developer/Xcode/DerivedData/Raygun-axcudgmpnnfcdxdbxtwjdvjtmfyb/Build/Products/Debug/frame000.bmp"; sourceTree = "<group>"; };
 		5A2AF25B1E56371E00910E82 /* world.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = world.cpp; sourceTree = "<group>"; };
 		5A2AF25C1E56371E00910E82 /* world.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = world.hpp; sourceTree = "<group>"; };
 		5A2AF25E1E56376C00910E82 /* color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = color.cpp; sourceTree = "<group>"; };
@@ -78,6 +79,7 @@
 			children = (
 				5A9656C41E546F9E005A8D95 /* Raygun */,
 				5A9656C31E546F9E005A8D95 /* Products */,
+				5A1D400D206BDA8100970FE3 /* frame000.bmp */,
 				5A92340C1E82E1BE006FF027 /* raytrace.bmp */,
 				5AAE57E91E5E073800A562A8 /* raytrace.bmp */,
 				5A78BCCA1EBA5E5E007615A7 /* frame000.bmp */,
@@ -116,7 +118,7 @@
 				5A2AF25E1E56376C00910E82 /* color.cpp */,
 				5A2AF25B1E56371E00910E82 /* world.cpp */,
 			);
-			name = Source;
+			path = Source;
 			sourceTree = "<group>";
 		};
 		5AAE57EA1E5E079000A562A8 /* Headers */ = {
@@ -136,6 +138,7 @@
 				5A9DFB361E772D8300BA3B30 /* aabb.hpp */,
 			);
 			name = Headers;
+			path = Include;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
