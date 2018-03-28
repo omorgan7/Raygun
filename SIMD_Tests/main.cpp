@@ -8,6 +8,7 @@
 
 #include "vec3.hpp"
 #include <cstdio>
+#include <algorithm>
 
 template <class Pred>
 bool binaryTest(float a, float b, float c, float d, float e, float f, Pred pred)
@@ -80,7 +81,62 @@ int main() {
         vec3 v3 = cross(v1, v2);
         return v3.x() == t3[0] && v3.y() == t3[1] && v3.z() == t3[2];
     })) {
-        printf("Cross produced failed\n");
+        printf("Cross product failed\n");
+    }
+    
+    if (!binaryTest(1.0f, 2.0f, 3.0f, 5.0f, -7.0f, -299.0f, [] (vec3 v1, vec3 v2, float* t1, float* t2) {
+        float t3[] = {t1[0] < t2[0] ? 1.0f : 0.0f,
+            t1[1] < t2[1] ? 1.0f : 0.0f,
+            t1[2] < t2[2] ? 1.0f : 0.0f,
+        };
+        vec3 v3 = v1 < v2;
+        return v3.x() == t3[0] && v3.y() == t3[1] && v3.z() == t3[2];
+    })) {
+        printf("Less than failed\n");
+    }
+    
+    if (!binaryTest(1.0f, 2.0f, 3.0f, 1.0f, 8.0f, -299.0f, [] (vec3 v1, vec3 v2, float* t1, float* t2) {
+        float t3[] = {t1[0] <= t2[0] ? 1.0f : 0.0f,
+            t1[1] <= t2[1] ? 1.0f : 0.0f,
+            t1[2] <= t2[2] ? 1.0f : 0.0f,
+        };
+        vec3 v3 = v1 <= v2;
+        return v3.x() == t3[0] && v3.y() == t3[1] && v3.z() == t3[2];
+    })) {
+        printf("Less than or equal to failed\n");
+    }
+    
+    if (!binaryTest(1.0f, 2.0f, 3.0f, 5.0f, -7.0f, -299.0f, [] (vec3 v1, vec3 v2, float* t1, float* t2) {
+        float t3[] = {t1[0] > t2[0] ? 1.0f : 0.0f,
+            t1[1] > t2[1] ? 1.0f : 0.0f,
+            t1[2] > t2[2] ? 1.0f : 0.0f,
+        };
+        vec3 v3 = v1 > v2;
+        return v3.x() == t3[0] && v3.y() == t3[1] && v3.z() == t3[2];
+    })) {
+        printf("Greater than failed\n");
+    }
+    
+    if (!binaryTest(1.0f, 2.0f, 3.0f, 1.0f, 8.0f, -299.0f, [] (vec3 v1, vec3 v2, float* t1, float* t2) {
+        float t3[] = {t1[0] >= t2[0] ? 1.0f : 0.0f,
+            t1[1] >= t2[1] ? 1.0f : 0.0f,
+            t1[2] >= t2[2] ? 1.0f : 0.0f,
+        };
+        vec3 v3 = v1 >= v2;
+        return v3.x() == t3[0] && v3.y() == t3[1] && v3.z() == t3[2];
+    })) {
+        printf("Greater than or equal to failed\n");
+    }
+    
+    if (!binaryTest(1.0f, 2.0f, 3.0f, 1.0f, 8.0f, -299.0f, [] (vec3 v1, vec3 v2, float* t1, float* t2) {
+        float t3[] = {t1[0] == t2[0] ? 1.0f : 0.0f,
+            t1[1] == t2[1] ? 1.0f : 0.0f,
+            t1[2] == t2[2] ? 1.0f : 0.0f,
+        };
+        vec3 v3 = v1 == v2;
+        return v3.x() == t3[0] && v3.y() == t3[1] && v3.z() == t3[2];
+    })) {
+        printf("Equal to failed\n");
     }
     
     if (!unaryTest(1.0f, 2.0f, 3.0f, [] (vec3 v1, float* t1) {
@@ -108,6 +164,38 @@ int main() {
     })) {
         printf("Normalisation failed\n");
     }
+    
+    if (!unaryTest(1.0f, -2.0f, 3.0f, [] (vec3 v1, float* t1) {
+        float tmin = std::min(std::min(t1[0], t1[1]), t1[2]);
+        float vmin = v1.minElement();
+        
+        return tmin == vmin;
+    })) {
+        printf("Min element failed\n");
+    }
+    
+    if (!unaryTest(1.0f, -2.0f, 3.0f, [] (vec3 v1, float* t1) {
+        float tmax = std::max(std::max(t1[0], t1[1]), t1[2]);
+        float vmax = v1.maxElement();
+        
+        return tmax == vmax;
+    })) {
+        printf("Max element failed\n");
+    }
+    
+    if (!unaryTest(1.0f, -2.0f, 3.0f, [] (vec3 v1, float* t1) {
+        float tsign[]{t1[0] < 0.0f ? -1.0f : 1.0f,
+            t1[1] < 0.0f ? -1.0f : 1.0f,
+            t1[2] < 0.0f ? -1.0f : 1.0f,
+        };
+        vec3 vsign = sign(v1);
+        
+        return vsign.x() == tsign[0] && vsign.y() == tsign[1] && vsign.z() == tsign[2];
+    })) {
+        printf("Sign of failed\n");
+    }
+    
+    
     
     printf("All tests finished\n");
     
