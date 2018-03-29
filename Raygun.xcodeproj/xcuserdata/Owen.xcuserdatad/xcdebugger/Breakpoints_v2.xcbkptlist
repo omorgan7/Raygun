@@ -38,12 +38,12 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             condition = "i == 50 * 50 * 3"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Source/main.cpp"
-            timestampString = "543947224.4881901"
+            timestampString = "544007578.871119"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "158"
@@ -219,7 +219,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Source/trace.cpp"
-            timestampString = "543947224.488809"
+            timestampString = "543966057.592412"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "300"
@@ -411,7 +411,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Source/main.cpp"
-            timestampString = "543947224.489817"
+            timestampString = "544007578.871637"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "75"
@@ -427,12 +427,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Source/aabb.cpp"
-            timestampString = "543947224.489903"
+            timestampString = "544007578.871852"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "126"
-            endingLineNumber = "126"
-            landmarkName = "getminmaxmed(AABB * root, std::vector&lt;std::vector&lt;float&gt; &gt;&amp; vertices, std::vector&lt;unsigned int&gt;&amp; vertexIndices, MinMax&amp; stats)"
+            startingLineNumber = "149"
+            endingLineNumber = "149"
+            landmarkName = "computeTrianglesMinMax(AABB* root, std::vector&lt;std::vector&lt;float&gt; &gt;&amp; vertices, std::vector&lt;unsigned int&gt;&amp; vertexIndices)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -475,11 +475,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Source/aabb.cpp"
-            timestampString = "543947224.4905421"
+            timestampString = "544007578.871928"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "75"
-            endingLineNumber = "75"
+            startingLineNumber = "63"
+            endingLineNumber = "63"
             landmarkName = "buildAABBTree(AABB* root, std::vector&lt;std::vector&lt;float&gt;&gt;&amp; vertices, std::vector&lt;unsigned int&gt;&amp; vertexIndices, std::vector&lt;std::vector&lt;float&gt;&gt;&amp; medians, int depth)"
             landmarkType = "9">
          </BreakpointContent>
@@ -491,11 +491,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Source/aabb.cpp"
-            timestampString = "543947224.490791"
+            timestampString = "544007578.8719749"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "76"
-            endingLineNumber = "76"
+            startingLineNumber = "64"
+            endingLineNumber = "64"
             landmarkName = "buildAABBTree(AABB* root, std::vector&lt;std::vector&lt;float&gt;&gt;&amp; vertices, std::vector&lt;unsigned int&gt;&amp; vertexIndices, std::vector&lt;std::vector&lt;float&gt;&gt;&amp; medians, int depth)"
             landmarkType = "9">
          </BreakpointContent>
@@ -507,12 +507,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Raygun/Source/aabb.cpp"
-            timestampString = "543947224.491028"
+            timestampString = "544007578.8720191"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "11"
             endingLineNumber = "11"
             landmarkName = "buildAABBTree(AABB* root, std::vector&lt;std::vector&lt;float&gt;&gt;&amp; vertices, std::vector&lt;unsigned int&gt;&amp; vertexIndices, std::vector&lt;std::vector&lt;float&gt;&gt;&amp; medians, int depth)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Raygun/Source/trace.cpp"
+            timestampString = "544007630.1633019"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
+            landmarkName = "ForwardRayIntersection(Mesh * mesh, Ray * ray, size_t * out_tri_number)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

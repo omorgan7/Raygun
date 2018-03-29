@@ -42,12 +42,9 @@ triangle::triangle(
     specularCoeff = 0.3f;
     Color = color(1.0f, 0, 1.0f);
     ComputeNormal();
-    MinMax xyz;
     std::vector<unsigned int> vertexIndices(indices, indices + 3);
     tribox.triNumber.push_back(0);
-    getminmaxmed(&tribox, *input_vertices, vertexIndices, xyz);
-    tribox.min = xyz.min;
-    tribox.max = xyz.max;
+    computeTrianglesMinMax(&tribox, *input_vertices, vertexIndices);
 
 }
 void triangle::translateTri(vec3f translate){
@@ -254,14 +251,10 @@ Mesh::~Mesh(){
 
 void Mesh::computeBVH(std::vector<std::vector<float> >& vertices, std::vector<unsigned int>& vertexIndices) {
     
-	MinMax xyz;
     BVH->triNumber = std::vector<unsigned int>(num_tris);
     std::iota(BVH->triNumber.begin(), BVH->triNumber.end(), 0);
     
-	getminmaxmed(BVH, vertices, vertexIndices, xyz);
-    BVH->min = xyz.min;
-    BVH->max = xyz.max;
-
+	computeTrianglesMinMax(BVH, vertices, vertexIndices);
 
 	std::vector<std::vector<float> > medians = std::vector<std::vector<float> >(num_tris);
 	for (size_t i = 0; i < num_tris; i++) {

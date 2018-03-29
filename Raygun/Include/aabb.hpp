@@ -13,7 +13,7 @@ struct MinMax{
     vec3f max;
 };
 
-struct AABB{
+struct AABB {
     vec3f min;
     vec3f max;
 
@@ -36,45 +36,11 @@ int buildAABBTree(AABB* root,
                   std::vector<std::vector<float>>& medians,
                   int depth);
 
-void getminmaxmed(AABB* root,
+void computeTrianglesMinMax(AABB* root,
                   std::vector<std::vector<float>>& vertices,
-                  std::vector<unsigned int>& vertexIndices,
-                  MinMax& stats);
+                  std::vector<unsigned int>& vertexIndices);
 
-FORCE_INLINE bool AABBRayIntersection(AABB * root, vec3 origin, vec3 invDirection, std::vector<unsigned int> * intersectedVertices){
-    
-    vec3f boxmin, boxmax;
-    
-    boxmin = (root->min - origin) * invDirection;
-    boxmax = (root->max - origin) * invDirection;
-    
-    vec3f minintersection = vec3::min(boxmin, boxmax);
-    vec3f maxintersection = vec3::max(boxmin, boxmax);
-    
-    float tmin = minintersection.maxElement();
-    float tmax = maxintersection.minElement();
-    
-    bool hit = (tmax >= 0) && (tmax >= tmin);
-    if (!hit) {
-        return false;
-    }
-    
-    bool leftret = false, rightret = false;
-    if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
-        for (size_t i = 0; i < root->triNumber.size(); i++) {
-            (*intersectedVertices).push_back(root->triNumber[i]);
-        }
-        return true;
-    }
-    if (root->leftbox != nullptr) {
-        leftret = AABBRayIntersection(root->leftbox, origin, invDirection, intersectedVertices);
-    }
-    if (root->rightbox != nullptr) {
-        rightret = AABBRayIntersection(root->rightbox, origin, invDirection, intersectedVertices);
-    }
-    
-    return leftret || rightret;
-}
+bool AABBRayIntersection(AABB * root, vec3 origin, vec3 invDirection, std::vector<unsigned int> * intersectedVertices);
 
 void cleanupAABBTree(AABB * root);
 

@@ -11,10 +11,9 @@ int buildAABBTree(AABB* root,
         return depth;
     }
  
-    MinMax xyz;
-    getminmaxmed(root, vertices, vertexIndices, xyz);
+    computeTrianglesMinMax(root, vertices, vertexIndices);
 
-    vec3f range = xyz.max - xyz.min;
+    vec3f range = root->max - root->min;
     
     int maxrange_index = 2;
     float maxrange = range.maxElement();
@@ -34,15 +33,9 @@ int buildAABBTree(AABB* root,
     
     for(size_t i = 0; i < root->triNumber.size(); i++){
         if(i < root->triNumber.size() / 2){
-//            root->leftbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]]);
-//            root->leftbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]+1]);
-//            root->leftbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]+2]);
             root->leftbox->triNumber.push_back(root->triNumber[i]);
         }
         else{
-//            root->rightbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]]);
-//            root->rightbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]+1]);
-//            root->rightbox->vertex_indices.push_back((*vertex_indices)[3*root->triNumber[i]+2]);
             root->rightbox->triNumber.push_back(root->triNumber[i]);
         }
     }
@@ -60,17 +53,12 @@ int buildAABBTree(AABB* root,
 
     int leftdepth=0,rightdepth=0;
     if(!leftnul){
-        MinMax left;
-        getminmaxmed(root->leftbox, vertices, vertexIndices, left);
-        root->leftbox->min = left.min;
-        root->leftbox->max = left.max;
+        computeTrianglesMinMax(root->leftbox, vertices, vertexIndices);
 
     }
     if(!rightnul){
         MinMax right;
-        getminmaxmed(root->rightbox, vertices, vertexIndices, right);
-        root->rightbox->min = right.min;
-        root->rightbox->max = right.max;
+        computeTrianglesMinMax(root->rightbox, vertices, vertexIndices);
     }
     if(!leftnul && root->leftbox->triNumber.size() != root->triNumber.size()){
         leftdepth = buildAABBTree(root->leftbox, vertices, vertexIndices, medians, depth);
@@ -101,9 +89,44 @@ void cleanupAABBTree(AABB * root){
     return;
 };
 
-void getminmaxmed(AABB * root, std::vector<std::vector<float> >& vertices,
-                  std::vector<unsigned int>& vertexIndices,
-                  MinMax& stats){
+bool AABBRayIntersection(AABB * root, vec3 origin, vec3 invDirection, std::vector<unsigned int> * intersectedVertices){
+    
+    vec3f boxmin, boxmax;
+    
+    boxmin = (root->min - origin) * invDirection;
+    boxmax = (root->max - origin) * invDirection;
+    
+    vec3f minintersection = vec3::min(boxmin, boxmax);
+    vec3f maxintersection = vec3::max(boxmin, boxmax);
+    
+    float tmin = minintersection.maxElement();
+    float tmax = maxintersection.minElement();
+    
+    bool hit = (tmax >= 0) && (tmax >= tmin);
+    if (!hit) {
+        return false;
+    }
+    
+    bool leftret = false, rightret = false;
+    if (root->leftbox == nullptr && root->rightbox == nullptr) {//at a leaf node.
+        for (size_t i = 0; i < root->triNumber.size(); i++) {
+            (*intersectedVertices).push_back(root->triNumber[i]);
+        }
+        return true;
+    }
+    if (root->leftbox != nullptr) {
+        leftret = AABBRayIntersection(root->leftbox, origin, invDirection, intersectedVertices);
+    }
+    if (root->rightbox != nullptr) {
+        rightret = AABBRayIntersection(root->rightbox, origin, invDirection, intersectedVertices);
+    }
+    
+    return leftret || rightret;
+}
+
+void computeTrianglesMinMax(AABB* root,
+                  std::vector<std::vector<float> >& vertices,
+                  std::vector<unsigned int>& vertexIndices){
     std::vector<float> x, y, z;
     //std::vector<std::vector<float> > medians;
     std::vector<unsigned int> viSorted(3 * root->triNumber.size());
@@ -123,11 +146,11 @@ void getminmaxmed(AABB * root, std::vector<std::vector<float> >& vertices,
         y.push_back(vertices[viSorted[i]][1]);
         z.push_back(vertices[viSorted[i]][2]);
     }
-    stats.min.setX(*std::min_element(x.begin(), x.end()));
-    stats.max.setX(*std::max_element(x.begin(), x.end()));
-    stats.min.setY(*std::min_element(y.begin(), y.end()));
-    stats.max.setY(*std::max_element(y.begin(), y.end()));
-    stats.min.setZ(*std::min_element(z.begin(), z.end()));
-    stats.max.setZ(*std::max_element(z.begin(), z.end()));
+    root->min.setX(*std::min_element(x.begin(), x.end()));
+    root->max.setX(*std::max_element(x.begin(), x.end()));
+    root->min.setY(*std::min_element(y.begin(), y.end()));
+    root->max.setY(*std::max_element(y.begin(), y.end()));
+    root->min.setZ(*std::min_element(z.begin(), z.end()));
+    root->max.setZ(*std::max_element(z.begin(), z.end()));
 }
 
